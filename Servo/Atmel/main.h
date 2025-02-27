@@ -1,5 +1,5 @@
-/*
- * main.h
+﻿/*
+ * λ main.h
  *
  * Created: 17.12.2020 2:05:42
  *  Author: m4d

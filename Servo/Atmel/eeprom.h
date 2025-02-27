@@ -1,5 +1,5 @@
-/*
- * m4d_eeprom.h
+п»ї/*
+ * О» m4d_eeprom.h
  *
  * Created: 17.12.2020 1:28:58
  *  Author: m4d
@@ -9,10 +9,10 @@
 
 #include "main.h"
 
-void EEPROM_write(uint8_t uiAddress, unsigned char ucData); //пишем
-unsigned char EEPROM_read(uint8_t uiAddress); //читаем
-void EEPROM_write_word(uint16_t uiAddress, uint16_t ucData); //пишем 2х-байтовую величину
-uint16_t EEPROM_read_word(uint16_t uiAddress); //читаем 2х-байтовую величину
+void EEPROM_write(uint8_t uiAddress, unsigned char ucData); //РїРёС€РµРј
+unsigned char EEPROM_read(uint8_t uiAddress); //С‡РёС‚Р°РµРј
+void EEPROM_write_word(uint16_t uiAddress, uint16_t ucData); //РїРёС€РµРј 2С…-Р±Р°Р№С‚РѕРІСѓСЋ РІРµР»РёС‡РёРЅСѓ
+uint16_t EEPROM_read_word(uint16_t uiAddress); //С‡РёС‚Р°РµРј 2С…-Р±Р°Р№С‚РѕРІСѓСЋ РІРµР»РёС‡РёРЅСѓ
 
 #define PR_MODE_SERVO_CONFIG_START 10
 #define PR_MODE_MOTOR_SPEED 100

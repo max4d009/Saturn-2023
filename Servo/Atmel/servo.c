@@ -1,5 +1,5 @@
-/*
- * m4d_servo.c
+Ôªø/*
+ * Œª m4d_servo.c
  *
  * Created: 04.12.2020 1:10:36
  *  Author: m4d
@@ -8,6 +8,7 @@
 
 static void reel_end_timer(uint8_t speed_left, uint8_t speed_right, uint16_t speed_sum);
 
+// —Ç–µ—Å—Ç –∫–æ–¥–∏—Ä–æ–≤–∫–∞
 void reels_speed_timer(uint8_t speed_left, uint8_t speed_right, uint16_t speed_sum)
 { 
 	if (kinematics_mode.current == PLAY_MODE) {
@@ -82,12 +83,12 @@ void auto_stop_timer(uint16_t adc)
 		after_black = 0;
 		timer = 0;
 		return;
-	} else if (adc < AUTOSTOP_ADC_ACTIVATION) { // 100 —‡·‡Ú˚‚‡ÂÚ Ì‡ ˜ÂÌÓÈ ÎÂÌÚÂ
+	} else if (adc < AUTOSTOP_ADC_ACTIVATION) { // 100 –°—Ä–∞–±–∞—Ç—ã–≤–∞–µ—Ç –Ω–∞ —á–µ—Ä–Ω–æ–π –ª–µ–Ω—Ç–µ
 		if (after_black < 50) {
 			after_black++;
 		}
 		return;
-	} else if (after_black < 50) { // ≈˘∏ ÌÂ ·˚ÎÓ ÎÂÌÚ˚
+	} else if (after_black < 50) { // –ï—â—ë –Ω–µ –±—ã–ª–æ –ª–µ–Ω—Ç—ã
 		after_black = 0;
 		return;
 	} else if (timer < AUTOSTOP_OPACITY_TIMER) { // 2

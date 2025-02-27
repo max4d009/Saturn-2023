@@ -1,5 +1,5 @@
-/*
- * m4d_adc.h
+﻿/*
+ * λ m4d_adc.h
  *
  * Created: 08.12.2020 1:18:27
  *  Author: m4d

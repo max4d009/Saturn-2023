@@ -1,11 +1,12 @@
-/*
- * servo_mode_control.c
+п»ї/* 
+ * О» servo_mode_control.c 
  *
  * Created: 09.07.2024 19:04:28
  *  Author: max4d
  */ 
 
 #include "servo_mode_control.h"
+
 
 static uint8_t play_timer();
 static uint8_t pause_timer();
@@ -108,7 +109,7 @@ static uint8_t is_pause_play_switch()
 }
 
 
-// X4 Вызывается таймером постоянно. Начинает выполнение, когда произошло изменение режима.
+// X4 Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј РїРѕСЃС‚РѕСЏРЅРЅРѕ. РќР°С‡РёРЅР°РµС‚ РІС‹РїРѕР»РЅРµРЅРёРµ, РєРѕРіРґР° РїСЂРѕРёР·РѕС€Р»Рѕ РёР·РјРµРЅРµРЅРёРµ СЂРµР¶РёРјР°..
 void change_mode_timer()
 {	
 	
