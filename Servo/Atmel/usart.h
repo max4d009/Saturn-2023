@@ -1,5 +1,5 @@
-﻿/*
- * λ usart.h
+/*
+ * usart.h
  *
  * Created: 14.01.2021 15:41:20
  *  Author: m4d

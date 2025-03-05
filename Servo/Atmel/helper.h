@@ -1,5 +1,5 @@
-﻿/*
- * λ helper.h
+/*
+ * helper.h
  *
  * Created: 12.08.2022 2:04:10
  *  Author: m4d

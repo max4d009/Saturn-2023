@@ -1,5 +1,5 @@
-﻿/*
- * λ Real-to-real tape recorder main.c
+/*
+ * Real-to-real tape recorder main.c
  *
  * Created: 08.04.2019 2:01:38
  * Author : m4d

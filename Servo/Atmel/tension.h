@@ -1,5 +1,5 @@
-п»ї/*
- * О» tension.h
+/*
+ * tension.h
  *
  * Created: 13.01.2023 1:59:18
  *  Author: m4d
@@ -9,7 +9,7 @@
 
 #include "main.h"
 
-#define TENSION_MIDDLE_ADC 450 // РЎСЂРµРґРЅСЏСЏ С‚РѕС‡РєР° РґР°С‚С‡РёРєР° РЅР°С‚СЏР¶РµРЅРёСЏ. Р—РЅР°С‡РµРЅРёРµ ADC 450, С‡РµРј Р±РѕР»СЊС€Рµ С‚РµРј РјРµРЅСЊС€Рµ РЅР°С‚СЏР¶РµРЅРёРµ
+#define TENSION_MIDDLE_ADC 450 // Средняя точка датчика натяжения. Значение ADC 450, чем больше тем меньше натяжение
 
 #define TENSION_PLAY_P 0.08
 #define TENSION_PLAY_I 0.03

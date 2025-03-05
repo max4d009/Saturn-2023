@@ -1,5 +1,5 @@
-﻿/*
- * λ audio.c
+/*
+ * audio.c
  *
  * Created: 12.08.2022 2:53:37
  *  Author: m4d

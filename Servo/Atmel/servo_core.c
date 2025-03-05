@@ -1,5 +1,5 @@
-п»ї/*
- * О» servo_core.c
+/*
+ * servo_core.c
  *
  * Created: 09.07.2024 18:44:35
  *  Author: max4d
@@ -82,7 +82,7 @@ void m4d_servo_init()
 	servo_list[SERVO_LEFT].light_brake_angle   = servo_list[SERVO_LEFT].stop_angle  + 40;
 	servo_list[SERVO_RIGHT].light_brake_angle  = servo_list[SERVO_RIGHT].play_angle + 40;
 	
-	// РќР°СЃС‚СЂРѕР№РєР° С€РёРј
+	// Настройка шим
 	OCR1A = 20000;
 	TCCR1A = 0;
 	TCCR1B |= (1 << WGM12);
@@ -101,17 +101,17 @@ void m4d_servo_init()
 	TCCR1B |= (1 << CS11);
 	TIMSK1 |= (1 << OCIE1A);
 	
-	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј PB1,PB2,PB3,PB4 РєР°Рє РІС‹С…РѕРґ
+	// Устанавливаем PB1,PB2,PB3,PB4 как выход
 	SERVO_DDR |= (1 << SERVO_LEFT_PIN);
 	SERVO_DDR |= (1 << REWIND_SERVO_PIN);
 	SERVO_DDR |= (1 << PLAY_SERVO_PIN);
 	SERVO_DDR |= (1 << SERVO_RIGHT_PIN);
-	// Р‘РµР· РїРѕРґС‚СЏРіРёРІР°СЋС‰РёС… СЂРµР·РёСЃС‚РѕСЂРѕРІ
+	// Без подтягивающих резисторов
 	SERVO_PORT &= ~(1 << SERVO_LEFT_PIN);
 	SERVO_PORT &= ~(1 << REWIND_SERVO_PIN);
 	SERVO_PORT &= ~(1 << PLAY_SERVO_PIN);
 	SERVO_PORT &= ~(1 << SERVO_RIGHT_PIN);
-	// РџРѕРґР°С‚СЊ РїРёС‚Р°РЅРёРµ РЅР° СЃРµСЂРІРѕРїСЂРёРІРѕРґС‹
+	// Подать питание на сервоприводы
 	SERVO_ENABLE_DDR  |= (1 << SERVO_ENABLE_PIN);
 	SERVO_ENABLE_PORT |= (1 << SERVO_ENABLE_PIN);
 	
@@ -120,7 +120,7 @@ void m4d_servo_init()
 
 static void servo_timer_divide_x1()
 {	
-	compute_all_adc_timer(); // РїРѕРїСЂРѕР±РѕРІР°С‚СЊ Р±С‹СЃС‚СЂРµРµ РѕР±РЅРѕРІР»СЏС‚СЊ
+	compute_all_adc_timer(); // попробовать быстрее обновлять
 	search_program_timer();
 
 	if (kinematics_mode.kinematics_speed == 2) {

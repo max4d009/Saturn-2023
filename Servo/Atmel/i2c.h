@@ -1,5 +1,5 @@
-п»ї/*
- * О» m4d_i2c.h
+/*
+ * m4d_i2c.h
  *
  * Created: 17.12.2020 1:03:28
  *  Author: m4d
@@ -15,7 +15,7 @@ void update_i2c_data_timer();
 void i2c_send_debug_int_var_oled(char *varName, uint16_t varValue);
 void I2C_Slave_Init(uint8_t slave_address);
 
-#define ME_ADDR 0x4D // РїРѕСЃР»РµРґРЅРёР№ СЂРµР·СЂРµС€РµРЅРёРµ РѕС‚РєР»РёРєР° РЅР° Р°РґСЂРµСЃ
+#define ME_ADDR 0x4D // последний резрешение отклика на адрес
 
 #define REC_MODE 0
 #define PLAY_MODE 1

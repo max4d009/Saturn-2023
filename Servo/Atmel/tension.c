@@ -1,5 +1,5 @@
-﻿/*
- * λ tension.c
+/*
+ * tension.c
  *
  * Created: 13.01.2023 1:58:47
  *  Author: m4d
