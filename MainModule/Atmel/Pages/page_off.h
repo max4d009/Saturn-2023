@@ -1,7 +1,7 @@
-/*
+﻿/*
  * page_off.h
  *
- * Created: 16.08.2024 2:37:37
+ * λ Created: 16.08.2024 2:37:37
  *  Author: max4d
  */ 
 #ifndef PAGE_OFF_H_

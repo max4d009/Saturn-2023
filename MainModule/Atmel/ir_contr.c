@@ -1,63 +1,63 @@
-/*****************************************************
-Project: IRContr
+п»ї/*****************************************************
+Project: IRContr О»
 Based on: https://forum.vegalab.ru/showthread.php?t=38671
 *****************************************************/
 #include "ir_contr.h"
 
 static void ir_button_press(uint8_t button);
 
-volatile uint8_t End_bit;                  // флаг завершения приёма новой команду ДУ
+volatile uint8_t End_bit;                  // С„Р»Р°Рі Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРёС‘РјР° РЅРѕРІРѕР№ РєРѕРјР°РЅРґСѓ Р”РЈ
 
-volatile unsigned char IR_i;               // счётчик, переполняющийся при отпускании кнопки ДУ
-volatile int system_code;                  // код системы ДУ
+volatile unsigned char IR_i;               // СЃС‡С‘С‚С‡РёРє, РїРµСЂРµРїРѕР»РЅСЏСЋС‰РёР№СЃСЏ РїСЂРё РѕС‚РїСѓСЃРєР°РЅРёРё РєРЅРѕРїРєРё Р”РЈ
+volatile int system_code;                  // РєРѕРґ СЃРёСЃС‚РµРјС‹ Р”РЈ
 uint16_t system_code_eepprom_address = 4335;
 uint32_t system_code_saved = 0;
 
-volatile unsigned char ir_code;                     // данные ДУ
+volatile unsigned char ir_code;                     // РґР°РЅРЅС‹Рµ Р”РЈ
 
 unsigned char i;
 unsigned char ii = 0;
 unsigned char button;
-unsigned char t_pressed = 0; // счётчик времени удержания кнопки
+unsigned char t_pressed = 0; // СЃС‡С‘С‚С‡РёРє РІСЂРµРјРµРЅРё СѓРґРµСЂР¶Р°РЅРёСЏ РєРЅРѕРїРєРё
 volatile uint8_t binding_mode;
 
 
 void init_ir()
 {
-	ir_button_list[IR_BUTTON_OFF].name = PSTR("выкл");
+	ir_button_list[IR_BUTTON_OFF].name = PSTR("РІС‹РєР»");
 	ir_button_list[IR_BUTTON_OFF].eeprom_address = 50;
 	
-	ir_button_list[IR_BUTTON_ON].name = PSTR("вкл");
+	ir_button_list[IR_BUTTON_ON].name = PSTR("РІРєР»");
 	ir_button_list[IR_BUTTON_ON].eeprom_address = 51;
 	
-	ir_button_list[IR_BUTTON_KONTR].name = PSTR("контр");
+	ir_button_list[IR_BUTTON_KONTR].name = PSTR("РєРѕРЅС‚СЂ");
 	ir_button_list[IR_BUTTON_KONTR].eeprom_address = 52;
 	
-	ir_button_list[IR_BUTTON_EQ].name = PSTR("эк");
+	ir_button_list[IR_BUTTON_EQ].name = PSTR("СЌРє");
 	ir_button_list[IR_BUTTON_EQ].eeprom_address = 53;
 
-	ir_button_list[IR_BUTTON_NR].name = PSTR("шп");
+	ir_button_list[IR_BUTTON_NR].name = PSTR("С€Рї");
 	ir_button_list[IR_BUTTON_NR].eeprom_address = 54;
 	
-	ir_button_list[IR_BUTTON_STOP].name = PSTR("стоп");
+	ir_button_list[IR_BUTTON_STOP].name = PSTR("СЃС‚РѕРї");
 	ir_button_list[IR_BUTTON_STOP].eeprom_address = 55;
 	
-	ir_button_list[IR_BUTTON_PLAY].name = PSTR("восп");
+	ir_button_list[IR_BUTTON_PLAY].name = PSTR("РІРѕСЃРї");
 	ir_button_list[IR_BUTTON_PLAY].eeprom_address = 56;
 	
-	ir_button_list[IR_BUTTON_REWIND].name = PSTR("наз");
+	ir_button_list[IR_BUTTON_REWIND].name = PSTR("РЅР°Р·");
 	ir_button_list[IR_BUTTON_REWIND].eeprom_address = 57;
 	
-	ir_button_list[IR_BUTTON_FORWARD].name = PSTR("впер");
+	ir_button_list[IR_BUTTON_FORWARD].name = PSTR("РІРїРµСЂ");
 	ir_button_list[IR_BUTTON_FORWARD].eeprom_address = 58;
 	
-	ir_button_list[IR_BUTTON_PAUSE].name = PSTR("пау");
+	ir_button_list[IR_BUTTON_PAUSE].name = PSTR("РїР°Сѓ");
 	ir_button_list[IR_BUTTON_PAUSE].eeprom_address = 59;
 	
-	ir_button_list[IR_BUTTON_REPEAT].name = PSTR("повт");
+	ir_button_list[IR_BUTTON_REPEAT].name = PSTR("РїРѕРІС‚");
 	ir_button_list[IR_BUTTON_REPEAT].eeprom_address = 60;
 		
-	// переписываем привязку кнопок пульта
+	// РїРµСЂРµРїРёСЃС‹РІР°РµРј РїСЂРёРІСЏР·РєСѓ РєРЅРѕРїРѕРє РїСѓР»СЊС‚Р°
 	for (i = 0; i < IR_BUTTONS_COUNT; i++) {
 		ir_button_list[i].code = EEPROM_read(ir_button_list[i].eeprom_address);
 	}
@@ -91,9 +91,9 @@ void ir_binding()
 
 		memset(button_name, ' ', 6);
 		strcpy_P(button_name, ir_button_list[i].name);
-		//oled_printf(0, 10, FONTID_6X8M, "кн:%s", button_name);
+		//oled_printf(0, 10, FONTID_6X8M, "РєРЅ:%s", button_name);
 		char str_buf[10];
-		oled_printf(0, 10, FONTID_6X8M, strcpy_P(str_buf, PSTR("кн:%s")), button_name);
+		oled_printf(0, 10, FONTID_6X8M, strcpy_P(str_buf, PSTR("РєРЅ:%s")), button_name);
 		disp1color_UpdateFromBuff();
 		
 		sei();
@@ -169,9 +169,9 @@ void while_ir()
 		system_code = system_code * -1;
 	}	
 		
-	if (system_code == system_code_saved) {  // если команда принята
+	if (system_code == system_code_saved) {  // РµСЃР»Рё РєРѕРјР°РЅРґР° РїСЂРёРЅСЏС‚Р°
 		cli();
-		for (uint8_t i = 0; i < IR_BUTTONS_COUNT; i++) {            // находим нажатую кнопку
+		for (uint8_t i = 0; i < IR_BUTTONS_COUNT; i++) {            // РЅР°С…РѕРґРёРј РЅР°Р¶Р°С‚СѓСЋ РєРЅРѕРїРєСѓ
 			if (ir_code == ir_button_list[i].code) {
 				ir_button_press(i);
 				break;
@@ -179,10 +179,10 @@ void while_ir()
 		}
 	}
 	
-	system_code = 0xFFFE;   // очищаем код устройства
-	ir_code = 0xFE;         // очищаем данные
-	End_bit = 0;            // очистили бит конца приёма
-	EICRA = 0;              // устанавливаем прерывания по низкому уровню на INT0(фотоприёмник)
+	system_code = 0xFFFE;   // РѕС‡РёС‰Р°РµРј РєРѕРґ СѓСЃС‚СЂРѕР№СЃС‚РІР°
+	ir_code = 0xFE;         // РѕС‡РёС‰Р°РµРј РґР°РЅРЅС‹Рµ
+	End_bit = 0;            // РѕС‡РёСЃС‚РёР»Рё Р±РёС‚ РєРѕРЅС†Р° РїСЂРёС‘РјР°
+	EICRA = 0;              // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РїРѕ РЅРёР·РєРѕРјСѓ СѓСЂРѕРІРЅСЋ РЅР° INT0(С„РѕС‚РѕРїСЂРёС‘РјРЅРёРє)
 	EICRA = 0x01;           // any logical change on INT0 interrupt
 			
 	IR_impulse_count = 0;
@@ -190,8 +190,8 @@ void while_ir()
 	sei();
 }
 
-// Обработчик прерывания от фотоприёмника
-// для измерения длительности используется Timer0 Ft=8Мгц/256 -> T=32us
+// РћР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёСЏ РѕС‚ С„РѕС‚РѕРїСЂРёС‘РјРЅРёРєР°
+// РґР»СЏ РёР·РјРµСЂРµРЅРёСЏ РґР»РёС‚РµР»СЊРЅРѕСЃС‚Рё РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Timer0 Ft=8РњРіС†/256 -> T=32us
 // for NEC format
 // 0       0.5625ms  14...22
 // 1       1.6875ms  42...64
@@ -200,47 +200,47 @@ void while_ir()
 ISR (INT0_vect)
 {
 	if (End_bit == 1) {
-		TIFR0 |= (1<<TOV0); // сбрасываем флаг переполнения (записью лог. 1)
+		TIFR0 |= (1<<TOV0); // СЃР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ (Р·Р°РїРёСЃСЊСЋ Р»РѕРі. 1)
 		return;
 	}
 	
 	unsigned char tau = TCNT0;
-	TCNT0 = 0; // обнуляем счётный регистр
+	TCNT0 = 0; // РѕР±РЅСѓР»СЏРµРј СЃС‡С‘С‚РЅС‹Р№ СЂРµРіРёСЃС‚СЂ
 
-	// если на выходе фотоприёмника ноль
-	// если таймер0 переполнился (длит. "1" на IRIn была больше 8.192ms)
-	// будет либо приём новой команды либо удержание кнопки
+	// РµСЃР»Рё РЅР° РІС‹С…РѕРґРµ С„РѕС‚РѕРїСЂРёС‘РјРЅРёРєР° РЅРѕР»СЊ
+	// РµСЃР»Рё С‚Р°Р№РјРµСЂ0 РїРµСЂРµРїРѕР»РЅРёР»СЃСЏ (РґР»РёС‚. "1" РЅР° IRIn Р±С‹Р»Р° Р±РѕР»СЊС€Рµ 8.192ms)
+	// Р±СѓРґРµС‚ Р»РёР±Рѕ РїСЂРёС‘Рј РЅРѕРІРѕР№ РєРѕРјР°РЅРґС‹ Р»РёР±Рѕ СѓРґРµСЂР¶Р°РЅРёРµ РєРЅРѕРїРєРё
 	if (!(PIND & (1 << IR_PIN))) {
 		if (TIFR0 & (1 << TOV0)) {
-			IR_impulse_count = 0;     // обнуляем счётчик кол-ва принятых импульсов
-		} else if ((IR_impulse_count == 0) && (tau > 55) && (tau < 85)) { // если удерживаем кнопку нажатой
-			IR_i = 0;                 //выполняем команду ещё 130ms
-		} else if ((IR_impulse_count > 0) && (((tau > 13) && (tau < 23)) || ((tau > 41) && (tau < 65)))) {  // если приняли не первый импульс и длительн. соответ. 0 или 1
+			IR_impulse_count = 0;     // РѕР±РЅСѓР»СЏРµРј СЃС‡С‘С‚С‡РёРє РєРѕР»-РІР° РїСЂРёРЅСЏС‚С‹С… РёРјРїСѓР»СЊСЃРѕРІ
+		} else if ((IR_impulse_count == 0) && (tau > 55) && (tau < 85)) { // РµСЃР»Рё СѓРґРµСЂР¶РёРІР°РµРј РєРЅРѕРїРєСѓ РЅР°Р¶Р°С‚РѕР№
+			IR_i = 0;                 //РІС‹РїРѕР»РЅСЏРµРј РєРѕРјР°РЅРґСѓ РµС‰С‘ 130ms
+		} else if ((IR_impulse_count > 0) && (((tau > 13) && (tau < 23)) || ((tau > 41) && (tau < 65)))) {  // РµСЃР»Рё РїСЂРёРЅСЏР»Рё РЅРµ РїРµСЂРІС‹Р№ РёРјРїСѓР»СЊСЃ Рё РґР»РёС‚РµР»СЊРЅ. СЃРѕРѕС‚РІРµС‚. 0 РёР»Рё 1
 			if (IR_impulse_count == 32) {
-				End_bit = 1;                        // устанавливаем бит конца приёма на 32-м импульсе
+				End_bit = 1;                        // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±РёС‚ РєРѕРЅС†Р° РїСЂРёС‘РјР° РЅР° 32-Рј РёРјРїСѓР»СЊСЃРµ
 				while_ir();
 			} else {
-				if (IR_impulse_count < 17) {        // принимаем код системы
+				if (IR_impulse_count < 17) {        // РїСЂРёРЅРёРјР°РµРј РєРѕРґ СЃРёСЃС‚РµРјС‹
 					system_code <<= 1;
 					if (tau > 41) {
-						system_code |= 1;           // приняли 1?
+						system_code |= 1;           // РїСЂРёРЅСЏР»Рё 1?
 						IR_wait = 1;
 					}
-				} else if (IR_impulse_count < 25) { // принимаем данные
+				} else if (IR_impulse_count < 25) { // РїСЂРёРЅРёРјР°РµРј РґР°РЅРЅС‹Рµ
 					ir_code <<= 1;
 					if (tau > 41) {
-						ir_code |= 1;                // приняли 1?
+						ir_code |= 1;                // РїСЂРёРЅСЏР»Рё 1?
 					}
 				}
 				IR_impulse_count++;
 			}
-		} else {                                    // длительность вне пределов или стартовая посылка 4.5ms
+		} else {                                    // РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІРЅРµ РїСЂРµРґРµР»РѕРІ РёР»Рё СЃС‚Р°СЂС‚РѕРІР°СЏ РїРѕСЃС‹Р»РєР° 4.5ms
 			system_code = 0xFFFE;
 			ir_code = 0xFE;
-			End_bit = 0;                            // очистили бит конца приёма
-			if ((IR_impulse_count == 0) && (tau>111) && (tau < 171)) {  //если приняли стартовую посылку
+			End_bit = 0;                            // РѕС‡РёСЃС‚РёР»Рё Р±РёС‚ РєРѕРЅС†Р° РїСЂРёС‘РјР°
+			if ((IR_impulse_count == 0) && (tau>111) && (tau < 171)) {  //РµСЃР»Рё РїСЂРёРЅСЏР»Рё СЃС‚Р°СЂС‚РѕРІСѓСЋ РїРѕСЃС‹Р»РєСѓ
 				IR_impulse_count = 1;
-				IR_i = 0;                           // ждем ещё 130мс
+				IR_i = 0;                           // Р¶РґРµРј РµС‰С‘ 130РјСЃ
 				//
 			} else {
 				IR_impulse_count = 0;
@@ -248,5 +248,5 @@ ISR (INT0_vect)
 			}
 		}
 	}
-	TIFR0 |= (1<<TOV0); // сбрасываем флаг переполнения (записью лог. 1)
+	TIFR0 |= (1<<TOV0); // СЃР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ (Р·Р°РїРёСЃСЊСЋ Р»РѕРі. 1)
 }

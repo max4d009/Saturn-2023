@@ -1,7 +1,7 @@
-/*
+﻿/*
  * page_timer.h
  *
- * Created: 24.10.2023 18:20:35
+ * λ Created: 24.10.2023 18:20:35
  *  Author: m4d
  */ 
 #ifndef PAGE_TIMER_H_

@@ -1,7 +1,7 @@
-/*
+ï»¿/*
  * usart.c
  *
- * Created: 14.01.2021 15:41:00
+ * Î» Created: 14.01.2021 15:41:00
  *  Author: m4d
  */ 
 #include "usart.h"
@@ -16,7 +16,7 @@ void USART_ini(unsigned int speed)
 	PORTD |= (1 << 1) | (1 << 0);
 	UBRR0H = (unsigned char) (speed >> 8);
 	UBRR0L = (unsigned char) speed;
-	UCSR0A |= (1 << U2X0); // Óäâîåíèå ÷àñòîòû
+	UCSR0A |= (1 << U2X0); // Ð£Ð´Ð²Ð¾ÐµÐ½Ð¸Ðµ Ñ‡Ð°ÑÑ‚Ð¾Ñ‚Ñ‹
 	UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01);
 	UCSR0B |= (1 << RXEN0) | (1 << RXCIE0) | (1 << TXEN0);
 
@@ -40,7 +40,7 @@ ISR(USART_RX_vect)
 	com_i++;
 }
 
-// Îáðàáîòêà ïðèíÿòîé ÷åðåç com - ïîðò ñòðîêè
+// ÐžÐ±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð¿Ñ€Ð¸Ð½ÑÑ‚Ð¾Ð¹ Ñ‡ÐµÑ€ÐµÐ· com - Ð¿Ð¾Ñ€Ñ‚ ÑÑ‚Ñ€Ð¾ÐºÐ¸
 void process_transmit_data()
 {
 	char value[8] = {'\0','\0','\0','\0','\0','\0','\0','\0'};
@@ -83,7 +83,7 @@ void process_transmit_data()
 
 void USART_Transmit(unsigned char data)
 {
-	// Íà÷íåì ïåðåäàâàòü äàííûå, íî òîëüêî óáåäèâøèñü, ÷òî áóôåð ïóñò
+	// ÐÐ°Ñ‡Ð½ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ð²Ð°Ñ‚ÑŒ Ð´Ð°Ð½Ð½Ñ‹Ðµ, Ð½Ð¾ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ ÑƒÐ±ÐµÐ´Ð¸Ð²ÑˆÐ¸ÑÑŒ, Ñ‡Ñ‚Ð¾ Ð±ÑƒÑ„ÐµÑ€ Ð¿ÑƒÑÑ‚
 	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = data;
 }

@@ -1,7 +1,7 @@
-/*
+ï»¿/*
  * page_off.c
  *
- * Created: 16.08.2024 2:37:20
+ * Î» Created: 16.08.2024 2:37:20
  *  Author: max4d
  */ 
 #include "page_off.h"
@@ -25,7 +25,7 @@ void page_off_render(uint8_t first_render)
 	}
 	
 	if (height_bias < 12) {
-		oled_printf(5, 10,  FONTID_6X8M, strcpy_P(str_buf, PSTR("Âûêëþ÷åíèå...")));
+		oled_printf(5, 10,  FONTID_6X8M, strcpy_P(str_buf, PSTR("Ð’Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ...")));
 	}
 	
 	if (height_bias < 18) {

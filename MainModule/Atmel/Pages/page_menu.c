@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * CFile1.c
  *
- * Created: 17.08.2024 4:04:15
+ * О» Created: 17.08.2024 4:04:15
  *  Author: max4d
  */ 
 #include "page_menu.h"
@@ -14,22 +14,22 @@ void page_menu_render(uint8_t first_render)
 {
 	if (first_render == 1) {
 		page_menu[0].page_id = PAGE_OLED_SERVO_CONFIG;
-		page_menu[0].name = PSTR("Настр. серв");
+		page_menu[0].name = PSTR("РќР°СЃС‚СЂ. СЃРµСЂРІ");
 		
 		page_menu[1].page_id = PAGE_OLED_LEVEL;
-		page_menu[1].name = PSTR("Уровень");
+		page_menu[1].name = PSTR("РЈСЂРѕРІРµРЅСЊ");
 		
 		page_menu[2].page_id = PAGE_OLED_SPEED;
-		page_menu[2].name = PSTR("Скорость");
+		page_menu[2].name = PSTR("РЎРєРѕСЂРѕСЃС‚СЊ");
 		
 		page_menu[3].page_id = PAGE_OLED_IR_BINDING;
-		page_menu[3].name = PSTR("Привязка ДУ");
+		page_menu[3].name = PSTR("РџСЂРёРІСЏР·РєР° Р”РЈ");
 		
 		page_menu[4].page_id = PAGE_OLED_VU;
-		page_menu[4].name = PSTR("Индикаторы");
+		page_menu[4].name = PSTR("РРЅРґРёРєР°С‚РѕСЂС‹");
 		
 		page_menu[5].page_id = PAGE_OLED_TENSION_CONFIG;
-		page_menu[5].name = PSTR("Натяжение");
+		page_menu[5].name = PSTR("РќР°С‚СЏР¶РµРЅРёРµ");
 	}
 		
 	show_main_menu(2, 0, current_page);

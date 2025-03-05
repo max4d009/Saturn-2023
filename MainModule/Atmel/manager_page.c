@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * manager_page.c
  *
- * Created: 17.08.2024 1:28:08
+ * О» Created: 17.08.2024 1:28:08
  *  Author: max4d
  */ 
 #include "manager_page.h"
@@ -120,7 +120,7 @@ void manager_page_showPage()
 		}
 	}
 	
-	_delay_ms(20); // todo: Исследовать почему без задежки виснет
+	_delay_ms(20); // todo: РСЃСЃР»РµРґРѕРІР°С‚СЊ РїРѕС‡РµРјСѓ Р±РµР· Р·Р°РґРµР¶РєРё РІРёСЃРЅРµС‚
 	
 	if (current_page != current.page) {
 		page_list[current.page].render_page(1);

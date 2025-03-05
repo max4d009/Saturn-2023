@@ -1,7 +1,7 @@
-/*
+﻿/*
  * buttons_adc.h
  *
- * Created: 24.10.2023 18:27:32
+ * λ Created: 24.10.2023 18:27:32
  *  Author: m4d
  */ 
 #ifndef BUTTONS_ADC_H_

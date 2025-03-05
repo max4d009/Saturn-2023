@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * pageServoConfig.c
  *
- * Created: 29.11.2023 3:35:47
+ * О» Created: 29.11.2023 3:35:47
  *  Author: max-4d
  */ 
 #include "page_servo_config.h"
@@ -17,40 +17,40 @@ PGM_P servo_names[4];
 
 void init_page_servo_config()
 {
-	servo_names[SERVO_LEFT]   = PSTR("натяж.л.");
-	servo_names[SERVO_REWIND] = PSTR("перем.");
-	servo_names[SERVO_PLAY]   = PSTR("воспр.");
-	servo_names[SERVO_RIGHT]  = PSTR("натяж.пр.");
+	servo_names[SERVO_LEFT]   = PSTR("РЅР°С‚СЏР¶.Р».");
+	servo_names[SERVO_REWIND] = PSTR("РїРµСЂРµРј.");
+	servo_names[SERVO_PLAY]   = PSTR("РІРѕСЃРїСЂ.");
+	servo_names[SERVO_RIGHT]  = PSTR("РЅР°С‚СЏР¶.РїСЂ.");
 	
-	menu_servo_params[CONFIG_SERVO_MIN].name = PSTR("мин");
+	menu_servo_params[CONFIG_SERVO_MIN].name = PSTR("РјРёРЅ");
 	menu_servo_params[CONFIG_SERVO_MIN].id = I2C_DATA_CONFIG_SERVO_MIN;
 	menu_servo_params[CONFIG_SERVO_MIN].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_MAX].name = PSTR("макс");
+	menu_servo_params[CONFIG_SERVO_MAX].name = PSTR("РјР°РєСЃ");
 	menu_servo_params[CONFIG_SERVO_MAX].id = I2C_DATA_CONFIG_SERVO_MAX;
 	menu_servo_params[CONFIG_SERVO_MAX].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_PLAY].name = PSTR("воспр");
+	menu_servo_params[CONFIG_SERVO_PLAY].name = PSTR("РІРѕСЃРїСЂ");
 	menu_servo_params[CONFIG_SERVO_PLAY].id = I2C_DATA_CONFIG_SERVO_PLAY;
 	menu_servo_params[CONFIG_SERVO_PLAY].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_STOP].name = PSTR("стоп");
+	menu_servo_params[CONFIG_SERVO_STOP].name = PSTR("СЃС‚РѕРї");
 	menu_servo_params[CONFIG_SERVO_STOP].id = I2C_DATA_CONFIG_SERVO_STOP;
 	menu_servo_params[CONFIG_SERVO_STOP].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_FORWARD].name = PSTR("впер");
+	menu_servo_params[CONFIG_SERVO_FORWARD].name = PSTR("РІРїРµСЂ");
 	menu_servo_params[CONFIG_SERVO_FORWARD].id = I2C_DATA_CONFIG_SERVO_FORWARD;
 	menu_servo_params[CONFIG_SERVO_FORWARD].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_REWIND].name = PSTR("назад");
+	menu_servo_params[CONFIG_SERVO_REWIND].name = PSTR("РЅР°Р·Р°Рґ");
 	menu_servo_params[CONFIG_SERVO_REWIND].id = I2C_DATA_CONFIG_SERVO_REWIND;
 	menu_servo_params[CONFIG_SERVO_REWIND].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_PAUSE].name = PSTR("пауза");
+	menu_servo_params[CONFIG_SERVO_PAUSE].name = PSTR("РїР°СѓР·Р°");
 	menu_servo_params[CONFIG_SERVO_PAUSE].id = I2C_DATA_CONFIG_SERVO_PAUSE;
 	menu_servo_params[CONFIG_SERVO_PAUSE].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_SEARCH].name = PSTR("поиск");
+	menu_servo_params[CONFIG_SERVO_SEARCH].name = PSTR("РїРѕРёСЃРє");
 	menu_servo_params[CONFIG_SERVO_SEARCH].id = I2C_DATA_CONFIG_SERVO_SEARCH;
 	menu_servo_params[CONFIG_SERVO_SEARCH].value = 0;
 }
@@ -62,7 +62,7 @@ void page_servo_config_render(uint8_t first_render)
 	
 	char str_buf[15];
 		
-	oled_printf(0, -2, FONTID_6X8M, strcpy_P(str_buf, PSTR("серво:%s")), servo_name);
+	oled_printf(0, -2, FONTID_6X8M, strcpy_P(str_buf, PSTR("СЃРµСЂРІРѕ:%s")), servo_name);
 
 	for (uint8_t i2c_param = I2C_DATA_CONFIG_SERVO_MIN; i2c_param <= I2C_DATA_CONFIG_SERVO_SEARCH; i2c_param++) {
 			
@@ -77,7 +77,7 @@ void page_servo_config_render(uint8_t first_render)
 			menu_servo_params[servo_parameter].value = MAX;
 		}
 			
-		// Для текущей настройки прибавляем измененное значение
+		// Р”Р»СЏ С‚РµРєСѓС‰РµР№ РЅР°СЃС‚СЂРѕР№РєРё РїСЂРёР±Р°РІР»СЏРµРј РёР·РјРµРЅРµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
 		if (current_param == servo_parameter) {
 			if((menu_servo_params[servo_parameter].value + current_param_change) < 0) {
 				menu_servo_params[servo_parameter].value = 0;
@@ -127,7 +127,7 @@ void page_servo_config_save()
 {
 	i2c_save_position_servo(current_servo, menu_servo_params[current_param].id, menu_servo_params[current_param].value);
 	current_param_change = 0;
-	_delay_ms(100); // Подождать инициализацию серво модуля
+	_delay_ms(100); // РџРѕРґРѕР¶РґР°С‚СЊ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ СЃРµСЂРІРѕ РјРѕРґСѓР»СЏ
 	i2c_send_position_servo(current_servo, menu_servo_params[current_param].value);
 }
 

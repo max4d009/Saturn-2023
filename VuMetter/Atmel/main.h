@@ -1,7 +1,7 @@
-/*
+﻿/*
  * main.h
  *
- * Created: 12.07.2021 0:32:36
+ * λ Created: 12.07.2021 0:32:36
  *  Author: m4d
  */ 
 #ifndef MAIN_H_

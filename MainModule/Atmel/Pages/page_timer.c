@@ -1,7 +1,7 @@
-/*
+Ôªø/*
  * page_timer.c
  *
- * Created: 24.10.2023 18:20:14
+ * Œª Created: 24.10.2023 18:20:14
  *  Author: m4d
  */ 
 #include "page_timer.h"
@@ -61,7 +61,7 @@ static void show_timer()
 static void show_left_menu()
 {
 	if (current.nr == 1) {
-		oled_printf(2, 25, FONTID_6X8M, "Ò¯Ô");
+		oled_printf(2, 25, FONTID_6X8M, "—Å—à–ø");
 	}
 
 	static uint8_t eq_timer = 30;
@@ -75,9 +75,9 @@ static void show_left_menu()
 	}
 
 	if (current.kontr == 1) {
-		oled_printf(2, 7, FONTID_6X8M, "‚˚"); oled_printf(14, 7, FONTID_6X8M, "ıÓ‰");
+		oled_printf(2, 7, FONTID_6X8M, "–≤—ã"); oled_printf(14, 7, FONTID_6X8M, "—Ö–æ–¥");
 	} else {
-		oled_printf(2, 7, FONTID_6X8M, "‚"); oled_printf(8, 7, FONTID_6X8M, "ıÓ‰");
+		oled_printf(2, 7, FONTID_6X8M, "–≤"); oled_printf(8, 7, FONTID_6X8M, "—Ö–æ–¥");
 	}
 }
 
@@ -112,7 +112,7 @@ static void show_current_mode()
 		break;
 		case REC_MODE:
 		case REC_MODE_PLAY:
-			oled_printf(42, 7, FONTID_6X8M, "«¿œ»—‹!");
+			oled_printf(42, 7, FONTID_6X8M, "–ó–ê–ü–ò–°–¨!");
 		break;
 		case FORWARD_MODE:
 		case FORWARD_LITTLE_MODE:		
@@ -120,11 +120,11 @@ static void show_current_mode()
 		break;
 		case REWIND_SEARCH_MODE:
 			oled_show_rewind(44, 9);
-			oled_printf(64, 7, FONTID_6X8M, "ÔÓËÒÍ");
+			oled_printf(64, 7, FONTID_6X8M, "–ø–æ–∏—Å–∫");
 		break;
 		case FORWARD_SEARCH_MODE:
 			oled_show_forward(44, 9);
-			oled_printf(64, 7, FONTID_6X8M, "ÔÓËÒÍ");
+			oled_printf(64, 7, FONTID_6X8M, "–ø–æ–∏—Å–∫");
 		break;
 		case PAUSE_MODE:
 			oled_show_pause(44, 9);

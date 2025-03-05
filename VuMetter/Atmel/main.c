@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * vu.c
  *
- * Created: 11.07.2021 23:28:18
+ * О» Created: 11.07.2021 23:28:18
  * Author : m4d
  */ 
 #include "main.h"
@@ -198,7 +198,7 @@ int main(void)
 			continue;
 		}
 	
-		// Производим измерение
+		// РџСЂРѕРёР·РІРѕРґРёРј РёР·РјРµСЂРµРЅРёРµ
 		uint16_t levelLeft = get_level_by_channel(LEFT_CHANNEL);
 		uint16_t levelRight = get_level_by_channel(RIGHT_CHANNEL);
 		int8_t numDiodLeft = getNumDiodByAdc(levelLeft);

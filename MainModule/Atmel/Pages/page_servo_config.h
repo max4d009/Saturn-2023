@@ -1,7 +1,7 @@
-/*
+﻿/*
  * pageServoConfig.h
  *
- * Created: 29.11.2023 3:36:09
+ * λ Created: 29.11.2023 3:36:09
  *  Author: max-4d
  */ 
 #ifndef PAGESERVOCONFIG_H_

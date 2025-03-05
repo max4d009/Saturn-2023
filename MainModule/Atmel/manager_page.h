@@ -1,7 +1,7 @@
-/*
+﻿/*
  * manager_page.h
  *
- * Created: 17.08.2024 1:28:24
+ * λ Created: 17.08.2024 1:28:24
  *  Author: max4d
  */ 
 #ifndef MANAGER_PAGE_H_

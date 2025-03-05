@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * i2c.h
  *
- * Created: 19.08.2024 1:32:45
+ * О» Created: 19.08.2024 1:32:45
  *  Author: max4d
  */ 
 #ifndef I2C_H_
@@ -9,7 +9,7 @@
 
 #include "main.h"
 
-#define ME_ADDR 0x3E // последний резрешение отклика на адрес
+#define ME_ADDR 0x3E // РїРѕСЃР»РµРґРЅРёР№ СЂРµР·СЂРµС€РµРЅРёРµ РѕС‚РєР»РёРєР° РЅР° Р°РґСЂРµСЃ
 
 #define I2C_VU_START_TRANSACTION_PEAKS_MODE 1
 #define I2C_VU_START_TRANSACTION_PEAKS_MODE_SAVE 2

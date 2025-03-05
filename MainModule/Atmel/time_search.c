@@ -1,7 +1,7 @@
-/*
+﻿/*
  * time_search.c
  *
- * Created: 24.01.2025 2:33:15
+ * λ Created: 24.01.2025 2:33:15
  *  Author: max4d
  */ 
 #include "time_search.h"

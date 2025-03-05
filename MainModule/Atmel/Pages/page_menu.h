@@ -1,7 +1,7 @@
-/*
+﻿/*
  * page_menu.h
  *
- * Created: 17.08.2024 4:04:46
+ * λ Created: 17.08.2024 4:04:46
  *  Author: max4d
  */ 
 #ifndef PAGE_MENU_H_

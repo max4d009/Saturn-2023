@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * page_tension_config.c
  *
- * Created: 23.01.2025 2:39:37
+ * О» Created: 23.01.2025 2:39:37
  *  Author: max4d
  */ 
 #include "page_tension_config.h"
@@ -17,9 +17,9 @@ PGM_P tension_pid_type_names[3];
 
 void init_page_tension_config()
 {
-	tension_pid_type_names[PID_REGULATOR_TENSION_PLAY]    = PSTR("натяж.воспр");
-	tension_pid_type_names[PID_REGULATOR_TENSION_FORWARD] = PSTR("натяж.впер");
-	tension_pid_type_names[PID_REGULATOR_TENSION_REWIND]  = PSTR("натяж.назад");
+	tension_pid_type_names[PID_REGULATOR_TENSION_PLAY]    = PSTR("РЅР°С‚СЏР¶.РІРѕСЃРїСЂ");
+	tension_pid_type_names[PID_REGULATOR_TENSION_FORWARD] = PSTR("РЅР°С‚СЏР¶.РІРїРµСЂ");
+	tension_pid_type_names[PID_REGULATOR_TENSION_REWIND]  = PSTR("РЅР°С‚СЏР¶.РЅР°Р·Р°Рґ");
 	
 	menu_pid_params[CONFIG_TENSION_P].name = PSTR("P");
 	menu_pid_params[CONFIG_TENSION_P].id = I2C_DATA_CONFIG_TENSION_P;
@@ -40,14 +40,14 @@ void page_tension_config_render(uint8_t first_render)
 	strcpy_P(tension_pid_type_name, tension_pid_type_names[current_pid]);
 	
 	char str_buf[10];
-	oled_printf(0, -2, FONTID_6X8M, strcpy_P(str_buf, PSTR("коэф:%s")), tension_pid_type_name);
+	oled_printf(0, -2, FONTID_6X8M, strcpy_P(str_buf, PSTR("РєРѕСЌС„:%s")), tension_pid_type_name);
 	
 	for (uint8_t i2c_param = I2C_DATA_CONFIG_TENSION_P; i2c_param <= I2C_DATA_CONFIG_TENSION_D; i2c_param++) {
 		uint8_t pid_parameter = i2c_param - I2C_DATA_CONFIG_TENSION_P;
 		
 		menu_pid_params[pid_parameter].value = i2c_data[i2c_param];
 		
-		// Для текущей настройки прибавляем измененное значение
+		// Р”Р»СЏ С‚РµРєСѓС‰РµР№ РЅР°СЃС‚СЂРѕР№РєРё РїСЂРёР±Р°РІР»СЏРµРј РёР·РјРµРЅРµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
 		if (current_param == pid_parameter) {
 			if((menu_pid_params[pid_parameter].value + current_param_change) < 0) {
 				menu_pid_params[pid_parameter].value = 0;

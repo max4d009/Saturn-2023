@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * m4d_i2c.c
  *
- * Created: 17.12.2020 0:42:18
+ * О» Created: 17.12.2020 0:42:18
  *  Author: m4d
  */ 
 
@@ -11,7 +11,7 @@ volatile unsigned char status;
 volatile uint8_t need_execute = 0;
 volatile uint8_t i2c_data_current = 0;
 
-// Инициализаця в роли ведомого устройства
+// РРЅРёС†РёР°Р»РёР·Р°С†СЏ РІ СЂРѕР»Рё РІРµРґРѕРјРѕРіРѕ СѓСЃС‚СЂРѕР№СЃС‚РІР°
 void m4d_i2c_init_as_slave(void)
 {
 	TWAR = ME_ADDR & 0xFE;
@@ -45,7 +45,7 @@ ISR(TWI_vect)
 	switch (status)
 	{
 		case 0x80:
-		{  // Пришли данные от мастера. (До это мы уже приняли свой адрес)
+		{  // РџСЂРёС€Р»Рё РґР°РЅРЅС‹Рµ РѕС‚ РјР°СЃС‚РµСЂР°. (Р”Рѕ СЌС‚Рѕ РјС‹ СѓР¶Рµ РїСЂРёРЅСЏР»Рё СЃРІРѕР№ Р°РґСЂРµСЃ)
 			char data = TWDR;
 			if (transactProcess == 0) {
 				transactType = data;

@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * gen.c
  *
- * Created: 27.08.2021 10:42:14
+ * О» Created: 27.08.2021 10:42:14
  * Author : m4d
  */ 
 
@@ -9,7 +9,7 @@
 
 void set_freq(int freq_)
 {
-	SPI_init(); // todo: проверить без этой строки
+	SPI_init(); // todo: РїСЂРѕРІРµСЂРёС‚СЊ Р±РµР· СЌС‚РѕР№ СЃС‚СЂРѕРєРё
 	Freq_change(freq_, 0);
 }
 

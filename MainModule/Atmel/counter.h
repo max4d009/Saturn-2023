@@ -1,7 +1,7 @@
-/*
+﻿/*
  * counter.h
  *
- * Created: 17.08.2024 1:19:20
+ * λ Created: 17.08.2024 1:19:20
  *  Author: max4d
  */ 
 #ifndef COUNTER_H_

@@ -1,7 +1,7 @@
-/*
+﻿/*
  * mainboard.cpp
  *
- * Created: 06.11.2021 2:09:48
+ * λ Created: 06.11.2021 2:09:48
  * Author : m4d
  */ 
 

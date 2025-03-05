@@ -1,7 +1,7 @@
-/*
+﻿/*
  * page_speed.h
  *
- * Created: 31.07.2024 3:22:38
+ * λ Created: 31.07.2024 3:22:38
  *  Author: max4d
  */ 
 #ifndef PAGE_SPEED_H_

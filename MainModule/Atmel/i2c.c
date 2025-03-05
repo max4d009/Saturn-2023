@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * i2c.c
  *
- * Created: 17.12.2020 0:42:18
+ * О» Created: 17.12.2020 0:42:18
  *  Author: m4d
  */ 
 #include "i2c.h"
@@ -240,7 +240,7 @@ static void after_i2c_read_servo()
 			
 		current.motor_speed = i2c_data[I2C_DATA_CONFIG_MOTOR_SPEED];
 		current.tension = i2c_data[I2C_DATA_TENSION];
-		// todo Оптимизировать
+		// todo РћРїС‚РёРјРёР·РёСЂРѕРІР°С‚СЊ
 			
 		memset(debug_string, '\0', DEBUG_STR_LEFT_MAX_LEN);
 			
@@ -414,7 +414,7 @@ static uint8_t i2c_send_data(uint8_t *data, uint8_t long_wait, uint8_t count)
 		return 0;
 	}
 	if (long_wait == 1) {
-		_delay_ms(500); // надо избавиться на сервомодуле от ситуаций, когда в прерывании он долго думает
+		_delay_ms(500); // РЅР°РґРѕ РёР·Р±Р°РІРёС‚СЊСЃСЏ РЅР° СЃРµСЂРІРѕРјРѕРґСѓР»Рµ РѕС‚ СЃРёС‚СѓР°С†РёР№, РєРѕРіРґР° РІ РїСЂРµСЂС‹РІР°РЅРёРё РѕРЅ РґРѕР»РіРѕ РґСѓРјР°РµС‚
 	} else {
 		_delay_ms(50);
 	}
@@ -461,7 +461,7 @@ static uint8_t i2c_send_byte(uint8_t data)
 
 static uint8_t i2c_stop_condition(void)
 {
-	TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN); //  убрал и заработало
+	TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN); //  СѓР±СЂР°Р» Рё Р·Р°СЂР°Р±РѕС‚Р°Р»Рѕ
 
 // 	uint16_t i2c_wait = TWINT_WAIT_TIMEOUT;
 // 	while ((TWCR & (1<<TWSTO)) && i2c_wait != 0) {

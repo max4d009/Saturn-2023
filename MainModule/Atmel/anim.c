@@ -1,7 +1,7 @@
-/*
+﻿/*
  * anim.c
  *
- * Created: 30.07.2024 4:31:48
+ * λ Created: 30.07.2024 4:31:48
  *  Author: max4d
  */ 
 #include "anim.h"

@@ -1,7 +1,7 @@
-/*
+﻿/*
  * main.c
  *
- *  Author: max4d
+ * λ Author: max4d
  */ 
 #include "main.h"
 

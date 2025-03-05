@@ -1,7 +1,7 @@
-/*
+﻿/*
  * page_vu.h
  *
- * Created: 19.08.2024 3:02:36
+ * λ Created: 19.08.2024 3:02:36
  *  Author: max4d
  */ 
 #ifndef PAGE_VU_H_

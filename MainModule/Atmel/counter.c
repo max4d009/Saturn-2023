@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * counter.c
  *
- * Created: 17.08.2024 1:19:07
+ * О» Created: 17.08.2024 1:19:07
  *  Author: max4d
  */ 
 #include "counter.h"
@@ -96,12 +96,12 @@ void inc_counter()
 				}
 				timer.m_sec = 9;
 				if (timer.sec == -1) {
-					timer.min--; // Увеличиваем минуты
+					timer.min--; // РЈРІРµР»РёС‡РёРІР°РµРј РјРёРЅСѓС‚С‹
 					timer.m_sec = 9; timer.sec = 59;
 					if (timer.min == -1) {
-						timer.hour--; // Увеличиваем часы
+						timer.hour--; // РЈРІРµР»РёС‡РёРІР°РµРј С‡Р°СЃС‹
 						timer.m_sec = 9; timer.sec = 59; timer.min = 59;
-						if (timer.hour == -1) { // Если прошел час обнуляем все
+						if (timer.hour == -1) { // Р•СЃР»Рё РїСЂРѕС€РµР» С‡Р°СЃ РѕР±РЅСѓР»СЏРµРј РІСЃРµ
 							timer.m_sec = 9; timer.sec = 59; timer.min = 59; timer.hour = 5;
 						}
 					}

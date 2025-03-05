@@ -1,7 +1,7 @@
-/*
+Ôªø/*
  * pageFFT.c
  *
- * Created: 24.10.2023 18:21:57
+ * Œª Created: 24.10.2023 18:21:57
  *  Author: m4d
  */ 
 #include "page_fft.h"
@@ -89,13 +89,13 @@ static void show_fft()
 	oled_draw_line(7,   f50,   12,  f50);  // 50
 	oled_draw_line(16,  f100,  24,  f100); // 100
 	oled_draw_line(28,  f350,  38,  f350); // 350
-	oled_draw_line(42,  f1k,   47,  f1k);  // 1Í
-	oled_draw_line(51,  f6k,   58,  f6k);  // 6Í
-	oled_draw_line(62,  f10k,  71,  f10k); // 10Í
-	oled_draw_line(75,  f12k,  84,  f12k); // 12Í
-	oled_draw_line(88,  f14k,  97,  f14k); // 14Í
-	oled_draw_line(101, f16k,  110, f16k); // 16Í
-	oled_draw_line(113, f20k,  123, f20k); // 20Í
+	oled_draw_line(42,  f1k,   47,  f1k);  // 1–∫
+	oled_draw_line(51,  f6k,   58,  f6k);  // 6–∫
+	oled_draw_line(62,  f10k,  71,  f10k); // 10–∫
+	oled_draw_line(75,  f12k,  84,  f12k); // 12–∫
+	oled_draw_line(88,  f14k,  97,  f14k); // 14–∫
+	oled_draw_line(101, f16k,  110, f16k); // 16–∫
+	oled_draw_line(113, f20k,  123, f20k); // 20–∫
 }
 
 static void show_fft_background()
@@ -162,13 +162,13 @@ static void show_menu()
 	char str_buf[15];
 	
 	if (current_channel == CHANNEL_LEFT) {
-		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:ÎÂ‚")));
+		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:–ª–µ–≤")));
 	} else {
-		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:Ô")));
+		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:–ø—Ä")));
 	}
 	
-	oled_draw_menu_item(45, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_BIAS ? 1:0, strcpy_P(str_buf, PSTR("ÔÓ‰Ï:%02d")), current.bias);
-	oled_draw_menu_item(96, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("˝k‚:%d")), current.uz_eq);
+	oled_draw_menu_item(45, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_BIAS ? 1:0, strcpy_P(str_buf, PSTR("–ø–æ–¥–º:%02d")), current.bias);
+	oled_draw_menu_item(96, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("—çk–≤:%d")), current.uz_eq);
 }
 
 static void set_freq_level(uint8_t freq_name, uint8_t freq_level)

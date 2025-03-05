@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * page_vu.c
  *
- * Created: 19.08.2024 3:02:24
+ * О» Created: 19.08.2024 3:02:24
  *  Author: max4d
  */ 
 #include "page_vu.h"
@@ -14,7 +14,7 @@ void page_vu_render(uint8_t first_render)
 {
 	if (first_render == 1) {
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].id_item = VU_CONFIG_MENU_ITEM_PEAKS_MODE;
-		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].name = PSTR("Отобр. пики");
+		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].name = PSTR("РћС‚РѕР±СЂ. РїРёРєРё");
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].min = 0;
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].max = 3;
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].current = current.vu_peaks_mode;
@@ -22,7 +22,7 @@ void page_vu_render(uint8_t first_render)
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_MODE].i2c_symbol_save = I2C_VU_START_TRANSACTION_PEAKS_MODE_SAVE;
 		
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].id_item = VU_CONFIG_MENU_ITEM_PEAKS_TIME;
-		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].name = PSTR("Время отобр.");
+		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].name = PSTR("Р’СЂРµРјСЏ РѕС‚РѕР±СЂ.");
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].min = 0;
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].max = 25;
 		vu_menu[VU_CONFIG_MENU_ITEM_PEAKS_TIME].current = current.vu_peaks_time;

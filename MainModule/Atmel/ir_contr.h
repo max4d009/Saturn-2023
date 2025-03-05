@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * ir_contr.h
  *
- * Created: 07.12.2023 1:41:35
+ * О» Created: 07.12.2023 1:41:35
  *  Author: max-4d
  */ 
 #ifndef IR_CONTR_H_
@@ -35,8 +35,8 @@ struct IRButton {
 
 volatile struct IRButton ir_button_list[IR_BUTTONS_COUNT];
 
-volatile unsigned char IR_impulse_count;   // счётчик кол-ва принятых импульсов ДУ
-volatile unsigned char IR_wait;   // счётчик кол-ва принятых импульсов ДУ
+volatile unsigned char IR_impulse_count;   // СЃС‡С‘С‚С‡РёРє РєРѕР»-РІР° РїСЂРёРЅСЏС‚С‹С… РёРјРїСѓР»СЊСЃРѕРІ Р”РЈ
+volatile unsigned char IR_wait;   // СЃС‡С‘С‚С‡РёРє РєРѕР»-РІР° РїСЂРёРЅСЏС‚С‹С… РёРјРїСѓР»СЊСЃРѕРІ Р”РЈ
 
 
 #endif /* IR_CONTR_H_ */

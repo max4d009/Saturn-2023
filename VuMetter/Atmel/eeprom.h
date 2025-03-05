@@ -1,7 +1,7 @@
-/*
+﻿/*
  * eeprom.h
  *
- * Created: 19.08.2024 2:29:31
+ * λ Created: 19.08.2024 2:29:31
  *  Author: max4d
  */ 
 #ifndef EEPROM_H_

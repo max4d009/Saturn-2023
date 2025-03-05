@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * buttons.c
  *
- * Created: 23.10.2023 20:21:19
+ * О» Created: 23.10.2023 20:21:19
  *  Author: m4d
  */ 
 #include "buttons.h"
@@ -189,8 +189,8 @@ void off_timer()
 		for (uint8_t i = 0; i < 255; i++) {
 			i2c_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
 		}
-		TWCR &= ~(1 << TWEA); // Вспомнить зачем это..
-		TWCR &= ~(1 << TWEN); // Вспомнить зачем это..
+		TWCR &= ~(1 << TWEA); // Р’СЃРїРѕРјРЅРёС‚СЊ Р·Р°С‡РµРј СЌС‚Рѕ..
+		TWCR &= ~(1 << TWEN); // Р’СЃРїРѕРјРЅРёС‚СЊ Р·Р°С‡РµРј СЌС‚Рѕ..
 		
 		PORTD &= ~(1 << STAND_BY_PIN);
 		_delay_ms(1000);
