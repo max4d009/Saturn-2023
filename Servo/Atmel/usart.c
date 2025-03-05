@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * usart.c
  *
- * Created: 14.01.2021 15:41:00
+ * О» Created: 14.01.2021 15:41:00
  *  Author: m4d
  */ 
 #include "usart.h"
@@ -46,7 +46,7 @@ void usart_send_boost(uint8_t boost)
 
 static void USART_Transmit(char data)
 {
-	// Начнем передавать данные, но только убедившись, что буфер пуст
+	// РќР°С‡РЅРµРј РїРµСЂРµРґР°РІР°С‚СЊ РґР°РЅРЅС‹Рµ, РЅРѕ С‚РѕР»СЊРєРѕ СѓР±РµРґРёРІС€РёСЃСЊ, С‡С‚Рѕ Р±СѓС„РµСЂ РїСѓСЃС‚
 	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = data;
 	_delay_us(200);

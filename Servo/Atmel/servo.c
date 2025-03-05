@@ -1,7 +1,7 @@
-/*
+ï»¿/*
  * m4d_servo.c
  *
- * Created: 04.12.2020 1:10:36
+ * Î» Created: 04.12.2020 1:10:36
  *  Author: m4d
  */ 
 #include "servo.h"
@@ -82,12 +82,12 @@ void auto_stop_timer(uint16_t adc)
 		after_black = 0;
 		timer = 0;
 		return;
-	} else if (adc < AUTOSTOP_ADC_ACTIVATION) { // 100 Ñðàáàòûâàåò íà ÷åðíîé ëåíòå
+	} else if (adc < AUTOSTOP_ADC_ACTIVATION) { // 100 Ð¡Ñ€Ð°Ð±Ð°Ñ‚Ñ‹Ð²Ð°ÐµÑ‚ Ð½Ð° Ñ‡ÐµÑ€Ð½Ð¾Ð¹ Ð»ÐµÐ½Ñ‚Ðµ
 		if (after_black < 50) {
 			after_black++;
 		}
 		return;
-	} else if (after_black < 50) { // Åù¸ íå áûëî ëåíòû
+	} else if (after_black < 50) { // Ð•Ñ‰Ñ‘ Ð½Ðµ Ð±Ñ‹Ð»Ð¾ Ð»ÐµÐ½Ñ‚Ñ‹
 		after_black = 0;
 		return;
 	} else if (timer < AUTOSTOP_OPACITY_TIMER) { // 2

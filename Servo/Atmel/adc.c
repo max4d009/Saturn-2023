@@ -1,7 +1,7 @@
-/*
- * m4d_adc.с
+п»ї/*
+ * m4d_adc.СЃ
  *
- * Created: 02.12.2020 1:24:46
+ * О» Created: 02.12.2020 1:24:46
  *  Author: m4d
  */ 
 #include "adc.h"
@@ -9,7 +9,7 @@
 static void adc_result_timer(uint8_t mux);
 volatile uint8_t current_mux = 0;
 
-// Инициализация АЦП:
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РђР¦Рџ:
 void m4d_adc_init_8(void) 
 {	
 	adc_list[ADC_OPERATION_KEYBOARD].adc_result = 0;
@@ -36,18 +36,18 @@ void m4d_adc_init_8(void)
 	adc_list[ADC_OPERATION_CURRENT_CONSUPTION].status = ADC_STATUS_NO_COMPUTE;
 	adc_list[ADC_OPERATION_CURRENT_CONSUPTION].repeat = 0;
 	
-	// Включить АЦП
+	// Р’РєР»СЋС‡РёС‚СЊ РђР¦Рџ
 	ADCSRA |=  (1 << ADEN);
-	// Частота 250 000
+	// Р§Р°СЃС‚РѕС‚Р° 250 000
 	ADCSRA |= (1 << ADPS0);
 	ADCSRA |= (1 << ADPS1);
 	ADCSRA &= ~(1 << ADPS2);
 		
-	// Опорное напряжение по VCC 5v
+	// РћРїРѕСЂРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРѕ VCC 5v
 	ADMUX |=  (1 << REFS0);
 	ADMUX &= ~(1 << REFS1);
 		
-	// Разрешить прерывания
+	// Р Р°Р·СЂРµС€РёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёСЏ
 	ADCSRA |= (1 << ADIE);
 }
 
@@ -65,8 +65,8 @@ void compute_all_adc_timer()
 		ADCSRA |= (1 << ADSC);
 		adc_list[current_mux].status = ADC_STATUS_IN_COMPUTE;
 		adc_list[current_mux].adc_result = 0;		
-	} else if (adc_list[current_mux].status == ADC_STATUS_IN_COMPUTE) { // Между попытками ждём	
-	} else if (adc_list[current_mux].status == ADC_STATUS_ISR_COMPUTED) { // Если было получено значение в прерывании
+	} else if (adc_list[current_mux].status == ADC_STATUS_IN_COMPUTE) { // РњРµР¶РґСѓ РїРѕРїС‹С‚РєР°РјРё Р¶РґС‘Рј	
+	} else if (adc_list[current_mux].status == ADC_STATUS_ISR_COMPUTED) { // Р•СЃР»Рё Р±С‹Р»Рѕ РїРѕР»СѓС‡РµРЅРѕ Р·РЅР°С‡РµРЅРёРµ РІ РїСЂРµСЂС‹РІР°РЅРёРё
 		adc_result_timer(current_mux);
 		adc_list[current_mux].status = ADC_STATUS_COMPUTED;
 		current_mux++;

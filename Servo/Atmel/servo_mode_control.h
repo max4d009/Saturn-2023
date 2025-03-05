@@ -1,7 +1,7 @@
-/*
+﻿/*
  * servo_mode_control.h
  *
- * Created: 09.07.2024 19:04:46
+ * λ Created: 09.07.2024 19:04:46
  *  Author: max4d
  */ 
 #ifndef SERVO_MODE_CONTROL_H_

@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * search.c
  *
- * Created: 11.06.2024 1:29:06
+ * О» Created: 11.06.2024 1:29:06
  *  Author: max4d
  */ 
 
@@ -14,7 +14,7 @@ static float expRunningAverageAdaptive(float newVal);
 
 void search_program_timer()
 {
-	// Выходим если не в режиме поиска
+	// Р’С‹С…РѕРґРёРј РµСЃР»Рё РЅРµ РІ СЂРµР¶РёРјРµ РїРѕРёСЃРєР°
 	if (kinematics_mode.in_search == 0) {
 		if (kinematics_mode.search_step != SEARCH_STEP_0_STOP_SEARCH) {
 			kinematics_mode.search_step = SEARCH_STEP_0_STOP_SEARCH;
@@ -82,17 +82,17 @@ void search_pause_with_adc(uint16_t adc)
 	
 	adc = (uint16_t) expRunningAverageAdaptive(adc);
 	
-	// Ждём пока не появится стабильный уровень сигнала
+	// Р–РґС‘Рј РїРѕРєР° РЅРµ РїРѕСЏРІРёС‚СЃСЏ СЃС‚Р°Р±РёР»СЊРЅС‹Р№ СѓСЂРѕРІРµРЅСЊ СЃРёРіРЅР°Р»Р°
 	if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) {
 		silens_wait_time = 0;
 		hight_level_time = 0;
-	} else if (adc > SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) { // Проверяем, что уровень сигнала наблюдается некоторое время
+	} else if (adc > SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) { // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ СѓСЂРѕРІРµРЅСЊ СЃРёРіРЅР°Р»Р° РЅР°Р±Р»СЋРґР°РµС‚СЃСЏ РЅРµРєРѕС‚РѕСЂРѕРµ РІСЂРµРјСЏ
 		hight_level_time++;
-	} else if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time > SEARCH_LEVEL_WITHOUT_DROPS_TIME && silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) { // Считаем время в паузе
+	} else if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time > SEARCH_LEVEL_WITHOUT_DROPS_TIME && silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) { // РЎС‡РёС‚Р°РµРј РІСЂРµРјСЏ РІ РїР°СѓР·Рµ
 		if (silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) {
 			silens_wait_time++;
 		}
-	} else if (silens_wait_time >= SEARCH_LEVEL_SILENCE_TIME) { // Если обнаружена пауза
+	} else if (silens_wait_time >= SEARCH_LEVEL_SILENCE_TIME) { // Р•СЃР»Рё РѕР±РЅР°СЂСѓР¶РµРЅР° РїР°СѓР·Р°
 		set_mode(STOP_MODE, 0, 0);
 		hight_level_time = 0;
 		silens_wait_time = 0;
@@ -115,7 +115,7 @@ static float expRunningAverageAdaptive(float newVal)
 {
 	static float filVal = 0;
 	float k;
-	// резкость фильтра зависит от модуля разности значений
+	// СЂРµР·РєРѕСЃС‚СЊ С„РёР»СЊС‚СЂР° Р·Р°РІРёСЃРёС‚ РѕС‚ РјРѕРґСѓР»СЏ СЂР°Р·РЅРѕСЃС‚Рё Р·РЅР°С‡РµРЅРёР№
 	if (abs(newVal - filVal) > 1.5) k = 0.9;
 	else k = 0.03;
 	

@@ -1,7 +1,7 @@
-/*
+п»ї/*
  * servo_core.h
  *
- * Created: 09.07.2024 18:44:56
+ * О» Created: 09.07.2024 18:44:56
  *  Author: max4d
  */ 
 #ifndef SERVO_CORE_H_
@@ -11,13 +11,13 @@
 
 #define NUM_SERVO 4
 
-// Пины для сервоприводов
+// РџРёРЅС‹ РґР»СЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
 #define SERVO_LEFT_PIN PB1
 #define REWIND_SERVO_PIN PB2
 #define PLAY_SERVO_PIN PB3
 #define SERVO_RIGHT_PIN PB4
 
-// Пин выключения питания на сервоприводы
+// РџРёРЅ РІС‹РєР»СЋС‡РµРЅРёСЏ РїРёС‚Р°РЅРёСЏ РЅР° СЃРµСЂРІРѕРїСЂРёРІРѕРґС‹
 #define SERVO_ENABLE_PORT PORTD
 #define SERVO_ENABLE_DDR DDRD
 #define SERVO_ENABLE_PIN PD3
@@ -69,7 +69,7 @@
 #define AUTOSTOP_ADC_ACTIVATION 16
 #define AUTOSTOP_OPACITY_TIMER 1
 
-// Общая структура для всех сервоприводов
+// РћР±С‰Р°СЏ СЃС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РІСЃРµС… СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
 struct Servo {
 	char pin;
 	volatile uint8_t speed;

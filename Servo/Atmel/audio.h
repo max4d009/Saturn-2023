@@ -1,7 +1,7 @@
-/*
+﻿/*
  * audio.h
  *
- * Created: 12.08.2022 2:53:53
+ * λ Created: 12.08.2022 2:53:53
  *  Author: m4d
  */ 
 #ifndef AUDIO_H_
