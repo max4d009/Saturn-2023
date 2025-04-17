@@ -10,6 +10,7 @@ static void stabilization_play();
 static void stabilization_forward();
 static void stabilization_rewind();
 
+// Получаем настройки пид регуляторов
 void tension_init()
 {
 	for (uint8_t i = 0; i < NUM_PID_REGULATOR; i++) {
@@ -23,6 +24,8 @@ void tension_init()
 	}
 }
 
+// Вызывается таймером.
+// Установка натяжения ленты в зависимомти от режима.
 void tension_sensor_set_timer()
 {		
 	switch (kinematics_mode.current) {
@@ -43,6 +46,8 @@ void tension_sensor_set_timer()
 	}
 }
 
+// Если это воспроизведение - будем подстраивать натяжение на подмоточном узле относительно скорости вращения боковых узлов
+// Переписать.... родилось в результате дебага и отладки..
 void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right)
 {	
 	static uint8_t reel_right_stable_inc = 0;	
@@ -88,6 +93,7 @@ void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right)
 	}
 }
 
+// Если это воспроизведение - будем подстраивать натяжение на подающем узле
 static void stabilization_play()
 {
 	servo_list[SERVO_LEFT].need_angle = computePID(
@@ -102,6 +108,7 @@ static void stabilization_play()
 	);	
 }
 	
+// Если это перемотка вперед - будем подстраивать натяжение на подающем узле
 static void stabilization_forward()
 {
 	double kp = pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].p;
@@ -123,6 +130,7 @@ static void stabilization_forward()
 	);
 }
 	
+// Если это перемотка назад - будем подстраивать натяжение на подающем узле
 static void stabilization_rewind()
 {
 	double kp = pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].p;
@@ -131,7 +139,6 @@ static void stabilization_rewind()
 		kp = TENSION_REWIND_P_SMALL_REEL;
 		ki = TENSION_REWIND_I_SMALL_REEL;
 	}
-		i2c_send_debug_int_var_oled("R",kinematics_mode.tension);
 
 	servo_list[SERVO_RIGHT].need_angle = computePID(
 		kinematics_mode.tension,

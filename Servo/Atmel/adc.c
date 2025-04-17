@@ -9,7 +9,7 @@
 static void adc_result_timer(uint8_t mux);
 volatile uint8_t current_mux = 0;
 
-// Инициализация АЦП:
+// Инициализация АЦП
 void m4d_adc_init_8(void) 
 {	
 	adc_list[ADC_OPERATION_KEYBOARD].adc_result = 0;
@@ -51,6 +51,11 @@ void m4d_adc_init_8(void)
 	ADCSRA |= (1 << ADIE);
 }
 
+// Функция производит иммерения АЦП
+// Запускается по таймеру. 
+// Если для канала АЦП указан флаг repeat измерения будут производиться бесконечно.
+// Для однократного измерения установить status в ADC_STATUS_NEED_COMPUTE
+// После каждого измерения будет выполненна функция adc_result_timer
 void compute_all_adc_timer()
 {		
 	if (adc_list[current_mux].repeat == 1 && (adc_list[current_mux].status == ADC_STATUS_NO_COMPUTE || adc_list[current_mux].status == ADC_STATUS_COMPUTED)) {
@@ -76,17 +81,20 @@ void compute_all_adc_timer()
 	} 
 }
 
+// Включить непрерывное измерение для канала АЦП
 void repeat_adc_on(uint8_t mux)
 {
 	adc_list[mux].repeat = 1;
 }
 
+// Выключить непрерывное измерение для канала АЦП
 void repeat_adc_off(uint8_t mux)
 {
 	adc_list[mux].repeat = 0;
 	adc_list[mux].status = ADC_STATUS_NO_COMPUTE;
 }
 
+// Выполняется после измерения АЦП
 static void adc_result_timer(uint8_t mux)
 {
 	if (mux == ADC_OPERATION_LEFT_CHANNEL) {
@@ -106,6 +114,7 @@ static void adc_result_timer(uint8_t mux)
 	}
 }
 
+// Установка текущего канала АЦП
 void mux_set(uint8_t mux)
 {
 	switch (mux) {

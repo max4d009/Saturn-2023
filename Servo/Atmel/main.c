@@ -18,11 +18,12 @@ int main(void)
 	tension_init();
 	audio_init();
 
-	repeat_adc_on(ADC_OPERATION_LEFT_CHANNEL);
-	repeat_adc_on(ADC_OPERATION_RIGHT_CHANNEL);
-	repeat_adc_on(ADC_OPERATION_TENSION);
-	repeat_adc_on(ADC_OPERATION_CURRENT_CONSUPTION);
-	repeat_adc_on(ADC_OPERATION_AUTO_STOP);
+    // Включаем каналы АЦП на постоянную цикличную работу. 
+	repeat_adc_on(ADC_OPERATION_LEFT_CHANNEL); // измерить уровень по левому каналу
+	repeat_adc_on(ADC_OPERATION_RIGHT_CHANNEL); // измерить уровень по правому каналу
+	repeat_adc_on(ADC_OPERATION_TENSION); // измерить уровень по датчикку натяжения
+	repeat_adc_on(ADC_OPERATION_CURRENT_CONSUPTION);  // измерить уровень потребулению тока сервоприводами
+	repeat_adc_on(ADC_OPERATION_AUTO_STOP);  // измерить уровень по каналу автостопа
 	
 	DDRD &= ~(1 << PD4);
 	PORTD &= ~(1 << PD4);

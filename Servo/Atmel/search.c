@@ -12,6 +12,8 @@ uint16_t count_stopped_overdo = 0;
 
 static float expRunningAverageAdaptive(float newVal);
 
+// Запускаеся постоянно по таймеру
+// Функция поиска по паузам, написанная "по быстрому" нужно дорабатывать
 void search_program_timer()
 {
 	// Выходим если не в режиме поиска
@@ -22,6 +24,7 @@ void search_program_timer()
 		return;
 	}
 
+	// Сначала переходим в режим поиска паузы
 	if (kinematics_mode.search_step == SEARCH_STEP_0_STOP_SEARCH) {
 		count_stopped_overdo = 0;
 		overdo_sum = 0;
@@ -29,10 +32,13 @@ void search_program_timer()
 		return;
 	}
 	
+	// Пока пауза не нашлась выходим
 	if (kinematics_mode.search_step == SEARCH_STEP_1_FIND_PAUSE) {
 		return;
 	}
 
+	// Как только нашли паузу некоторое время ждём пока механика переходт в режим стоп.
+	// В это время так же считаются срабатывания датчиков на боковых узлах
 	if (kinematics_mode.search_step == SEARCH_STEP_2_CALC_OVERDO) {
 		count_stopped_overdo++;
 		if (count_stopped_overdo > SEARCH_OVERDO_CALC_TIME) {
@@ -41,6 +47,9 @@ void search_program_timer()
 		return;
 	}
 
+    // Если кол-во срабатываний датчиков было небольшим сразу включаем воспроизведение
+	// Иначе считаем, что слишком долго останавливалась механика и мы сильно перелетели паузу
+	// Тогда нужно с помощью перемотки отмотать назад на кол-во срабатываний датчиков боковых узлов
 	if (kinematics_mode.search_step == SEARCH_STEP_3_OVERDO_CALCULATED) {
 		if (overdo_sum <= SEARCH_OVERDO_IGNORE) {
 			kinematics_mode.in_search = 0;
@@ -59,6 +68,7 @@ void search_program_timer()
 		return;
 	}
 
+	// Включаем воспроизведение после возврата к паузе которую "перелетели"
 	if (kinematics_mode.search_step == SEARCH_STEP_5_REWIND) {
 		if (overdo_sum <= SEARCH_OVERDO_BEFORE_REACHING) {
 			kinematics_mode.in_search = 0;
@@ -69,6 +79,7 @@ void search_program_timer()
 	}
 }
 
+// Вызывается после того как АЦП произвел рассчёт
 void search_pause_with_adc(uint16_t adc)
 {
 	static uint8_t silens_wait_time = 0;
@@ -100,6 +111,9 @@ void search_pause_with_adc(uint16_t adc)
 	}
 }
 
+// Вызывается при срабатывании любого из датчиков боковых узлов при их вращении
+// Пока просто начинаем считать срабатывания при обнаружении паузы при поиске
+// Если паузу перелетели, на такое же кол-во срабатываний медленной будем мотать назад
 void calc_search_overdo()
 {
 	if (kinematics_mode.search_step == SEARCH_STEP_2_CALC_OVERDO && overdo_sum < SEARCH_OVERDO_MAX) {

@@ -22,6 +22,7 @@ void USART_ini(unsigned int speed)
 
 char str_speed[10];
 
+// Отправить скорость двигателя и тип пид регулятора в блок двигателя
 void usart_send_speed(uint16_t speed, uint8_t pid_type)
 {	
 	itoa(speed, str_speed, 10);
@@ -33,10 +34,9 @@ void usart_send_speed(uint16_t speed, uint8_t pid_type)
 	} else {
 		USART_send_var('l', str_speed);
 	}
-	
-	
 }
 
+// Deprecated
 void usart_send_boost(uint8_t boost)
 {
 	itoa(boost, str_speed, 10);

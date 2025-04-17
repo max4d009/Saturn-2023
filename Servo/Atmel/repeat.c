@@ -7,6 +7,7 @@
 
 #include "repeat.h"
 
+// Пока простенький алгорим повтора всей катушки
 void repeat_program()
 {
 	if (kinematics_mode.repeat == 0) {

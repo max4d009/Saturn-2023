@@ -7,6 +7,9 @@
 
 #include "audio.h"
 
+// Массив, должен был использоваться
+// для получения уровня в дБ от -30 до 0
+// по факту пока приблизительно работает через getDbsByAdc
 uint16_t dbs[40] = {
 	88,86,84,82,80,
 	78,76,74,72,70,
@@ -26,16 +29,22 @@ void audio_init()
 	audio_level.right = 0;
 }
 
+// Выполняется после измерения АЦП
+// Сохраняет уровень сигнала от 0 до 40 в структуру
 void audio_timer_left(uint16_t adc)
 {
 	audio_level.left = getDbsByAdc(adc);
 }
 
+// Выполняется после измерения АЦП
+// Сохраняет уровень сигнала от 0 до 40 в структуру
 void audio_timer_right(uint16_t adc)
 {
 	audio_level.right = getDbsByAdc(adc);
 }
 
+// Получаем уровень сигнала от 0 до 40, в зависимости от измерения АЦП
+// Делал временно, так и осталось пока
 static char getDbsByAdc(uint16_t adc)
 {
 	for (uint8_t i = 0; i <= 39; i++){

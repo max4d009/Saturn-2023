@@ -20,17 +20,20 @@ static uint8_t need_stop_mode();
 static uint8_t little_forward_timer_off();
 static uint8_t little_rweind_timer_off();
 
-
+// делалась временно.... для тестирования поиска по паузам.
+// падаем сюда при выборе режима кинематики.
 static uint8_t search_on_off_check(uint8_t mode)
 {
+	// Если сейчас не в режими поиска и пришла команда включить поиск
 	if (kinematics_mode.in_search == 0 && (mode == FORWARD_SEARCH_MODE || mode == REWIND_SEARCH_MODE)) {
-		kinematics_mode.current = mode;
-		set_motor_speed(SEARCH_SPEED, 0);
-		servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].search_angle;
-		kinematics_mode.in_search = 1;
+		kinematics_mode.current = mode; // устанавливаем текущий режим, как режим поиска
+		set_motor_speed(SEARCH_SPEED, 0); // Двигатель переводим на скорость при поиске
+		servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].search_angle; // Подводим ленту ближе к ГВ
+		kinematics_mode.in_search = 1; // Сохраняем флаг, что мы в поиске...
 		return 1;
 	}
 
+	// Если сейчас в режиме поиска и пришла команда включить обычную перемотку, выходим из режима поиска и переходим к обычной перемотке
 	if (kinematics_mode.in_search == 1) {
 		if (mode == FORWARD_MODE && kinematics_mode.current == FORWARD_SEARCH_MODE) {
 			servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].forward_angle;
@@ -52,20 +55,25 @@ static uint8_t search_on_off_check(uint8_t mode)
 	return 0;
 }
 
+// Установить режим кинематики
 void set_mode(uint8_t mode, uint8_t force_off_search, uint8_t is_autostop)
 {
+	// Если кинематика уже в переходном процессе - ничего не делаем.
 	if (kinematics_mode.in_process == 1) {
 		return;
 	}
 	
+	// Если пришел флаг принудительного выключения поиска
 	if (force_off_search == 1) {
 		kinematics_mode.in_search = 0;
 	}
 	
+	// Если это переход между перемоткой и поиском по паузам - выполняем пока внутри этой функции этот переход
 	if (search_on_off_check(mode) == 1) {
 		return;
 	}
 	
+    // Задаем новый режим кинематики. Изменение режима произведет таймер change_mode_timer()
 	if (kinematics_mode.current != mode) {
 		kinematics_mode.change_mode_counter = 0;
 		kinematics_mode.previous = kinematics_mode.current;
@@ -75,6 +83,7 @@ void set_mode(uint8_t mode, uint8_t force_off_search, uint8_t is_autostop)
 	}
 }
 
+// Определяет нужно ли при переходе из одного режима в другой, сначала перейти в стоп.
 static uint8_t need_stop_mode()
 {
 	if (is_pause_play_switch() == 1) {
@@ -96,6 +105,7 @@ static uint8_t need_stop_mode()
 	return 0;
 }
 
+// Определяет, что это переход между воспроизведением и паузой и обратно
 static uint8_t is_pause_play_switch()
 {
 	if ((kinematics_mode.current == PLAY_MODE || kinematics_mode.current == REC_MODE_PLAY) && kinematics_mode.previous == PAUSE_MODE) {
@@ -108,14 +118,16 @@ static uint8_t is_pause_play_switch()
 }
 
 
-// X4 Вызывается таймером постоянно. Начинает выполнение, когда произошло изменение режима.
+// Вызывается таймером постоянно. Начинает выполнение, когда произошло изменение режима.
+// Собственно изменяеи режим кинематики
 void change_mode_timer()
 {	
-	
+	// Если кинематика уже в переходном процессе - ничего не делаем.
 	if (kinematics_mode.in_process == 0) {
 		return;
 	}
 	
+	// Если есть запрос на изменение режима, но сначала нужно перейти в стоп режим - сделаем это
 	if (need_stop_mode() == 1) {
 		if (stop_timer(1) == 0 && kinematics_mode.change_mode_counter < 500) {
 			kinematics_mode.change_mode_counter++;
@@ -127,6 +139,7 @@ void change_mode_timer()
 		kinematics_mode.change_mode_counter = 0;
 	}
 	
+	// Запускаем нужный таймер изменения режима.
 	uint8_t result;
 	switch (kinematics_mode.current) {
 		case STOP_MODE:
@@ -174,6 +187,7 @@ void change_mode_timer()
 	}
 }
 
+// Вызывается таймером. Переводит кинематику в режим воспроизведения.
 static uint8_t play_timer()
 {
 	if (kinematics_mode.previous == FORWARD_LITTLE_MODE) {
@@ -207,6 +221,7 @@ static uint8_t play_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику в режим пауза.
 static uint8_t pause_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -232,6 +247,7 @@ static uint8_t pause_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику в режим перемотки вперед.
 static uint8_t forward_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -272,6 +288,7 @@ static uint8_t forward_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику в режим перемотки назад.
 static uint8_t rewind_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -313,6 +330,7 @@ static uint8_t rewind_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику в режим стоп.
 static uint8_t stop_timer(uint8_t long_wait)
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -356,6 +374,7 @@ static uint8_t stop_timer(uint8_t long_wait)
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику из режима воспроизведения в режим медленной перемотки вперед.
 static uint8_t little_forward_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -378,6 +397,7 @@ static uint8_t little_forward_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику из режима медленной перемотки вперед в режим воспроизведения
 static uint8_t little_forward_timer_off()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -397,7 +417,7 @@ static uint8_t little_forward_timer_off()
 	return 0;
 }
 
-
+// Вызывается таймером. Переводит кинематику из режима воспроизведения в режим медленной перемотки назад.
 static uint8_t little_rewind_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -426,6 +446,7 @@ static uint8_t little_rewind_timer()
 	return 0;
 }
 
+// Вызывается таймером. Переводит кинематику из режима медленной перемотки назад в режим воспроизведения
 static uint8_t little_rweind_timer_off()
 {
 	if (kinematics_mode.change_mode_counter == 0) {

@@ -25,6 +25,7 @@ uint8_t servo_timer_on = 0;
 
 void m4d_servo_init()
 {
+	// Начальные значения состояния кинематики
 	kinematics_mode.current = STOP_MODE;
 	kinematics_mode.previous = STOP_MODE;
 	kinematics_mode.in_process = 0;
@@ -46,6 +47,7 @@ void m4d_servo_init()
 	kinematics_mode.servo_left_saved_angle = 0;
 	kinematics_mode.reel_size = 0;
 
+	// Начальные значения делителей таймера
 	servo_timer.div_x2  = 0;
 	servo_timer.div_x4  = 0;
 	servo_timer.div_x6  = 0;
@@ -54,11 +56,13 @@ void m4d_servo_init()
 	servo_timer.div_x20 = 0;
 	servo_timer.div_x60 = 0;
 	
+	// Начальные значения скорости боковых узлов
 	reels_speed.left_timer  = 0;
 	reels_speed.right_timer = 0;
 	reels_speed.left  = 0;
 	reels_speed.right = 0;
 	
+	// Начальные параметры сервоприводов
 	servo_list[SERVO_LEFT].pin   = SERVO_LEFT_PIN;
 	servo_list[SERVO_REWIND].pin = REWIND_SERVO_PIN;
 	servo_list[SERVO_PLAY].pin   = PLAY_SERVO_PIN;
@@ -118,59 +122,69 @@ void m4d_servo_init()
 	set_motor_speed(STOP_SPEED, 1);
 }
 
+// Самый быстрый таймер
 static void servo_timer_divide_x1()
 {	
-	compute_all_adc_timer(); // попробовать быстрее обновлять
-	search_program_timer();
+	compute_all_adc_timer(); // Рассчёты АЦП
+	search_program_timer();  // Поиск по паузам
 
 	if (kinematics_mode.kinematics_speed == 2) {
-		update_servo_positions();
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 	
-	emergency_shutdown_timer();
+	emergency_shutdown_timer(); // Аварийное отключение при отключении питания
 }
 
+// В 2 раза медленней
 static void servo_timer_divide_x2()
 {
-	execute_command_timer();
+	execute_command_timer(); // Выполнить команды если какие то пришли по i2c
 }
 
+// В 3 раза медленней
 static void servo_timer_divide_x3()
 {
 	if (kinematics_mode.kinematics_speed == 1) {
-		update_servo_positions();
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 }
 
+// В 4 раза медленней
 static void servo_timer_divide_x4()
 {	
-	change_mode_timer(kinematics_mode.current);
+	change_mode_timer(kinematics_mode.current); // Переключение режимов кинематики
 }
 
+// В 6 раза медленней
 static void servo_timer_divide_x6()
 {
 }
 
+// В 8 раза медленней
 static void servo_timer_divide_x8()
 {
 	if (kinematics_mode.kinematics_speed == 0) {
-		update_servo_positions();
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 }
 
+// В 10 раза медленней
 static void servo_timer_divide_x10()
 {
 }
 
+// В 20 раза медленней
 static void servo_timer_divide_x20()
 {
-	reels_timer();
+	reels_timer(); // Рассчет скорости боковых узлов
 }
 
+// В 60 раза медленней
 static void servo_timer_divide_x60()
 {
 }
 
+// Тут пока вызов различных функций для которых нужна скорость боковых узлов
 static void reels_timer()
 {
 	if (reels_speed.left > 0 && reels_speed.right > 0) {
@@ -185,6 +199,7 @@ static void reels_timer()
 	reels_speed.right = 0;
 }
 
+// Вызов функций-таймеров с различными делителями
 static void servo_timer_inc()
 {
 	servo_timer_divide_x1();
@@ -239,6 +254,7 @@ static void servo_timer_inc()
 	servo_timer.div_x60++;
 }
 
+ // Обновление положения сервоприводов
 static void update_servo_positions()
 {
 	uint16_t delta;
@@ -277,6 +293,7 @@ static void update_servo_positions()
 	}
 }
 
+// Аварийное отключение при отключении питания
 static void emergency_shutdown_timer()
 {
 	if (!(PIND & (1 << PD4))) {
@@ -321,6 +338,9 @@ void servo_update_timer()
 // 	}
 }
 
+// Здесь реализован программный шим для управления 4 сервоприводами
+// Так же здесь вызываеся функция servo_timer_inc() таком образом, чтобы не портить шим сигнал.
+// Т.е. по сути servo_timer_inc() основной таймер. В момент её вызова исполняюся весь нужный код, как если бы это был основной while в main
 ISR(TIMER1_COMPA_vect)
 {
 	if (servo_timer_on == 1) {

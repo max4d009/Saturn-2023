@@ -66,7 +66,7 @@
 #define BRAKE_SPEED 0
 #define REEL_END_SPEED 330
 
-#define AUTOSTOP_ADC_ACTIVATION 16
+#define AUTOSTOP_ADC_ACTIVATION 14
 #define AUTOSTOP_OPACITY_TIMER 1
 
 // Общая структура для всех сервоприводов

@@ -34,6 +34,8 @@ void m4d_i2c_init_as_slave(void)
 	while (!(TWCR & (1<<TWINT))); 
 }
 
+// Запускается по таймеру постоянно
+// Если пришла команда по i2c выполнить еёё
 uint8_t execute_command_timer()
 {
 	if (need_execute == 0) {
@@ -41,55 +43,55 @@ uint8_t execute_command_timer()
 	}
 
 	switch (transactType) {
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_MODE:	
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_MODE: // Приняли режим кинематики который нужно установить
 			set_mode(transactData[0], 1, 0);
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_CURRENT_SERVO:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_CURRENT_SERVO: // Приняли id сервопривода который будем настраивать
 			config_servo = transactData[0];
 			m4d_servo_init();
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_MOVE:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_MOVE: // Пришла команда провернуть сервопривод во время настройки
 			servo_list[(uint8_t)transactData[0]].need_angle = transactData[1];
 		break;
-		case I2C_START_TRANSACTION_SYMBOL_SET_MOTOR_SPEED:
+		case I2C_START_TRANSACTION_SYMBOL_SET_MOTOR_SPEED: // Команда - установить скорость мотора в зависимости от типа настройки. Может придти число от 0 до 255.
 			if (transactData[1] == 0) {
-				kinematics_mode.motor_speed_play_correction = transactData[0];
+				kinematics_mode.motor_speed_play_correction = transactData[0]; // Установить скорость мотора при воспроизведении
 				set_motor_speed(1000 + transactData[0], 1);
 			} else if (transactData[1] == 3) {
-				kinematics_mode.current_motor_speed = (uint8_t)transactData[0]*10;
+				kinematics_mode.current_motor_speed = (uint8_t)transactData[0]*10; // Установить скорость мотора с типом пид регулятора 0
 				set_motor_speed(transactData[0]*10, 0);
 			} else {
-				kinematics_mode.current_motor_speed = (uint8_t)transactData[0]*10;
+				kinematics_mode.current_motor_speed = (uint8_t)transactData[0]*10; // Установить скорость мотора с типом пид регулятора 1
 				set_motor_speed(transactData[0]*10, 1);
 			}
 		break;		
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PARAM:
-			update_servo_parameter_from_i2c(transactData[0], transactData[1], transactData[2]);
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PARAM: // Сохранить параметр сервопривода в eeprom
+			update_servo_parameter_from_i2c(transactData[0], transactData[1], transactData[2]); 
 			i2c_send_debug_int_var_oled("ok", transactData[2]);
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_DEBUG_ENABLE:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_DEBUG_ENABLE:  // Включить дебаг редим (больше данных передаётся по i2c в модуль дисплея)
 			debug_mode = transactData[0];
 			i2c_send_debug_int_var_oled("Debug", debug_mode);
 		break;
-		case I2C_START_TRANSACTION_SYMBOL_SAVE_MOTOR_SPEED:
+		case I2C_START_TRANSACTION_SYMBOL_SAVE_MOTOR_SPEED: // Сохранить скорость мотора при воспроизведении
 			EEPROM_write(PR_MODE_MOTOR_SPEED, kinematics_mode.motor_speed_play_correction);
 			i2c_send_debug_int_var_oled("ok", kinematics_mode.motor_speed_play_correction);
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_SET_KINEMATICS_SPEED:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_SET_KINEMATICS_SPEED: // Установить скорость работы кинематики
 			kinematics_mode.kinematics_speed = transactData[0];
 			i2c_send_debug_int_var_oled("ok", kinematics_mode.kinematics_speed);
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_REPEAT:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_REPEAT: // Установить режим повтора
 			kinematics_mode.repeat = transactData[0];
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_SET_REELS_SIZE:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_SET_REELS_SIZE: // Установить размер катушек
 			kinematics_mode.reel_size = transactData[0];
 			i2c_send_debug_int_var_oled("ok", kinematics_mode.reel_size);
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_CURRENT_PID_REGULATOR:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_CURRENT_PID_REGULATOR: // Приняли id пид регулятора который будем настраивать
 			config_pid = transactData[0];
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SEND_PID_KOEF:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SEND_PID_KOEF: // Приняли параметр пид регулятора
 			switch (transactData[1]) {
 				case CONFIG_PID_REGULATOR_P: 
 					pid_regulator_list[transactData[0]].p = transactData[2];
@@ -106,9 +108,8 @@ uint8_t execute_command_timer()
 			}
 			
 		break;
-		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF:
+		case I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF: // Сохранили параметр пид регулятора
 			update_pid_regulator_parameter_from_i2c(transactData[0], transactData[1], transactData[2]);
-			//i2c_send_debug_int_var_oled("ok", transactData[2]);
 		break;		
 	}
 	need_execute = 0;
@@ -116,6 +117,7 @@ uint8_t execute_command_timer()
 	return 1;
 }
 
+// функция наполняем массив i2c_data данными, которые будут забраны дисплейным модулем при обращении на чтение
 void update_i2c_data_timer()
 {	
 	i2c_data[I2C_DATA_REEL_SPEED_LEFT] = reels_speed.left_timer;
@@ -127,7 +129,7 @@ void update_i2c_data_timer()
 	reels_speed.left_timer = 0;
 	reels_speed.right_timer = 0;
 	
-	if (debug_mode == 1) {
+	if (debug_mode == 1) { // при debug_mode 1 передаем больше параметров для отладки
 		i2c_data[I2C_DATA_TENSION] = kinematics_mode.tension / 10;
 		i2c_data[I2C_DATA_AUDIO_L] = audio_level.left;
 		i2c_data[I2C_DATA_AUDIO_R] = audio_level.right;
@@ -152,7 +154,7 @@ void update_i2c_data_timer()
 		i2c_data[I2C_DATA_CONFIG_SERVO_SEARCH]  = servo_list[config_servo].search_angle;
 		
 		i2c_data[I2C_DATA_CONFIG_MOTOR_SPEED] = kinematics_mode.motor_speed_play_correction;
-	} else if (debug_mode == 2) {
+	} else if (debug_mode == 2) { // при debug_mode 2 сейчас пока отдаю настройки для пид регуляторов
 		i2c_data[I2C_DATA_TENSION] = kinematics_mode.tension / 10;
 		i2c_data[I2C_DATA_CONFIG_TENSION_P] = pid_regulator_list[config_pid].p;
 		i2c_data[I2C_DATA_CONFIG_TENSION_I] = pid_regulator_list[config_pid].i;
