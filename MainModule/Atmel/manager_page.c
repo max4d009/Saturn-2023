@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * manager_page.c
  *
- * О» Created: 17.08.2024 1:28:08
+ * ? Created: 17.08.2024 1:28:08
  *  Author: max4d
  */ 
 #include "manager_page.h"
@@ -120,7 +120,7 @@ void manager_page_showPage()
 		}
 	}
 	
-	_delay_ms(20); // todo: РСЃСЃР»РµРґРѕРІР°С‚СЊ РїРѕС‡РµРјСѓ Р±РµР· Р·Р°РґРµР¶РєРё РІРёСЃРЅРµС‚
+	//_delay_ms(50); // todo: Исследовать почему без задежки виснет
 	
 	if (current_page != current.page) {
 		page_list[current.page].render_page(1);
@@ -136,6 +136,8 @@ void change_record_page()
 {
 	if (current.servo_real_mode == STOP_MODE) {
 		rec_page_inc = 0;
+		current.page = PAGE_OLED_TIMER;
+		return;
 	}
 	current.page = rec_num_pages[rec_page_inc];
 	rec_page_inc++;
@@ -150,7 +152,12 @@ void set_record_page(uint8_t rec_mode_inc)
 	rec_page_inc = rec_mode_inc;
 }
 
-void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param)
+void reset_rec_page_inc()
+{
+	rec_page_inc = 0;
+}
+
+void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param, uint8_t items_per_row)
 {
 	char s1, s2;
 	uint8_t x, y = 7, xx = 0, yy = 0;
@@ -161,16 +168,16 @@ void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t curr
 			s1 = '['; s2 = ']';
 		}
 		x = 0;
-		if (xx == 2) {
+		if (items_per_row != 1 && xx == 2) {
 			x = 64; xx = 0;
 		}
-		
+				
 		char param_name[10];
 		strcpy_P(param_name, params[i].name);
-		
+						
 		char str_buf[12];
 		oled_printf(x, y, FONTID_6X8M, strcpy_P(str_buf, PSTR("%c%s:%03d%c")), s1, param_name, params[i].value, s2);
-		if (yy == 2) {
+		if (yy == items_per_row) {
 			y = y + 8; yy = 0;
 		}
 	}

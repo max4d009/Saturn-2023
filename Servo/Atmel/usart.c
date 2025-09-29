@@ -1,7 +1,7 @@
-ï»¿/*
+/*
  * usart.c
  *
- * Î» Created: 14.01.2021 15:41:00
+ * ? Created: 14.01.2021 15:41:00
  *  Author: m4d
  */ 
 #include "usart.h"
@@ -16,13 +16,13 @@ void USART_ini(unsigned int speed)
 	UBRR0H = (unsigned char) (speed >> 8);
 	UBRR0L = (unsigned char) speed;
 	UCSR0A |= (1 << U2X0);
-	UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 	UCSR0B |= (1 << TXEN0);
 }
 
 char str_speed[10];
 
-// ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ ÑÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð´Ð²Ð¸Ð³Ð°Ñ‚ÐµÐ»Ñ Ð¸ Ñ‚Ð¸Ð¿ Ð¿Ð¸Ð´ Ñ€ÐµÐ³ÑƒÐ»ÑÑ‚Ð¾Ñ€Ð° Ð² Ð±Ð»Ð¾Ðº Ð´Ð²Ð¸Ð³Ð°Ñ‚ÐµÐ»Ñ
+// Îòïðàâèòü ñêîðîñòü äâèãàòåëÿ è òèï ïèä ðåãóëÿòîðà â áëîê äâèãàòåëÿ
 void usart_send_speed(uint16_t speed, uint8_t pid_type)
 {	
 	itoa(speed, str_speed, 10);
@@ -46,10 +46,10 @@ void usart_send_boost(uint8_t boost)
 
 static void USART_Transmit(char data)
 {
-	// ÐÐ°Ñ‡Ð½ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ð²Ð°Ñ‚ÑŒ Ð´Ð°Ð½Ð½Ñ‹Ðµ, Ð½Ð¾ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ ÑƒÐ±ÐµÐ´Ð¸Ð²ÑˆÐ¸ÑÑŒ, Ñ‡Ñ‚Ð¾ Ð±ÑƒÑ„ÐµÑ€ Ð¿ÑƒÑÑ‚
+	// Íà÷íåì ïåðåäàâàòü äàííûå, íî òîëüêî óáåäèâøèñü, ÷òî áóôåð ïóñò
 	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = data;
-	_delay_us(200);
+	//_delay_us(200);
 }
 
 void USART_send_var(char name, char *value)

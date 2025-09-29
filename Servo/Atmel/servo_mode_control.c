@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * servo_mode_control.c
  *
- * О» Created: 09.07.2024 19:04:28
+ * ? Created: 09.07.2024 19:04:28
  *  Author: max4d
  */ 
 
@@ -20,20 +20,20 @@ static uint8_t need_stop_mode();
 static uint8_t little_forward_timer_off();
 static uint8_t little_rweind_timer_off();
 
-// РґРµР»Р°Р»Р°СЃСЊ РІСЂРµРјРµРЅРЅРѕ.... РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ РїРѕРёСЃРєР° РїРѕ РїР°СѓР·Р°Рј.
-// РїР°РґР°РµРј СЃСЋРґР° РїСЂРё РІС‹Р±РѕСЂРµ СЂРµР¶РёРјР° РєРёРЅРµРјР°С‚РёРєРё.
+// делалась временно.... для тестирования поиска по паузам.
+// падаем сюда при выборе режима кинематики.
 static uint8_t search_on_off_check(uint8_t mode)
 {
-	// Р•СЃР»Рё СЃРµР№С‡Р°СЃ РЅРµ РІ СЂРµР¶РёРјРё РїРѕРёСЃРєР° Рё РїСЂРёС€Р»Р° РєРѕРјР°РЅРґР° РІРєР»СЋС‡РёС‚СЊ РїРѕРёСЃРє
+	// Если сейчас не в режими поиска и пришла команда включить поиск
 	if (kinematics_mode.in_search == 0 && (mode == FORWARD_SEARCH_MODE || mode == REWIND_SEARCH_MODE)) {
-		kinematics_mode.current = mode; // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚РµРєСѓС‰РёР№ СЂРµР¶РёРј, РєР°Рє СЂРµР¶РёРј РїРѕРёСЃРєР°
-		set_motor_speed(SEARCH_SPEED, 0); // Р”РІРёРіР°С‚РµР»СЊ РїРµСЂРµРІРѕРґРёРј РЅР° СЃРєРѕСЂРѕСЃС‚СЊ РїСЂРё РїРѕРёСЃРєРµ
-		servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].search_angle; // РџРѕРґРІРѕРґРёРј Р»РµРЅС‚Сѓ Р±Р»РёР¶Рµ Рє Р“Р’
-		kinematics_mode.in_search = 1; // РЎРѕС…СЂР°РЅСЏРµРј С„Р»Р°Рі, С‡С‚Рѕ РјС‹ РІ РїРѕРёСЃРєРµ...
+		kinematics_mode.current = mode; // устанавливаем текущий режим, как режим поиска
+		set_motor_speed(SEARCH_SPEED, 0); // Двигатель переводим на скорость при поиске
+		servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].search_angle; // Подводим ленту ближе к ГВ
+		kinematics_mode.in_search = 1; // Сохраняем флаг, что мы в поиске...
 		return 1;
 	}
 
-	// Р•СЃР»Рё СЃРµР№С‡Р°СЃ РІ СЂРµР¶РёРјРµ РїРѕРёСЃРєР° Рё РїСЂРёС€Р»Р° РєРѕРјР°РЅРґР° РІРєР»СЋС‡РёС‚СЊ РѕР±С‹С‡РЅСѓСЋ РїРµСЂРµРјРѕС‚РєСѓ, РІС‹С…РѕРґРёРј РёР· СЂРµР¶РёРјР° РїРѕРёСЃРєР° Рё РїРµСЂРµС…РѕРґРёРј Рє РѕР±С‹С‡РЅРѕР№ РїРµСЂРµРјРѕС‚РєРµ
+	// Если сейчас в режиме поиска и пришла команда включить обычную перемотку, выходим из режима поиска и переходим к обычной перемотке
 	if (kinematics_mode.in_search == 1) {
 		if (mode == FORWARD_MODE && kinematics_mode.current == FORWARD_SEARCH_MODE) {
 			servo_list[SERVO_PLAY].need_angle = servo_list[SERVO_PLAY].forward_angle;
@@ -55,25 +55,25 @@ static uint8_t search_on_off_check(uint8_t mode)
 	return 0;
 }
 
-// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂРµР¶РёРј РєРёРЅРµРјР°С‚РёРєРё
+// Установить режим кинематики
 void set_mode(uint8_t mode, uint8_t force_off_search, uint8_t is_autostop)
 {
-	// Р•СЃР»Рё РєРёРЅРµРјР°С‚РёРєР° СѓР¶Рµ РІ РїРµСЂРµС…РѕРґРЅРѕРј РїСЂРѕС†РµСЃСЃРµ - РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј.
+	// Если кинематика уже в переходном процессе - ничего не делаем.
 	if (kinematics_mode.in_process == 1) {
 		return;
 	}
 	
-	// Р•СЃР»Рё РїСЂРёС€РµР» С„Р»Р°Рі РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРіРѕ РІС‹РєР»СЋС‡РµРЅРёСЏ РїРѕРёСЃРєР°
+	// Если пришел флаг принудительного выключения поиска
 	if (force_off_search == 1) {
 		kinematics_mode.in_search = 0;
 	}
 	
-	// Р•СЃР»Рё СЌС‚Рѕ РїРµСЂРµС…РѕРґ РјРµР¶РґСѓ РїРµСЂРµРјРѕС‚РєРѕР№ Рё РїРѕРёСЃРєРѕРј РїРѕ РїР°СѓР·Р°Рј - РІС‹РїРѕР»РЅСЏРµРј РїРѕРєР° РІРЅСѓС‚СЂРё СЌС‚РѕР№ С„СѓРЅРєС†РёРё СЌС‚РѕС‚ РїРµСЂРµС…РѕРґ
+	// Если это переход между перемоткой и поиском по паузам - выполняем пока внутри этой функции этот переход
 	if (search_on_off_check(mode) == 1) {
 		return;
 	}
 	
-    // Р—Р°РґР°РµРј РЅРѕРІС‹Р№ СЂРµР¶РёРј РєРёРЅРµРјР°С‚РёРєРё. РР·РјРµРЅРµРЅРёРµ СЂРµР¶РёРјР° РїСЂРѕРёР·РІРµРґРµС‚ С‚Р°Р№РјРµСЂ change_mode_timer()
+    // Задаем новый режим кинематики. Изменение режима произведет таймер change_mode_timer()
 	if (kinematics_mode.current != mode) {
 		kinematics_mode.change_mode_counter = 0;
 		kinematics_mode.previous = kinematics_mode.current;
@@ -83,7 +83,7 @@ void set_mode(uint8_t mode, uint8_t force_off_search, uint8_t is_autostop)
 	}
 }
 
-// РћРїСЂРµРґРµР»СЏРµС‚ РЅСѓР¶РЅРѕ Р»Рё РїСЂРё РїРµСЂРµС…РѕРґРµ РёР· РѕРґРЅРѕРіРѕ СЂРµР¶РёРјР° РІ РґСЂСѓРіРѕР№, СЃРЅР°С‡Р°Р»Р° РїРµСЂРµР№С‚Рё РІ СЃС‚РѕРї.
+// Определяет нужно ли при переходе из одного режима в другой, сначала перейти в стоп.
 static uint8_t need_stop_mode()
 {
 	if (is_pause_play_switch() == 1) {
@@ -105,7 +105,7 @@ static uint8_t need_stop_mode()
 	return 0;
 }
 
-// РћРїСЂРµРґРµР»СЏРµС‚, С‡С‚Рѕ СЌС‚Рѕ РїРµСЂРµС…РѕРґ РјРµР¶РґСѓ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµРј Рё РїР°СѓР·РѕР№ Рё РѕР±СЂР°С‚РЅРѕ
+// Определяет, что это переход между воспроизведением и паузой и обратно
 static uint8_t is_pause_play_switch()
 {
 	if ((kinematics_mode.current == PLAY_MODE || kinematics_mode.current == REC_MODE_PLAY) && kinematics_mode.previous == PAUSE_MODE) {
@@ -118,16 +118,16 @@ static uint8_t is_pause_play_switch()
 }
 
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј РїРѕСЃС‚РѕСЏРЅРЅРѕ. РќР°С‡РёРЅР°РµС‚ РІС‹РїРѕР»РЅРµРЅРёРµ, РєРѕРіРґР° РїСЂРѕРёР·РѕС€Р»Рѕ РёР·РјРµРЅРµРЅРёРµ СЂРµР¶РёРјР°.
-// РЎРѕР±СЃС‚РІРµРЅРЅРѕ РёР·РјРµРЅСЏРµРё СЂРµР¶РёРј РєРёРЅРµРјР°С‚РёРєРё
+// Вызывается таймером постоянно. Начинает выполнение, когда произошло изменение режима.
+// Собственно изменяеи режим кинематики
 void change_mode_timer()
 {	
-	// Р•СЃР»Рё РєРёРЅРµРјР°С‚РёРєР° СѓР¶Рµ РІ РїРµСЂРµС…РѕРґРЅРѕРј РїСЂРѕС†РµСЃСЃРµ - РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј.
+	// Если кинематика уже в переходном процессе - ничего не делаем.
 	if (kinematics_mode.in_process == 0) {
 		return;
 	}
 	
-	// Р•СЃР»Рё РµСЃС‚СЊ Р·Р°РїСЂРѕСЃ РЅР° РёР·РјРµРЅРµРЅРёРµ СЂРµР¶РёРјР°, РЅРѕ СЃРЅР°С‡Р°Р»Р° РЅСѓР¶РЅРѕ РїРµСЂРµР№С‚Рё РІ СЃС‚РѕРї СЂРµР¶РёРј - СЃРґРµР»Р°РµРј СЌС‚Рѕ
+	// Если есть запрос на изменение режима, но сначала нужно перейти в стоп режим - сделаем это
 	if (need_stop_mode() == 1) {
 		if (stop_timer(1) == 0 && kinematics_mode.change_mode_counter < 500) {
 			kinematics_mode.change_mode_counter++;
@@ -139,7 +139,7 @@ void change_mode_timer()
 		kinematics_mode.change_mode_counter = 0;
 	}
 	
-	// Р—Р°РїСѓСЃРєР°РµРј РЅСѓР¶РЅС‹Р№ С‚Р°Р№РјРµСЂ РёР·РјРµРЅРµРЅРёСЏ СЂРµР¶РёРјР°.
+	// Запускаем нужный таймер изменения режима.
 	uint8_t result;
 	switch (kinematics_mode.current) {
 		case STOP_MODE:
@@ -187,7 +187,7 @@ void change_mode_timer()
 	}
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РІ СЂРµР¶РёРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ.
+// Вызывается таймером. Переводит кинематику в режим воспроизведения.
 static uint8_t play_timer()
 {
 	if (kinematics_mode.previous == FORWARD_LITTLE_MODE) {
@@ -197,7 +197,14 @@ static uint8_t play_timer()
 	}
 	
 	if (kinematics_mode.change_mode_counter == 0) {
-		set_motor_speed(1000 + kinematics_mode.motor_speed_play_correction, 1);
+		if (kinematics_mode.reel_size == 15) {
+			set_motor_speed((1000 + kinematics_mode.motor_speed_play_correction) / 2, 1);
+		} else if (kinematics_mode.reel_size < 15) {
+			set_motor_speed((1000 + kinematics_mode.motor_speed_play_correction) / 4, 1);
+		} else {
+			set_motor_speed(1000 + kinematics_mode.motor_speed_play_correction, 1);
+		}
+		
 		if (kinematics_mode.kinematics_speed == 0) {
 			servo_list[SERVO_RIGHT].speed  = 2;
 		} else {
@@ -205,23 +212,23 @@ static uint8_t play_timer()
 		}
 		
 		servo_list[SERVO_LEFT].speed   = 1;
-		servo_list[SERVO_PLAY].speed   = 1;
+		servo_list[SERVO_PLAY].speed   = 2;
 		servo_list[SERVO_REWIND].speed = 1;
 		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].play_angle;
 		
-	} else if (kinematics_mode.change_mode_counter == 30) {
+	} else if (kinematics_mode.change_mode_counter == 20) {
 		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].play_angle;
 		servo_list[SERVO_LEFT].need_angle   = servo_list[SERVO_LEFT].play_angle;
-	} else if (kinematics_mode.change_mode_counter == 40) {
-		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].play_angle;
-		pidReset(servo_list[SERVO_LEFT].current_angle);
-		kinematics_mode.tension_sensor_enable = 1;
-		return 1;
-	}
+		
+				servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].play_angle;
+				pidReset(servo_list[SERVO_LEFT].current_angle);
+				kinematics_mode.tension_sensor_enable = 1;
+				return 1;
+	} 
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РІ СЂРµР¶РёРј РїР°СѓР·Р°.
+// Вызывается таймером. Переводит кинематику в режим пауза.
 static uint8_t pause_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -247,7 +254,7 @@ static uint8_t pause_timer()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РІ СЂРµР¶РёРј РїРµСЂРµРјРѕС‚РєРё РІРїРµСЂРµРґ.
+// Вызывается таймером. Переводит кинематику в режим перемотки вперед.
 static uint8_t forward_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -288,7 +295,7 @@ static uint8_t forward_timer()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РІ СЂРµР¶РёРј РїРµСЂРµРјРѕС‚РєРё РЅР°Р·Р°Рґ.
+// Вызывается таймером. Переводит кинематику в режим перемотки назад.
 static uint8_t rewind_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -330,21 +337,24 @@ static uint8_t rewind_timer()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РІ СЂРµР¶РёРј СЃС‚РѕРї.
+// Вызывается таймером. Переводит кинематику в режим стоп.
 static uint8_t stop_timer(uint8_t long_wait)
 {
 	if (kinematics_mode.change_mode_counter == 0) {
 		if (kinematics_mode.kinematics_speed == 0) {
-			servo_list[SERVO_RIGHT].speed  = 2;
-			servo_list[SERVO_LEFT].speed   = 2;
+ 			servo_list[SERVO_RIGHT].speed  = 2;
+ 			servo_list[SERVO_LEFT].speed   = 2;
 			servo_list[SERVO_PLAY].speed   = 2;
 			servo_list[SERVO_REWIND].speed = 2; 
 		} else {
-			servo_list[SERVO_RIGHT].speed  = 1;
-			servo_list[SERVO_LEFT].speed   = 1;
+ 			servo_list[SERVO_RIGHT].speed  = 1;
+ 			servo_list[SERVO_LEFT].speed   = 1;
 			servo_list[SERVO_PLAY].speed   = 1;
 			servo_list[SERVO_REWIND].speed = 1;
 		}
+
+// 		servo_list[SERVO_RIGHT].speed  = 2;
+// 		servo_list[SERVO_LEFT].speed   = 2;
 				
 		kinematics_mode.tension_sensor_enable = 0;
 		
@@ -355,26 +365,26 @@ static uint8_t stop_timer(uint8_t long_wait)
 		}
 		
 	} else if (kinematics_mode.change_mode_counter == 10) {
-		set_motor_speed(BRAKE_SPEED, 2);
-	} else if (kinematics_mode.change_mode_counter == 40) {	
 		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].stop_angle;
-	} else if (kinematics_mode.change_mode_counter == 60) {
-		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].stop_angle;
+				servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].stop_angle;
+	} else if (kinematics_mode.change_mode_counter == 40) {
+		//set_motor_speed(BRAKE_SPEED, 2);
 		servo_list[SERVO_LEFT].need_angle  = servo_list[SERVO_LEFT].stop_angle;
+
+	} else if (kinematics_mode.change_mode_counter == 50) {
 		servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].stop_angle;
-		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].stop_angle;
 		set_motor_speed(STOP_SPEED, 1);
 		
-	} else if (kinematics_mode.change_mode_counter == 80 && long_wait == 0) {
+	} else if (kinematics_mode.change_mode_counter == 55 && long_wait == 0) {
 		return 1;
-	} else if (kinematics_mode.change_mode_counter == 110 && long_wait == 1) {
+	} else if (kinematics_mode.change_mode_counter == 80 && long_wait == 1) {
 		return 1;
 	}
 
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РёР· СЂРµР¶РёРјР° РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ РІ СЂРµР¶РёРј РјРµРґР»РµРЅРЅРѕР№ РїРµСЂРµРјРѕС‚РєРё РІРїРµСЂРµРґ.
+// Вызывается таймером. Переводит кинематику из режима воспроизведения в режим медленной перемотки вперед.
 static uint8_t little_forward_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -397,7 +407,7 @@ static uint8_t little_forward_timer()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РёР· СЂРµР¶РёРјР° РјРµРґР»РµРЅРЅРѕР№ РїРµСЂРµРјРѕС‚РєРё РІРїРµСЂРµРґ РІ СЂРµР¶РёРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
+// Вызывается таймером. Переводит кинематику из режима медленной перемотки вперед в режим воспроизведения
 static uint8_t little_forward_timer_off()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -417,7 +427,7 @@ static uint8_t little_forward_timer_off()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РёР· СЂРµР¶РёРјР° РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ РІ СЂРµР¶РёРј РјРµРґР»РµРЅРЅРѕР№ РїРµСЂРµРјРѕС‚РєРё РЅР°Р·Р°Рґ.
+// Вызывается таймером. Переводит кинематику из режима воспроизведения в режим медленной перемотки назад.
 static uint8_t little_rewind_timer()
 {
 	if (kinematics_mode.change_mode_counter == 0) {
@@ -446,7 +456,7 @@ static uint8_t little_rewind_timer()
 	return 0;
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј. РџРµСЂРµРІРѕРґРёС‚ РєРёРЅРµРјР°С‚РёРєСѓ РёР· СЂРµР¶РёРјР° РјРµРґР»РµРЅРЅРѕР№ РїРµСЂРµРјРѕС‚РєРё РЅР°Р·Р°Рґ РІ СЂРµР¶РёРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
+// Вызывается таймером. Переводит кинематику из режима медленной перемотки назад в режим воспроизведения
 static uint8_t little_rweind_timer_off()
 {
 	if (kinematics_mode.change_mode_counter == 0) {

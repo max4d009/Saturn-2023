@@ -1,7 +1,7 @@
-ï»¿/*
+/*
  * CFile1.c
  *
- * Î» Created: 17.08.2024 4:04:15
+ * ? Created: 17.08.2024 4:04:15
  *  Author: max4d
  */ 
 #include "page_menu.h"
@@ -14,22 +14,22 @@ void page_menu_render(uint8_t first_render)
 {
 	if (first_render == 1) {
 		page_menu[0].page_id = PAGE_OLED_SERVO_CONFIG;
-		page_menu[0].name = PSTR("ÐÐ°ÑÑ‚Ñ€. ÑÐµÑ€Ð²");
+		page_menu[0].name = PSTR("Íàñòð. ñåðâ");
 		
 		page_menu[1].page_id = PAGE_OLED_LEVEL;
-		page_menu[1].name = PSTR("Ð£Ñ€Ð¾Ð²ÐµÐ½ÑŒ");
+		page_menu[1].name = PSTR("Óðîâ");
 		
 		page_menu[2].page_id = PAGE_OLED_SPEED;
-		page_menu[2].name = PSTR("Ð¡ÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ");
+		page_menu[2].name = PSTR("Ñêîðîñòü");
 		
 		page_menu[3].page_id = PAGE_OLED_IR_BINDING;
-		page_menu[3].name = PSTR("ÐŸÑ€Ð¸Ð²ÑÐ·ÐºÐ° Ð”Ð£");
+		page_menu[3].name = PSTR("Ïðèâÿçêà ÄÓ");
 		
 		page_menu[4].page_id = PAGE_OLED_VU;
-		page_menu[4].name = PSTR("Ð˜Ð½Ð´Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ñ‹");
+		page_menu[4].name = PSTR("Èíäèêàòîðû");
 		
 		page_menu[5].page_id = PAGE_OLED_TENSION_CONFIG;
-		page_menu[5].name = PSTR("ÐÐ°Ñ‚ÑÐ¶ÐµÐ½Ð¸Ðµ");
+		page_menu[5].name = PSTR("Íàòÿæåíèå");
 	}
 		
 	show_main_menu(2, 0, current_page);
@@ -64,7 +64,6 @@ void page_menu_menu()
 		current_page = 0;
 		return;
 	}
-	
 	
 	if (current_select > PAGE_MENU_ITEMS_ONE_PAGE_COUNT-1) {
 		current_page++;

@@ -1,7 +1,7 @@
-﻿/*
+/*
  * main.c
  *
- * λ Author: max4d
+ * ? Author: max4d
  */ 
 #include "main.h"
 
@@ -30,16 +30,19 @@ void resetParameters()
 	current.mute = 1;
 	current.reel_size = 18;
 	
+	reset_rec_page_inc();
+	reset_rec_mode_inc();
+	
 	memset(debug_string, '.', DEBUG_STR_LEFT_MAX_LEN);
 	timer_reset();
-	_delay_ms(200);
+	_delay_ms(300);
 	
 	sei();
 		
 	timer_inc = 0;
 	buttons_timer_inc = 0;
 	
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+ 	i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
 	i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
 	i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq);
 	i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr);
@@ -66,7 +69,6 @@ uint8_t is_rec_gen_mode()
 	return 0;
 }
 
-
 int main(void)
 {
 	DDRD |= (1 << IR_LED_PIN);
@@ -76,7 +78,7 @@ int main(void)
 	PORTD |= (1 << IR_PIN);
 	
 	disp1color_Init();
-	_delay_ms(100);
+	_delay_ms(300);
 	oled_sleep();
 	
 	manager_page_initPages();	
@@ -98,7 +100,7 @@ int main(void)
 			continue;
 		}
 			
-		off_timer(0);
+		off_timer();
 		
 		if (timer_inc > 200) {	
 			if (IR_impulse_count == 0) {

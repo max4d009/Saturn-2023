@@ -1,7 +1,7 @@
-ï»¿/*
+/*
  * page_speed.c
  *
- * Î» Created: 31.07.2024 3:22:23
+ * ? Created: 31.07.2024 3:22:23
  *  Author: max4d
  */ 
 #include "page_speed.h"
@@ -17,24 +17,11 @@ void page_speed_render(uint8_t first_render)
 	oled_printf(-1, 11, FONTID_6X8M, strcpy_P(str_buf, PSTR("%03d")), current.reel_speed_left);
 	oled_printf(109, 11, FONTID_6X8M, strcpy_P(str_buf, PSTR("%03d")), current.reel_speed_right);
 	
-	oled_draw_menu_item(2, 37, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_REEL_SIZE ? 1:0, strcpy_P(str_buf, PSTR("Ðº:%d")), current.reel_size);
-	oled_draw_menu_item(2, 46, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_KINEMATICS_SPEED ? 1:0, strcpy_P(str_buf, PSTR("Ñ.ÑÐµÑ€Ð²:%d")), current.kinematics_speed);
-	oled_draw_menu_item(2, 55, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_MOTOR_SPEED ? 1:0, strcpy_P(str_buf, PSTR("Ñ.Ð¼Ð¾Ñ‚:%d")), current.motor_speed);
+	oled_draw_menu_item(2, 37, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_REEL_SIZE ? 1:0, strcpy_P(str_buf, PSTR("ê:%d")), current.reel_size);
+	oled_draw_menu_item(2, 46, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_KINEMATICS_SPEED ? 1:0, strcpy_P(str_buf, PSTR("ñ.ñåðâ:%d")), current.kinematics_speed);
+	oled_draw_menu_item(2, 55, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_MOTOR_SPEED ? 1:0, strcpy_P(str_buf, PSTR("ñ.ìîò:%d")), current.motor_speed);
 	
-	oled_draw_line(117, 41, 118, 41);
-	oled_draw_line(116, 45, 118, 45);
-	oled_draw_line(117, 49, 118, 49);
- 	
- 	oled_draw_line(118, 26, 118, 64);
-	
-	uint8_t current_tension = 0;
-	if ((current.tension - 5) >= 5) {
-		current_tension = current.tension - 5;
-	}
-	
- 	show_level_bar(8, 120, 5, current_tension, 64, 1);
-	 
-	oled_printf(94, 55, FONTID_6X8M, strcpy_P(str_buf, PSTR("Ð½Ð°Ñ‚:")));
+	oled_show_tension();
 }
 
 void page_speed_menu() {}

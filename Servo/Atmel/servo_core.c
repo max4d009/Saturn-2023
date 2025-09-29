@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * servo_core.c
  *
- * О» Created: 09.07.2024 18:44:35
+ * ? Created: 09.07.2024 18:44:35
  *  Author: max4d
  */ 
 
@@ -22,10 +22,24 @@ static void emergency_shutdown_timer();
 static volatile uint8_t servo_timer_takt = 0, servo_timer_via_one = 0, servo_timer_num = 0;
 uint8_t servo_timer_on = 0;
 
+void servo_position_load(uint8_t servo)
+{
+	servo_list[servo].stop_angle    = get_servo_eeprom_val(servo, CONFIG_SERVO_STOP);
+	servo_list[servo].current_angle = get_servo_eeprom_val(servo, CONFIG_SERVO_STOP);
+	servo_list[servo].need_angle    = get_servo_eeprom_val(servo, CONFIG_SERVO_STOP);
+	servo_list[servo].max_angle     = get_servo_eeprom_val(servo, CONFIG_SERVO_MAX);
+	servo_list[servo].min_angle     = get_servo_eeprom_val(servo, CONFIG_SERVO_MIN);
+	servo_list[servo].play_angle    = get_servo_eeprom_val(servo, CONFIG_SERVO_PLAY);
+	servo_list[servo].forward_angle = get_servo_eeprom_val(servo, CONFIG_SERVO_FORWARD);
+	servo_list[servo].rewind_angle  = get_servo_eeprom_val(servo, CONFIG_SERVO_REWIND);
+	servo_list[servo].pause_angle   = get_servo_eeprom_val(servo, CONFIG_SERVO_PAUSE);
+	servo_list[servo].search_angle  = get_servo_eeprom_val(servo, CONFIG_SERVO_SEARCH);
+	servo_list[servo].speed         = get_servo_eeprom_val(servo, CONFIG_SERVO_SPEED);
+}
 
 void m4d_servo_init()
 {
-	// РќР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРёРЅРµРјР°С‚РёРєРё
+	// Начальные значения состояния кинематики
 	kinematics_mode.current = STOP_MODE;
 	kinematics_mode.previous = STOP_MODE;
 	kinematics_mode.in_process = 0;
@@ -45,9 +59,10 @@ void m4d_servo_init()
 	kinematics_mode.autostop_observer_enabled = 0;
 	kinematics_mode.tension_calibrate_enable = 0;
 	kinematics_mode.servo_left_saved_angle = 0;
-	kinematics_mode.reel_size = 0;
+	kinematics_mode.reel_size = 18;
+	kinematics_mode.debug_mode = 0;
 
-	// РќР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РґРµР»РёС‚РµР»РµР№ С‚Р°Р№РјРµСЂР°
+	// Начальные значения делителей таймера
 	servo_timer.div_x2  = 0;
 	servo_timer.div_x4  = 0;
 	servo_timer.div_x6  = 0;
@@ -56,37 +71,28 @@ void m4d_servo_init()
 	servo_timer.div_x20 = 0;
 	servo_timer.div_x60 = 0;
 	
-	// РќР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЃРєРѕСЂРѕСЃС‚Рё Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ
+	// Начальные значения скорости боковых узлов
 	reels_speed.left_timer  = 0;
 	reels_speed.right_timer = 0;
 	reels_speed.left  = 0;
 	reels_speed.right = 0;
 	
-	// РќР°С‡Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+	// Начальные параметры сервоприводов
 	servo_list[SERVO_LEFT].pin   = SERVO_LEFT_PIN;
 	servo_list[SERVO_REWIND].pin = REWIND_SERVO_PIN;
 	servo_list[SERVO_PLAY].pin   = PLAY_SERVO_PIN;
 	servo_list[SERVO_RIGHT].pin  = SERVO_RIGHT_PIN;
 
 	for (uint8_t i = 0; i < NUM_SERVO; i++) {
-		servo_list[i].stop_angle    = get_servo_eeprom_val(i, CONFIG_SERVO_STOP);
-		servo_list[i].current_angle = get_servo_eeprom_val(i, CONFIG_SERVO_STOP);
-		servo_list[i].need_angle    = get_servo_eeprom_val(i, CONFIG_SERVO_STOP);
-		servo_list[i].max_angle     = get_servo_eeprom_val(i, CONFIG_SERVO_MAX);
-		servo_list[i].min_angle     = get_servo_eeprom_val(i, CONFIG_SERVO_MIN);
-		servo_list[i].play_angle    = get_servo_eeprom_val(i, CONFIG_SERVO_PLAY);
-		servo_list[i].forward_angle = get_servo_eeprom_val(i, CONFIG_SERVO_FORWARD);
-		servo_list[i].rewind_angle  = get_servo_eeprom_val(i, CONFIG_SERVO_REWIND);
-		servo_list[i].pause_angle   = get_servo_eeprom_val(i, CONFIG_SERVO_PAUSE);
-		servo_list[i].search_angle  = get_servo_eeprom_val(i, CONFIG_SERVO_SEARCH);
-		servo_list[i].speed         = get_servo_eeprom_val(i, CONFIG_SERVO_SPEED);
+		servo_position_load(i);
 	}
+	
 	servo_list[SERVO_PLAY].light_brake_angle   = 0;
 	servo_list[SERVO_REWIND].light_brake_angle = 0;
 	servo_list[SERVO_LEFT].light_brake_angle   = servo_list[SERVO_LEFT].stop_angle  + 40;
 	servo_list[SERVO_RIGHT].light_brake_angle  = servo_list[SERVO_RIGHT].play_angle + 40;
 	
-	// РќР°СЃС‚СЂРѕР№РєР° С€РёРј
+	// Настройка шим
 	OCR1A = 20000;
 	TCCR1A = 0;
 	TCCR1B |= (1 << WGM12);
@@ -105,86 +111,88 @@ void m4d_servo_init()
 	TCCR1B |= (1 << CS11);
 	TIMSK1 |= (1 << OCIE1A);
 	
-	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј PB1,PB2,PB3,PB4 РєР°Рє РІС‹С…РѕРґ
+	// Устанавливаем PB1,PB2,PB3,PB4 как выход
 	SERVO_DDR |= (1 << SERVO_LEFT_PIN);
 	SERVO_DDR |= (1 << REWIND_SERVO_PIN);
 	SERVO_DDR |= (1 << PLAY_SERVO_PIN);
 	SERVO_DDR |= (1 << SERVO_RIGHT_PIN);
-	// Р‘РµР· РїРѕРґС‚СЏРіРёРІР°СЋС‰РёС… СЂРµР·РёСЃС‚РѕСЂРѕРІ
+	// Без подтягивающих резисторов
 	SERVO_PORT &= ~(1 << SERVO_LEFT_PIN);
 	SERVO_PORT &= ~(1 << REWIND_SERVO_PIN);
 	SERVO_PORT &= ~(1 << PLAY_SERVO_PIN);
 	SERVO_PORT &= ~(1 << SERVO_RIGHT_PIN);
-	// РџРѕРґР°С‚СЊ РїРёС‚Р°РЅРёРµ РЅР° СЃРµСЂРІРѕРїСЂРёРІРѕРґС‹
+	// Подать питание на сервоприводы
 	SERVO_ENABLE_DDR  |= (1 << SERVO_ENABLE_PIN);
 	SERVO_ENABLE_PORT |= (1 << SERVO_ENABLE_PIN);
 	
 	set_motor_speed(STOP_SPEED, 1);
 }
 
-// РЎР°РјС‹Р№ Р±С‹СЃС‚СЂС‹Р№ С‚Р°Р№РјРµСЂ
+// Самый быстрый таймер
 static void servo_timer_divide_x1()
 {	
-	compute_all_adc_timer(); // Р Р°СЃСЃС‡С‘С‚С‹ РђР¦Рџ
-	search_program_timer();  // РџРѕРёСЃРє РїРѕ РїР°СѓР·Р°Рј
+	update_i2c_data_timer_background();
+	
+	compute_all_adc_timer(); // Рассчёты АЦП
+	search_program_timer();  // Поиск по паузам
 
 	if (kinematics_mode.kinematics_speed == 2) {
-		update_servo_positions(); // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»РѕР¶РµРЅРёСЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 	
-	emergency_shutdown_timer(); // РђРІР°СЂРёР№РЅРѕРµ РѕС‚РєР»СЋС‡РµРЅРёРµ РїСЂРё РѕС‚РєР»СЋС‡РµРЅРёРё РїРёС‚Р°РЅРёСЏ
+	emergency_shutdown_timer(); // Аварийное отключение при отключении питания
 }
 
-// Р’ 2 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 2 раза медленней
 static void servo_timer_divide_x2()
 {
-	execute_command_timer(); // Р’С‹РїРѕР»РЅРёС‚СЊ РєРѕРјР°РЅРґС‹ РµСЃР»Рё РєР°РєРёРµ С‚Рѕ РїСЂРёС€Р»Рё РїРѕ i2c
+	execute_command_timer(); // Выполнить команды если какие то пришли по i2c
 }
 
-// Р’ 3 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 3 раза медленней
 static void servo_timer_divide_x3()
 {
 	if (kinematics_mode.kinematics_speed == 1) {
-		update_servo_positions(); // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»РѕР¶РµРЅРёСЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 }
 
-// Р’ 4 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 4 раза медленней
 static void servo_timer_divide_x4()
 {	
-	change_mode_timer(kinematics_mode.current); // РџРµСЂРµРєР»СЋС‡РµРЅРёРµ СЂРµР¶РёРјРѕРІ РєРёРЅРµРјР°С‚РёРєРё
+	change_mode_timer(kinematics_mode.current); // Переключение режимов кинематики
 }
 
-// Р’ 6 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 6 раза медленней
 static void servo_timer_divide_x6()
 {
 }
 
-// Р’ 8 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 8 раза медленней
 static void servo_timer_divide_x8()
 {
 	if (kinematics_mode.kinematics_speed == 0) {
-		update_servo_positions(); // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»РѕР¶РµРЅРёСЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+		update_servo_positions(); // Обновление положения сервоприводов
 	}
 }
 
-// Р’ 10 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 10 раза медленней
 static void servo_timer_divide_x10()
 {
 }
 
-// Р’ 20 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 20 раза медленней
 static void servo_timer_divide_x20()
 {
-	reels_timer(); // Р Р°СЃСЃС‡РµС‚ СЃРєРѕСЂРѕСЃС‚Рё Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ
+	reels_timer(); // Рассчет скорости боковых узлов
 }
 
-// Р’ 60 СЂР°Р·Р° РјРµРґР»РµРЅРЅРµР№
+// В 60 раза медленней
 static void servo_timer_divide_x60()
 {
 }
 
-// РўСѓС‚ РїРѕРєР° РІС‹Р·РѕРІ СЂР°Р·Р»РёС‡РЅС‹С… С„СѓРЅРєС†РёР№ РґР»СЏ РєРѕС‚РѕСЂС‹С… РЅСѓР¶РЅР° СЃРєРѕСЂРѕСЃС‚СЊ Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ
+// Тут пока вызов различных функций для которых нужна скорость боковых узлов
 static void reels_timer()
 {
 	if (reels_speed.left > 0 && reels_speed.right > 0) {
@@ -199,7 +207,7 @@ static void reels_timer()
 	reels_speed.right = 0;
 }
 
-// Р’С‹Р·РѕРІ С„СѓРЅРєС†РёР№-С‚Р°Р№РјРµСЂРѕРІ СЃ СЂР°Р·Р»РёС‡РЅС‹РјРё РґРµР»РёС‚РµР»СЏРјРё
+// Вызов функций-таймеров с различными делителями
 static void servo_timer_inc()
 {
 	servo_timer_divide_x1();
@@ -254,7 +262,7 @@ static void servo_timer_inc()
 	servo_timer.div_x60++;
 }
 
- // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»РѕР¶РµРЅРёСЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+ // Обновление положения сервоприводов
 static void update_servo_positions()
 {
 	uint16_t delta;
@@ -263,12 +271,14 @@ static void update_servo_positions()
 		uint16_t current_angle = servo_list[i].current_angle;
 		uint16_t need_angle = servo_list[i].need_angle;
 		
-		if (need_angle < servo_list[i].min_angle) {
-			need_angle = servo_list[i].min_angle;
-		}
-		
-		if (need_angle > servo_list[i].max_angle) {
-			need_angle = servo_list[i].max_angle;
+		if (kinematics_mode.debug_mode != 1) {
+			if (need_angle < servo_list[i].min_angle) {
+				need_angle = servo_list[i].min_angle;
+			}
+			
+			if (need_angle > servo_list[i].max_angle) {
+				need_angle = servo_list[i].max_angle;
+			}
 		}
 		
 		if (current_angle > need_angle) {
@@ -293,7 +303,7 @@ static void update_servo_positions()
 	}
 }
 
-// РђРІР°СЂРёР№РЅРѕРµ РѕС‚РєР»СЋС‡РµРЅРёРµ РїСЂРё РѕС‚РєР»СЋС‡РµРЅРёРё РїРёС‚Р°РЅРёСЏ
+// Аварийное отключение при отключении питания
 static void emergency_shutdown_timer()
 {
 	if (!(PIND & (1 << PD4))) {
@@ -338,9 +348,9 @@ void servo_update_timer()
 // 	}
 }
 
-// Р—РґРµСЃСЊ СЂРµР°Р»РёР·РѕРІР°РЅ РїСЂРѕРіСЂР°РјРјРЅС‹Р№ С€РёРј РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ 4 СЃРµСЂРІРѕРїСЂРёРІРѕРґР°РјРё
-// РўР°Рє Р¶Рµ Р·РґРµСЃСЊ РІС‹Р·С‹РІР°РµСЃСЏ С„СѓРЅРєС†РёСЏ servo_timer_inc() С‚Р°РєРѕРј РѕР±СЂР°Р·РѕРј, С‡С‚РѕР±С‹ РЅРµ РїРѕСЂС‚РёС‚СЊ С€РёРј СЃРёРіРЅР°Р».
-// Рў.Рµ. РїРѕ СЃСѓС‚Рё servo_timer_inc() РѕСЃРЅРѕРІРЅРѕР№ С‚Р°Р№РјРµСЂ. Р’ РјРѕРјРµРЅС‚ РµС‘ РІС‹Р·РѕРІР° РёСЃРїРѕР»РЅСЏСЋСЃСЏ РІРµСЃСЊ РЅСѓР¶РЅС‹Р№ РєРѕРґ, РєР°Рє РµСЃР»Рё Р±С‹ СЌС‚Рѕ Р±С‹Р» РѕСЃРЅРѕРІРЅРѕР№ while РІ main
+// Здесь реализован программный шим для управления 4 сервоприводами
+// Так же здесь вызываеся функция servo_timer_inc() таком образом, чтобы не портить шим сигнал.
+// Т.е. по сути servo_timer_inc() основной таймер. В момент её вызова исполняюся весь нужный код, как если бы это был основной while в main
 ISR(TIMER1_COMPA_vect)
 {
 	if (servo_timer_on == 1) {

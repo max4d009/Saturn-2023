@@ -1,7 +1,7 @@
-﻿/*
+/*
  * m4d_eeprom.h
  *
- * λ Created: 17.12.2020 1:28:58
+ * ? Created: 17.12.2020 1:28:58
  *  Author: m4d
  */ 
 

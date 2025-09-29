@@ -1,7 +1,7 @@
-п»ї/*
- * m4d_adc.СЃ
+/*
+ * m4d_adc.с
  *
- * О» Created: 02.12.2020 1:24:46
+ * ? Created: 02.12.2020 1:24:46
  *  Author: m4d
  */ 
 #include "adc.h"
@@ -9,7 +9,7 @@
 static void adc_result_timer(uint8_t mux);
 volatile uint8_t current_mux = 0;
 
-// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РђР¦Рџ
+// Инициализация АЦП
 void m4d_adc_init_8(void) 
 {	
 	adc_list[ADC_OPERATION_KEYBOARD].adc_result = 0;
@@ -36,26 +36,26 @@ void m4d_adc_init_8(void)
 	adc_list[ADC_OPERATION_CURRENT_CONSUPTION].status = ADC_STATUS_NO_COMPUTE;
 	adc_list[ADC_OPERATION_CURRENT_CONSUPTION].repeat = 0;
 	
-	// Р’РєР»СЋС‡РёС‚СЊ РђР¦Рџ
+	// Включить АЦП
 	ADCSRA |=  (1 << ADEN);
-	// Р§Р°СЃС‚РѕС‚Р° 250 000
+	// Частота 250 000
 	ADCSRA |= (1 << ADPS0);
 	ADCSRA |= (1 << ADPS1);
 	ADCSRA &= ~(1 << ADPS2);
 		
-	// РћРїРѕСЂРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРѕ VCC 5v
+	// Опорное напряжение по VCC 5v
 	ADMUX |=  (1 << REFS0);
 	ADMUX &= ~(1 << REFS1);
 		
-	// Р Р°Р·СЂРµС€РёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёСЏ
+	// Разрешить прерывания
 	ADCSRA |= (1 << ADIE);
 }
 
-// Р¤СѓРЅРєС†РёСЏ РїСЂРѕРёР·РІРѕРґРёС‚ РёРјРјРµСЂРµРЅРёСЏ РђР¦Рџ
-// Р—Р°РїСѓСЃРєР°РµС‚СЃСЏ РїРѕ С‚Р°Р№РјРµСЂСѓ. 
-// Р•СЃР»Рё РґР»СЏ РєР°РЅР°Р»Р° РђР¦Рџ СѓРєР°Р·Р°РЅ С„Р»Р°Рі repeat РёР·РјРµСЂРµРЅРёСЏ Р±СѓРґСѓС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊСЃСЏ Р±РµСЃРєРѕРЅРµС‡РЅРѕ.
-// Р”Р»СЏ РѕРґРЅРѕРєСЂР°С‚РЅРѕРіРѕ РёР·РјРµСЂРµРЅРёСЏ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ status РІ ADC_STATUS_NEED_COMPUTE
-// РџРѕСЃР»Рµ РєР°Р¶РґРѕРіРѕ РёР·РјРµСЂРµРЅРёСЏ Р±СѓРґРµС‚ РІС‹РїРѕР»РЅРµРЅРЅР° С„СѓРЅРєС†РёСЏ adc_result_timer
+// Функция производит иммерения АЦП
+// Запускается по таймеру. 
+// Если для канала АЦП указан флаг repeat измерения будут производиться бесконечно.
+// Для однократного измерения установить status в ADC_STATUS_NEED_COMPUTE
+// После каждого измерения будет выполненна функция adc_result_timer
 void compute_all_adc_timer()
 {		
 	if (adc_list[current_mux].repeat == 1 && (adc_list[current_mux].status == ADC_STATUS_NO_COMPUTE || adc_list[current_mux].status == ADC_STATUS_COMPUTED)) {
@@ -70,8 +70,8 @@ void compute_all_adc_timer()
 		ADCSRA |= (1 << ADSC);
 		adc_list[current_mux].status = ADC_STATUS_IN_COMPUTE;
 		adc_list[current_mux].adc_result = 0;		
-	} else if (adc_list[current_mux].status == ADC_STATUS_IN_COMPUTE) { // РњРµР¶РґСѓ РїРѕРїС‹С‚РєР°РјРё Р¶РґС‘Рј	
-	} else if (adc_list[current_mux].status == ADC_STATUS_ISR_COMPUTED) { // Р•СЃР»Рё Р±С‹Р»Рѕ РїРѕР»СѓС‡РµРЅРѕ Р·РЅР°С‡РµРЅРёРµ РІ РїСЂРµСЂС‹РІР°РЅРёРё
+	} else if (adc_list[current_mux].status == ADC_STATUS_IN_COMPUTE) { // Между попытками ждём	
+	} else if (adc_list[current_mux].status == ADC_STATUS_ISR_COMPUTED) { // Если было получено значение в прерывании
 		adc_result_timer(current_mux);
 		adc_list[current_mux].status = ADC_STATUS_COMPUTED;
 		current_mux++;
@@ -81,20 +81,20 @@ void compute_all_adc_timer()
 	} 
 }
 
-// Р’РєР»СЋС‡РёС‚СЊ РЅРµРїСЂРµСЂС‹РІРЅРѕРµ РёР·РјРµСЂРµРЅРёРµ РґР»СЏ РєР°РЅР°Р»Р° РђР¦Рџ
+// Включить непрерывное измерение для канала АЦП
 void repeat_adc_on(uint8_t mux)
 {
 	adc_list[mux].repeat = 1;
 }
 
-// Р’С‹РєР»СЋС‡РёС‚СЊ РЅРµРїСЂРµСЂС‹РІРЅРѕРµ РёР·РјРµСЂРµРЅРёРµ РґР»СЏ РєР°РЅР°Р»Р° РђР¦Рџ
+// Выключить непрерывное измерение для канала АЦП
 void repeat_adc_off(uint8_t mux)
 {
 	adc_list[mux].repeat = 0;
 	adc_list[mux].status = ADC_STATUS_NO_COMPUTE;
 }
 
-// Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РїРѕСЃР»Рµ РёР·РјРµСЂРµРЅРёСЏ РђР¦Рџ
+// Выполняется после измерения АЦП
 static void adc_result_timer(uint8_t mux)
 {
 	if (mux == ADC_OPERATION_LEFT_CHANNEL) {
@@ -114,7 +114,7 @@ static void adc_result_timer(uint8_t mux)
 	}
 }
 
-// РЈСЃС‚Р°РЅРѕРІРєР° С‚РµРєСѓС‰РµРіРѕ РєР°РЅР°Р»Р° РђР¦Рџ
+// Установка текущего канала АЦП
 void mux_set(uint8_t mux)
 {
 	switch (mux) {

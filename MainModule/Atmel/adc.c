@@ -1,60 +1,67 @@
-п»ї/*
- * adc.СЃ
+/*
+ * adc.с
  *
- * О» Created: 02.12.2020 1:24:46
+ * ? Created: 02.12.2020 1:24:46
  *  Author: m4d
  */ 
 #include <avr/interrupt.h>
 #include "adc.h"
 
-// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РђР¦Рџ:
+// Инициализация АЦП:
 void adc_init_8(void) 
 {	
-	// Р’РєР»СЋС‡РёС‚СЊ РђР¦Рџ
+	// Включить АЦП
 	ADCSRA |= (1 << ADEN);
-	// Р§Р°СЃС‚РѕС‚Р° РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё 8
-	ADCSRA |= (1 << ADPS0);
-	ADCSRA |= (1 << ADPS1);
-	ADCSRA &= ~(1 << ADPS2);
 	
-	// РћРїРѕСЂРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРѕ VCC 5v
+	// Делитель частоты АЦП = 64 > fADC = 8MHz / 64 = 125kHz
+	ADCSRA |= (1 << ADPS2) | (1 << ADPS1);
+	ADCSRA &= ~(1 << ADPS0);
+	
+	// Опорное напряжение по VCC 5v
 	ADMUX |= (1 << REFS0);
 	ADMUX &= ~(1 << REFS1);
 }
 
-// РЎС‡РёС‚С‹РІР°РµРј СЃ ADC0
-void admux_freq_level()
-{
-	ADMUX &= ~(1 << MUX0);
-	ADMUX |= (1 << MUX1);
-	ADMUX |= (1 << MUX2);
-	ADMUX &= ~(1 << MUX3);
-}
-
-// РЎС‡РёС‚Р°С‚СЊ РїРѕРєР°Р·Р°РЅРёСЏ СЃ ADC
+// Считать показания с АЦП
 uint16_t adc_read()
 {
-	// Р’РєР»СЋС‡Р°РµРј РђР¦Рџ
+	// Запуск преобразования
 	ADCSRA |= (1 << ADSC);
-	// РџСЂРѕРёР·РІРѕРґРёРј РёР·РјРµСЂРµРЅРёРµ
+	
+	// Ждём завершения
 	while(ADCSRA & (1 << ADSC));
-	return ADC;	
+	
+	// Вернуть результат
+	volatile uint16_t result = ADC; // volatile чтобы гарантировать чтение
+	return result;
 }
 
-// Р§С‚РµРЅРёРµ РєР°РЅР°Р»Р° РђР¦Рџ РґР»СЏ РєР»Р°РІРёР°С‚СѓСЂС‹
-uint16_t adc_keyboard_read() 
+// Выбор канала АЦП (0–7)
+void adc_select_channel(uint8_t channel)
 {
-    admux_freq_level();
- 	uint16_t result = 0;
-	uint8_t i;
+	// Обнуляем биты MUX3:0, выбираем новый канал
+	ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
 	
+	// После переключения канала обычно делают одно «грязное» чтение
 	adc_read();
-	
-	for (i = 0; i < 5; i++) {
-		result = result + adc_read();
-	}
+}
 
-	result = result / 5;
+// Усреднённое чтение с указанного канала
+uint16_t adc_read_avg(uint8_t channel, uint8_t samples)
+{
+	adc_select_channel(channel);
 	
-	return result;
+	volatile uint32_t sum = 0;
+	for (uint8_t i = 0; i < samples; i++) {
+		sum += adc_read();
+		//_delay_ms(1); // опционально, чтобы уменьшить шум
+	}
+	
+	return (uint16_t)(sum / samples);
+}
+
+// Чтение канала АЦП для клавиатуры
+uint16_t adc_keyboard_read()
+{
+	return adc_read_avg(6, 10);
 }

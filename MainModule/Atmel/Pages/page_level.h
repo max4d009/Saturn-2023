@@ -1,7 +1,7 @@
-﻿/*
+/*
  * pageLevel.h
  *
- * λ Created: 19.07.2024 22:04:43
+ * ? Created: 19.07.2024 22:04:43
  *  Author: max4d
  */ 
 

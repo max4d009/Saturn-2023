@@ -143,7 +143,7 @@ void set_slow_pid()
 
 void set_fast_pid()
 {
-	maxOut = 26000;
+	maxOut = 35000;
 
 	kp = 40;
 	ki = 7;

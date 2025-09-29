@@ -1,25 +1,42 @@
-п»ї//------------------------------------------------------------------------------
-// О» This is Open source software. You can place this code on your site, but don't
+//------------------------------------------------------------------------------
+// ? This is Open source software. You can place this code on your site, but don't
 // forget a link to my YouTube-channel: https://www.youtube.com/channel/UChButpZaL5kUUl_zTyIDFkQ
-// Р­С‚Рѕ РїСЂРѕРіСЂР°РјРјРЅРѕРµ РѕР±РµСЃРїРµС‡РµРЅРёРµ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ СЃРІРѕР±РѕРґРЅРѕ. Р’С‹ РјРѕР¶РµС‚Рµ СЂР°Р·РјРµС‰Р°С‚СЊ
-// РµРіРѕ РЅР° РІР°С€РµРј СЃР°Р№С‚Рµ, РЅРѕ РЅРµ Р·Р°Р±СѓРґСЊС‚Рµ СѓРєР°Р·Р°С‚СЊ СЃСЃС‹Р»РєСѓ РЅР° РјРѕР№ YouTube-РєР°РЅР°Р» 
-// "Р­Р»РµРєС‚СЂРѕРЅРёРєР° РІ РѕР±СЉРµРєС‚РёРєРµ" https://www.youtube.com/channel/UChButpZaL5kUUl_zTyIDFkQ
-// РђРІС‚РѕСЂ: РќР°РґС‹СЂС€РёРЅ Р СѓСЃР»Р°РЅ / Nadyrshin Ruslan
+// Это программное обеспечение распространяется свободно. Вы можете размещать
+// его на вашем сайте, но не забудьте указать ссылку на мой YouTube-канал 
+// "Электроника в объектике" https://www.youtube.com/channel/UChButpZaL5kUUl_zTyIDFkQ
+// Автор: Надыршин Руслан / Nadyrshin Ruslan
 //------------------------------------------------------------------------------
 #ifndef _SPIM_H
 #define _SPIM_H
 
 #include "main.h"
 
-// РџСЂРѕС†РµРґСѓСЂР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё spi РІ СЂРµР¶РёРјРµ master
+typedef enum {
+	SPI_MODE_0 = 0, // CPOL=0, CPHA=0
+	SPI_MODE_1,     // CPOL=0, CPHA=1
+	SPI_MODE_2,     // CPOL=1, CPHA=0
+	SPI_MODE_3      // CPOL=1, CPHA=1
+} SPIMode;
+
+typedef enum {
+	SPI_SPEED_DIV2 = 0,
+	SPI_SPEED_DIV4,
+	SPI_SPEED_DIV8,
+	SPI_SPEED_DIV16,
+	SPI_SPEED_DIV32,
+	SPI_SPEED_DIV64,
+	SPI_SPEED_DIV128
+} SPISpeed;
+
+// Процедура инициализации spi в режиме master
 void spim_init(void);
-// РџСЂРѕС†РµРґСѓСЂР° РѕС‚РїСЂР°РІР»СЏРµС‚ РјР°СЃСЃРёРІ 16-Р±РёС‚РЅС‹С… СЃР»РѕРІ
+// Процедура отправляет массив 16-битных слов
 void SPI_send16b(uint16_t *pBuff, uint16_t Len);
-// РџСЂРѕС†РµРґСѓСЂР° РѕС‚РїСЂР°РІР»СЏРµС‚ РјР°СЃСЃРёРІ 8-Р±РёС‚РЅС‹С… СЃР»РѕРІ
+// Процедура отправляет массив 8-битных слов
 void SPI_send8b(uint8_t *pBuff, uint16_t Len);
-// РџСЂРѕС†РµРґСѓСЂР° РѕС‚РїСЂР°РІР»СЏРµС‚ РјР°СЃСЃРёРІ 16-Р±РёС‚РЅС‹С… СЃР»РѕРІ
+// Процедура отправляет массив 16-битных слов
 void SPI_recv16b(uint16_t *pBuff, uint16_t Len);
-// РџСЂРѕС†РµРґСѓСЂР° РѕС‚РїСЂР°РІР»СЏРµС‚ РјР°СЃСЃРёРІ 8-Р±РёС‚РЅС‹С… СЃР»РѕРІ
+// Процедура отправляет массив 8-битных слов
 void SPI_recv8b(uint8_t *pBuff, uint16_t Len);
 
 #endif

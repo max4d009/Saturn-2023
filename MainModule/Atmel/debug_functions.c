@@ -1,7 +1,7 @@
-﻿/*
+/*
  * debug_functions.c
  *
- * λ Created: 17.08.2024 1:35:11
+ * ? Created: 17.08.2024 1:35:11
  *  Author: max4d
  */ 
 #include "debug_functions.h"

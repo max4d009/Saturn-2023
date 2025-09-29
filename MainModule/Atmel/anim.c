@@ -1,7 +1,7 @@
-﻿/*
+/*
  * anim.c
  *
- * λ Created: 30.07.2024 4:31:48
+ * ? Created: 30.07.2024 4:31:48
  *  Author: max4d
  */ 
 #include "anim.h"
@@ -55,6 +55,43 @@ const uint8_t upm_rewind_belts[168][4] PROGMEM  = {
 	{86,3,86,3},{86,27,86,27},{87,3,87,3},{87,27,87,27},{88,3,88,3},{88,27,88,27},{89,3,89,3},{89,27,89,27},{90,3,90,3},{90,27,90,27},{91,2,91,2},{91,27,91,28},{92,2,92,2},{92,28,92,28},{93,2,93,2},{93,28,93,28},{94,2,94,2},{94,28,94,28},{95,2,95,2},{95,28,95,28},{96,2,96,2},{96,28,96,28},{97,2,97,2},{97,28,97,28}
 };
 
+typedef struct {
+	uint8_t x;
+	uint8_t y;
+	uint8_t double_pixel; // 1 = double_pixel, 0 = single_pixel
+	uint8_t color;        // 0 ??? 1
+} Pixel_t;
+
+// ??? ????? ??????
+const Pixel_t anim_pixels[] PROGMEM = {
+	// anim_inc = 3
+	{72,34,1,1}, {78,36,1,1}, {80,38,1,1}, {42,30,0,0}, {52,30,0,0}, {52,40,0,0}, {42,40,0,0}, {40,35,0,0}, {47,28,0,0}, {54,35,0,0}, {47,42,0,0},
+	// anim_inc = 2
+	{83,44,1,1}, {81,50,1,1}, {79,52,1,1}, {48,28,0,0}, {53,31,0,0}, {54,36,0,0}, {51,41,0,0}, {46,42,0,0}, {41,39,0,0}, {40,34,0,0}, {43,29,0,0}, {48,28,0,0},
+	// anim_inc = 1
+	{73,55,1,1}, {67,53,1,1}, {65,51,1,1}, {44,28,0,0}, {49,28,0,0}, {54,32,0,0}, {54,37,0,0}, {50,42,0,0}, {40,38,0,0}, {40,33,0,0}, {45,42,0,0},
+	// anim_inc = 0
+	{62,45,1,1}, {64,39,1,1}, {66,37,1,1}, {46,28,0,0}, {51,29,0,0}, {54,34,0,0}, {53,39,0,0}, {48,42,0,0}, {43,41,0,0}, {40,36,0,0}, {41,31,0,0}
+};
+
+// ??????? ?????? ??????? ????? ? ??????? anim_pixels
+const uint8_t anim_frame_start[4] PROGMEM = {0, 11, 23, 34};
+
+// ?????????? ???????? ? ?????
+const uint8_t anim_frame_count[4] PROGMEM = {11, 12, 11, 11};
+
+// ??????? ????????? ?????
+void draw_anim_frame(uint8_t frame) {
+	uint8_t start = pgm_read_byte(&anim_frame_start[frame]);
+	uint8_t count = pgm_read_byte(&anim_frame_count[frame]);
+	for (uint8_t i = 0; i < count; i++) {
+		Pixel_t p;
+		memcpy_P(&p, &anim_pixels[start + i], sizeof(Pixel_t));
+		if (p.double_pixel) oled_draw_double_pixel(p.x, p.y, p.color);
+		else oled_draw_pixel(p.x, p.y, p.color);
+	}
+}
+
 void show_loading()
 {
 	disp1color_FillScreenbuff(0);
@@ -99,56 +136,7 @@ void show_upm_anim()
 		}
 	}
 	
-	if (anim_inc == 3) {
-		oled_draw_double_pixel(72, 34, 1);
-		oled_draw_double_pixel(78, 36, 1);
-		oled_draw_double_pixel(80, 38, 1);
-		oled_draw_pixel(42, 30, 0);
-		oled_draw_pixel(52, 30, 0);
-		oled_draw_pixel(52, 40, 0);
-		oled_draw_pixel(42, 40, 0);
-		oled_draw_pixel(40, 35, 0);
-		oled_draw_pixel(47, 28, 0);
-		oled_draw_pixel(54, 35, 0);
-		oled_draw_pixel(47, 42, 0);
-	} else if (anim_inc == 2) {
-		oled_draw_double_pixel(83, 44, 1);
-		oled_draw_double_pixel(81, 50, 1);
-		oled_draw_double_pixel(79, 52, 1);
-		oled_draw_pixel(48, 28, 0);
-		oled_draw_pixel(53, 31, 0);
-		oled_draw_pixel(54, 36, 0);
-		oled_draw_pixel(51, 41, 0);
-		oled_draw_pixel(46, 42, 0);
-		oled_draw_pixel(41, 39, 0);
-		oled_draw_pixel(40, 34, 0);
-		oled_draw_pixel(43, 29, 0);
-		oled_draw_pixel(48, 28, 0);
-	} else if (anim_inc == 1) {
-		oled_draw_double_pixel(73, 55, 1);
-		oled_draw_double_pixel(67, 53, 1);
-		oled_draw_double_pixel(65, 51, 1);
-		oled_draw_pixel(44, 28, 0);
-		oled_draw_pixel(49, 28, 0);
-		oled_draw_pixel(54, 32, 0);
-		oled_draw_pixel(54, 37, 0);
-		oled_draw_pixel(50, 42, 0);
-		oled_draw_pixel(40, 38, 0);
-		oled_draw_pixel(40, 33, 0);
-		oled_draw_pixel(45, 42, 0);
-	} else if (anim_inc == 0) {
-		oled_draw_double_pixel(62, 45, 1);
-		oled_draw_double_pixel(64, 39, 1);
-		oled_draw_double_pixel(66, 37, 1);
-		oled_draw_pixel(46, 28, 0);
-		oled_draw_pixel(51, 29, 0);
-		oled_draw_pixel(54, 34, 0);
-		oled_draw_pixel(53, 39, 0);
-		oled_draw_pixel(48, 42, 0);
-		oled_draw_pixel(43, 41, 0);
-		oled_draw_pixel(40, 36, 0);
-		oled_draw_pixel(41, 31, 0);
-	}
+	draw_anim_frame(anim_inc);
 	
 	static uint8_t up_down = 1;
 	

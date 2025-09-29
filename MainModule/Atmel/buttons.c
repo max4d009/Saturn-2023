@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * buttons.c
  *
- * О» Created: 23.10.2023 20:21:19
+ * ? Created: 23.10.2023 20:21:19
  *  Author: m4d
  */ 
 #include "buttons.h"
@@ -16,6 +16,27 @@ static uint8_t button_timer = 0;
 static uint8_t button_timer_fast = 0;
 static uint16_t off_timer_inc = 0;
 static uint8_t vu_config_loaded = 0;
+
+// ????????? ??? ???????????? ??????
+typedef struct {
+	volatile uint8_t *DDR_REG;
+	volatile uint8_t *PORT_REG;
+	volatile uint8_t *PIN_REG;
+	uint8_t pin;
+	void (*operation)(void);
+	uint8_t wait_period;
+} ButtonConfig_t;
+
+// ???????????? ?????? ? PROGMEM
+static const ButtonConfig_t button_cfg[NUM_BUTTONS] PROGMEM = {
+	{ &DDRD, &PORTD, &PIND, PD0, on,   10 }, // ON_BUTTON
+	{ &DDRB, &PORTB, &PINB, PB7, off,  40 }, // OFF_BUTTON
+	{ &DDRC, &PORTC, &PINC, PC0, menu, 2  }, // MENU_BUTTON
+	{ &DDRC, &PORTC, &PINC, PC1, select, 2}, // SELECT_BUTTON
+	{ &DDRC, &PORTC, &PINC, PC2, minus, 1 }, // MINUS_BUTTON
+	{ &DDRC, &PORTC, &PINC, PC3, plus,  1 }, // PLUS_BUTTON
+	{ &DDRD, &PORTD, &PIND, PD1, save,  2 }  // SAVE_BUTTON
+};
 
 void buttons_timer()
 {
@@ -77,59 +98,22 @@ void buttons_timer()
 
 void buttons_init()
 {
-	button_list[ON_BUTTON].DDR_REG = &DDRD;
-	button_list[ON_BUTTON].PORT_REG = &PORTD;
-	button_list[ON_BUTTON].PIN_REG = &PIND;
-	button_list[ON_BUTTON].pin = PD0;
-	button_list[ON_BUTTON].operation = on;
-	button_list[ON_BUTTON].wait_period = 10;
-	
-	button_list[OFF_BUTTON].DDR_REG = &DDRB;
-	button_list[OFF_BUTTON].PORT_REG = &PORTB;
-	button_list[OFF_BUTTON].PIN_REG = &PINB;
-	button_list[OFF_BUTTON].pin = PB7;
-	button_list[OFF_BUTTON].operation = off;
-	button_list[OFF_BUTTON].wait_period = 40;
-	
-	button_list[MENU_BUTTON].DDR_REG = &DDRC;
-	button_list[MENU_BUTTON].PORT_REG = &PORTC;
-	button_list[MENU_BUTTON].PIN_REG = &PINC;
-	button_list[MENU_BUTTON].pin = PC0;
-	button_list[MENU_BUTTON].operation = menu;
-	button_list[MENU_BUTTON].wait_period = 2;
-	
-	button_list[SELECT_BUTTON].DDR_REG = &DDRC;
-	button_list[SELECT_BUTTON].PORT_REG = &PORTC;
-	button_list[SELECT_BUTTON].PIN_REG = &PINC;
-	button_list[SELECT_BUTTON].pin = PC1;
-	button_list[SELECT_BUTTON].operation = select;
-	button_list[SELECT_BUTTON].wait_period = 2;
-	
-	button_list[MINUS_BUTTON].DDR_REG = &DDRC;
-	button_list[MINUS_BUTTON].PORT_REG = &PORTC;
-	button_list[MINUS_BUTTON].PIN_REG = &PINC;
-	button_list[MINUS_BUTTON].pin = PC2;
-	button_list[MINUS_BUTTON].operation = minus;
-	button_list[MINUS_BUTTON].wait_period = 1;
-	
-	button_list[PLUS_BUTTON].DDR_REG = &DDRC;
-	button_list[PLUS_BUTTON].PORT_REG = &PORTC;
-	button_list[PLUS_BUTTON].PIN_REG = &PINC;
-	button_list[PLUS_BUTTON].pin = PC3;
-	button_list[PLUS_BUTTON].operation = plus;
-	button_list[PLUS_BUTTON].wait_period = 1;
-	
-	button_list[SAVE_BUTTON].DDR_REG = &DDRD;
-	button_list[SAVE_BUTTON].PORT_REG = &PORTD;
-	button_list[SAVE_BUTTON].PIN_REG = &PIND;
-	button_list[SAVE_BUTTON].pin = PD1;
-	button_list[SAVE_BUTTON].operation = save;
-	button_list[SAVE_BUTTON].wait_period = 2;
+    for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
+	    ButtonConfig_t tmp;
+	    memcpy_P(&tmp, &button_cfg[i], sizeof(ButtonConfig_t));
 
-	for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
-		*button_list[i].DDR_REG  &= ~(1 << button_list[i].pin);
-		*button_list[i].PORT_REG |= (1 << button_list[i].pin);
-	}
+	    // ??????????? ???? ?? ????? ??? volatile
+	    button_list[i].DDR_REG     = tmp.DDR_REG;
+	    button_list[i].PORT_REG    = tmp.PORT_REG;
+	    button_list[i].PIN_REG     = tmp.PIN_REG;
+	    button_list[i].pin         = tmp.pin;
+	    button_list[i].operation   = tmp.operation;
+	    button_list[i].wait_period = tmp.wait_period;
+
+	    // ??????????? ???? ? ?????????
+	    *button_list[i].DDR_REG  &= ~(1 << button_list[i].pin);
+	    *button_list[i].PORT_REG |=  (1 << button_list[i].pin);
+    }
 }
 
 void loading_anim(uint16_t wait_time)
@@ -163,6 +147,7 @@ void on()
 	current.page = PAGE_OLED_TIMER;
 
 	current.on = 1;
+	disp1color_SetBrightness(10);
 }
 
 void off_timer()
@@ -189,8 +174,8 @@ void off_timer()
 		for (uint8_t i = 0; i < 255; i++) {
 			i2c_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
 		}
-		TWCR &= ~(1 << TWEA); // Р’СЃРїРѕРјРЅРёС‚СЊ Р·Р°С‡РµРј СЌС‚Рѕ..
-		TWCR &= ~(1 << TWEN); // Р’СЃРїРѕРјРЅРёС‚СЊ Р·Р°С‡РµРј СЌС‚Рѕ..
+		TWCR &= ~(1 << TWEA); // Вспомнить зачем это..
+		TWCR &= ~(1 << TWEN); // Вспомнить зачем это..
 		
 		PORTD &= ~(1 << STAND_BY_PIN);
 		_delay_ms(1000);

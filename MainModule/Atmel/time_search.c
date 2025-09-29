@@ -1,7 +1,7 @@
-﻿/*
+/*
  * time_search.c
  *
- * λ Created: 24.01.2025 2:33:15
+ * ? Created: 24.01.2025 2:33:15
  *  Author: max4d
  */ 
 #include "time_search.h"
@@ -9,6 +9,7 @@
 static int8_t step_search = -1;
 static int16_t search_target_time = 0;
 static int16_t search_real_target_time = 0;
+static int8_t after_search_mode = STOP_MODE;
 
 int16_t timer_search_get_target_time()
 {
@@ -31,7 +32,13 @@ void timer_search_dec_target_time()
 
 void timer_search_start_search()
 {
-	if (search_target_time != 0) {
+	if (search_target_time != 0 && step_search == STEP_OFF) {
+		if (current.servo_real_mode == PLAY_MODE || current.servo_real_mode == STOP_MODE) {
+			after_search_mode = current.servo_real_mode;
+		} else {
+			after_search_mode = STOP_MODE;
+		}
+		
 		search_real_target_time = timer.all_sec + search_target_time;
 		
 		if (search_target_time > 0) {
@@ -97,6 +104,9 @@ void timer_search_timer()
 				
 				motor_speed--;
 				motor_speed--;
+				if (motor_speed < 10) {
+					motor_speed = 10;
+				}
 				i2c_set_motor_speed(motor_speed, 1);
 				break;
 			}
@@ -107,7 +117,7 @@ void timer_search_timer()
 				(current.servo_real_mode == FORWARD_MODE && (timer.all_sec+stop_coef) >= search_real_target_time) ||
 				(current.servo_real_mode == REWIND_MODE && (timer.all_sec-stop_coef) <= search_real_target_time)
 			) {
-				set_mode(STOP_MODE);
+				set_mode(after_search_mode);
 				timer_search_reset();
 			}
 		break;
@@ -119,4 +129,5 @@ void timer_search_reset()
 	search_real_target_time = 0;
 	search_target_time = 0;
 	step_search = STEP_OFF;
+	after_search_mode = STOP_MODE;
 }

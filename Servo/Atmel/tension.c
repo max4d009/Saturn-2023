@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * tension.c
  *
- * О» Created: 13.01.2023 1:58:47
+ * ? Created: 13.01.2023 1:58:47
  *  Author: m4d
  */ 
 #include "tension.h"
@@ -10,7 +10,7 @@ static void stabilization_play();
 static void stabilization_forward();
 static void stabilization_rewind();
 
-// РџРѕР»СѓС‡Р°РµРј РЅР°СЃС‚СЂРѕР№РєРё РїРёРґ СЂРµРіСѓР»СЏС‚РѕСЂРѕРІ
+// Получаем настройки пид регуляторов
 void tension_init()
 {
 	for (uint8_t i = 0; i < NUM_PID_REGULATOR; i++) {
@@ -24,8 +24,8 @@ void tension_init()
 	}
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјРµСЂРѕРј.
-// РЈСЃС‚Р°РЅРѕРІРєР° РЅР°С‚СЏР¶РµРЅРёСЏ Р»РµРЅС‚С‹ РІ Р·Р°РІРёСЃРёРјРѕРјС‚Рё РѕС‚ СЂРµР¶РёРјР°.
+// Вызывается таймером.
+// Установка натяжения ленты в зависимомти от режима.
 void tension_sensor_set_timer()
 {		
 	switch (kinematics_mode.current) {
@@ -46,20 +46,38 @@ void tension_sensor_set_timer()
 	}
 }
 
-// Р•СЃР»Рё СЌС‚Рѕ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ - Р±СѓРґРµРј РїРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РЅР°С‚СЏР¶РµРЅРёРµ РЅР° РїРѕРґРјРѕС‚РѕС‡РЅРѕРј СѓР·Р»Рµ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЃРєРѕСЂРѕСЃС‚Рё РІСЂР°С‰РµРЅРёСЏ Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ
-// РџРµСЂРµРїРёСЃР°С‚СЊ.... СЂРѕРґРёР»РѕСЃСЊ РІ СЂРµР·СѓР»СЊС‚Р°С‚Рµ РґРµР±Р°РіР° Рё РѕС‚Р»Р°РґРєРё..
-void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right)
+// Если это воспроизведение - будем подстраивать натяжение на подмоточном узле относительно скорости вращения боковых узлов
+// Переписать.... родилось в результате дебага и отладки..
+void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right, uint8_t speed_sum)
 {	
 	static uint8_t reel_right_stable_inc = 0;	
 	static uint8_t rt = 0;
 	static uint8_t rt_buf = 0;
+	static uint8_t letter_start = 0;	
 
-	if (kinematics_mode.current != PLAY_MODE || kinematics_mode.tension_sensor_enable == 0 || reels_speed.sum < 3) {
+	i2c_send_debug_int_var_oled("L", letter_start);
+
+
+	if (kinematics_mode.current != PLAY_MODE || kinematics_mode.tension_sensor_enable == 0 || kinematics_mode.in_process == 1) {
 		if (servo_list[SERVO_RIGHT].current_angle != servo_list[SERVO_RIGHT].play_angle) {
 			servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].play_angle;
 		}
 		reel_right_stable_inc = 0;
+		letter_start = 0;
 		return;
+	}
+	
+	if (speed_sum > 1 && letter_start < 16) {
+		letter_start++;
+	}
+	
+	if (letter_start < 15) {
+		return;
+	}
+	
+	
+	if (kinematics_mode.reel_size < 18) {
+		speed_right = speed_right * 2;
 	}
 	
 	if (rt_buf < 250) {
@@ -93,7 +111,9 @@ void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right)
 	}
 }
 
-// Р•СЃР»Рё СЌС‚Рѕ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ - Р±СѓРґРµРј РїРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РЅР°С‚СЏР¶РµРЅРёРµ РЅР° РїРѕРґР°СЋС‰РµРј СѓР·Р»Рµ
+
+
+// Если это воспроизведение - будем подстраивать натяжение на подающем узле
 static void stabilization_play()
 {
 	servo_list[SERVO_LEFT].need_angle = computePID(
@@ -108,21 +128,14 @@ static void stabilization_play()
 	);	
 }
 	
-// Р•СЃР»Рё СЌС‚Рѕ РїРµСЂРµРјРѕС‚РєР° РІРїРµСЂРµРґ - Р±СѓРґРµРј РїРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РЅР°С‚СЏР¶РµРЅРёРµ РЅР° РїРѕРґР°СЋС‰РµРј СѓР·Р»Рµ
+// Если это перемотка вперед - будем подстраивать натяжение на подающем узле
 static void stabilization_forward()
 {
-	double kp = pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].p;
-	double ki = pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].i;
-	if (kinematics_mode.reel_size < 15) {
-		kp = TENSION_FORWARD_P_SMALL_REEL;		
-		ki = TENSION_FORWARD_I_SMALL_REEL;
-	}
-
 	servo_list[SERVO_LEFT].need_angle = computePID(
 		kinematics_mode.tension,
 		TENSION_MIDDLE_ADC,
-		kp,
-		ki,
+		pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].p,
+		pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].i,
 		pid_regulator_calculated_list[PID_REGULATOR_TENSION_FORWARD].d,
 		TENSION_FORWARD_T,
 		servo_list[SERVO_LEFT].min_angle,
@@ -130,21 +143,14 @@ static void stabilization_forward()
 	);
 }
 	
-// Р•СЃР»Рё СЌС‚Рѕ РїРµСЂРµРјРѕС‚РєР° РЅР°Р·Р°Рґ - Р±СѓРґРµРј РїРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РЅР°С‚СЏР¶РµРЅРёРµ РЅР° РїРѕРґР°СЋС‰РµРј СѓР·Р»Рµ
+// Если это перемотка назад - будем подстраивать натяжение на подающем узле
 static void stabilization_rewind()
 {
-	double kp = pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].p;
-	double ki = pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].i;
-	if (kinematics_mode.reel_size < 15) {
-		kp = TENSION_REWIND_P_SMALL_REEL;
-		ki = TENSION_REWIND_I_SMALL_REEL;
-	}
-
 	servo_list[SERVO_RIGHT].need_angle = computePID(
 		kinematics_mode.tension,
 		TENSION_MIDDLE_ADC,
-		kp,
-		ki,
+		pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].p,
+		pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].i,
 		pid_regulator_calculated_list[PID_REGULATOR_TENSION_REWIND].d,
 		TENSION_REWIND_T,
 		servo_list[SERVO_RIGHT].min_angle,

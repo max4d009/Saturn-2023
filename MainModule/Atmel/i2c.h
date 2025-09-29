@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * i2c.h
  *
- * О» Created: 17.12.2020 1:03:28
+ *  Created: 17.12.2020 1:03:28
  *  Author: m4d
  */ 
 #ifndef I2C_H_
@@ -32,23 +32,23 @@ void i2c_send_config_current_pid(uint8_t pid_regulator_num);
 void i2c_send_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value);
 void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value);
 
-//#define ME_ADDR 0x5F // РїРѕСЃР»РµРґРЅРёР№ СЂР°Р·СЂРµС€РµРЅРёРµ РѕС‚РєР»РёРєР° РЅР° Р°РґСЂРµСЃ
+//#define ME_ADDR 0x5F // последний разрешение отклика на адрес
 
 #define VU_ADDR 0x3E
-#define SLA_R_VU VU_ADDR|0b00000001 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ С‡С‚РµРЅРёСЏ
-#define SLA_W_VU VU_ADDR&0b11111110 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ Р·Р°РїРёСЃРё
+#define SLA_R_VU VU_ADDR|0b00000001 // Макрос адреса + бит чтения
+#define SLA_W_VU VU_ADDR&0b11111110 // Макрос адреса + бит записи
 
 #define MAINBOARD_ADDR 0x5E // 94
-#define SLA_R_MAINBOARD MAINBOARD_ADDR|0b00000001 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ С‡С‚РµРЅРёСЏ
-#define SLA_W_MAINBOARD MAINBOARD_ADDR&0b11111110 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ Р·Р°РїРёСЃРё
+#define SLA_R_MAINBOARD MAINBOARD_ADDR|0b00000001 // Макрос адреса + бит чтения
+#define SLA_W_MAINBOARD MAINBOARD_ADDR&0b11111110 // Макрос адреса + бит записи
 
 #define GEN_ADDR 0x4A 
-#define SLA_R_GEN GEN_ADDR|0b00000001 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ С‡С‚РµРЅРёСЏ
-#define SLA_W_GEN GEN_ADDR&0b11111110 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ Р·Р°РїРёСЃРё
+#define SLA_R_GEN GEN_ADDR|0b00000001 // Макрос адреса + бит чтения
+#define SLA_W_GEN GEN_ADDR&0b11111110 // Макрос адреса + бит записи
 
 #define SERVO_ADDR 0x4D // 77
-#define SLA_R_SERVO SERVO_ADDR|0b00000001 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ С‡С‚РµРЅРёСЏ
-#define SLA_W_SERVO SERVO_ADDR&0b11111110 // РњР°РєСЂРѕСЃ Р°РґСЂРµСЃР° + Р±РёС‚ Р·Р°РїРёСЃРё
+#define SLA_R_SERVO SERVO_ADDR|0b00000001 // Макрос адреса + бит чтения
+#define SLA_W_SERVO SERVO_ADDR&0b11111110 // Макрос адреса + бит записи
 
 #define I2C_GEN_START_TRANSACTION_SYMBOL_FREQ 1
 
@@ -83,11 +83,14 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF 12
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SEND_PID_KOEF 13
 
-// #define TW_MT_DATA_ASK 0x28 // Р’РµРґСѓС‰РёР№ РїРµСЂРµРґР°Р» РґР°РЅРЅС‹Рµ Рё РІРµРґРѕРјС‹Р№ РїРѕРґС‚РІРµСЂРґРёР» РїСЂРёС‘Рј
-#define TW_MR_DATA_ASK 0x50 // Р’РµРґСѓС‰РёР№ РїСЂРёРЅСЏР» РґР°РЅРЅС‹Рµ Рё РїРµСЂРµРґР°Р» РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ
-#define TW_MR_DATA_NASK 0x58 // Р’РµРґСѓС‰РёР№ РїРµСЂРµРґР°Р» РґР°РЅРЅС‹Рµ Рё РІРµРґРѕРјС‹Р№ РїРѕРґС‚РІРµСЂРґРёР» РїСЂРёС‘Рј
+// #define TW_MT_DATA_ASK 0x28 // Ведущий передал данные и ведомый подтвердил приём
+#define TW_MR_DATA_ACK 0x50 // Ведущий принял данные и передал подтверждение
+#define TW_MR_DATA_NACK 0x58 // Ведущий передал данные и ведомый подтвердил приём
 
 #define TWINT_WAIT_TIMEOUT 250
+
+#define I2C_MAX_RETRY 3
+#define I2C_TIMEOUT 10000
 
 #define I2C_DATA_VU_PEAKS_MODE 0
 #define I2C_DATA_VU_PEAKS_TIME 1
@@ -123,10 +126,12 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_DATA_CONFIG_TENSION_P 6
 #define I2C_DATA_CONFIG_TENSION_I 7
 #define I2C_DATA_CONFIG_TENSION_D 8
+#define I2C_DATA_RESULT_EXIST 9
+#define I2C_DATA_RESULT_VALUE 10
 
 #define I2C_DATA_COUNT 5
 #define I2C_DATA_DEBUG_1_COUNT 29
-#define I2C_DATA_DEBUG_2_COUNT 9
+#define I2C_DATA_DEBUG_2_COUNT 11
 #define I2C_DATA_ALL_COUNT 29
 
 #define I2C_SEND_QUERY_COUNT 12

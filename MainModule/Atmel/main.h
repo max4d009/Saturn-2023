@@ -1,7 +1,7 @@
-﻿/*
+/*
  * main.h
  *
- * λ Author: max4d
+ * ? Author: max4d
  */ 
 #ifndef _MAIN_H
 #define _MAIN_H
