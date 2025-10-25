@@ -47,6 +47,7 @@ void update_i2c_data_timer_background()
     i2c_data_buffer[write_buffer][I2C_DATA_KINEMATICS_IN_PROCESS] = kinematics_mode.in_process;
     i2c_data_buffer[write_buffer][I2C_DATA_REPEAT] = kinematics_mode.repeat;
 	
+	
     if (kinematics_mode.debug_mode == 1) {
 	    i2c_data_buffer[write_buffer][I2C_DATA_TENSION] = kinematics_mode.tension / 10;
 	    i2c_data_buffer[write_buffer][I2C_DATA_AUDIO_L] = audio_level.left;
@@ -163,7 +164,7 @@ uint8_t execute_command_timer()
 		break;
 		case I2C_SERVO_START_TRANSACTION_SYMBOL_SET_REELS_SIZE: // Установить размер катушек
 			kinematics_mode.reel_size = transactData[0];
-			if (kinematics_mode.current == PLAY_MODE) {
+			if (kinematics_mode.current == PLAY_MODE || kinematics_mode.current == REC_MODE_PLAY) {
 				if (kinematics_mode.reel_size == 15) {
 					set_motor_speed((1000 + kinematics_mode.motor_speed_play_correction) / 2, 1);
 				} else if (kinematics_mode.reel_size < 15) {
@@ -181,15 +182,15 @@ uint8_t execute_command_timer()
 			switch (transactData[1]) {
 				case I2C_DATA_CONFIG_TENSION_P: 
 					pid_regulator_list[transactData[0]].p = transactData[2];
-					pid_regulator_calculated_list[transactData[0]].p = pid_regulator_list[transactData[0]].p * 0.01;
+					pid_regulator_calculated_list[transactData[0]].p = pid_regulator_list[transactData[0]].p * 0.001;
 				break;
 				case I2C_DATA_CONFIG_TENSION_I:
 					pid_regulator_list[transactData[0]].i = transactData[2];
-					pid_regulator_calculated_list[transactData[0]].i = pid_regulator_list[transactData[0]].i * 0.01;
+					pid_regulator_calculated_list[transactData[0]].i = pid_regulator_list[transactData[0]].i * 0.001;
 				break;
 				case I2C_DATA_CONFIG_TENSION_D:
 					pid_regulator_list[transactData[0]].d = transactData[2];
-					pid_regulator_calculated_list[transactData[0]].d = pid_regulator_list[transactData[0]].d * 0.01;					
+					pid_regulator_calculated_list[transactData[0]].d = pid_regulator_list[transactData[0]].d * 0.001;					
 				break;									
 			}
 		break;
@@ -210,13 +211,13 @@ uint8_t execute_command_timer()
 void update_i2c_data_timer()
 {	
 	// Обновляем скорости только в АКТИВНОМ буфере (текущие данные)
-	uint8_t oldSREG = SREG;
-	cli();
-	uint8_t current_buf = active_buffer;
-	SREG = oldSREG;
+// 	uint8_t oldSREG = SREG;
+// 	cli();
+// 	uint8_t current_buf = active_buffer;
+// 	SREG = oldSREG;
 	
-    i2c_data_buffer[current_buf][I2C_DATA_REEL_SPEED_LEFT] = reels_speed.left_timer;
-    i2c_data_buffer[current_buf][I2C_DATA_REEL_SPEED_RIGHT] = reels_speed.right_timer;
+    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_LEFT] = reels_speed.left_timer;
+    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_RIGHT] = reels_speed.right_timer;
 	
 	reels_speed.left_timer = 0;
 	reels_speed.right_timer = 0;

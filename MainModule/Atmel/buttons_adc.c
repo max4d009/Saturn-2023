@@ -51,8 +51,9 @@ void keyboard_adc_timer()
 	if (adc_pressed == 1) {
 		return;
 	}
-	
-	if (adc > 10 && adc < 30) {			 // REC
+
+
+	if (adc > 10 && adc < 30) { // REC
 		
 		if (current.servo_real_mode != STOP_MODE && is_rec_mode(current.servo_real_mode) == 0) {
 			return;
@@ -60,7 +61,7 @@ void keyboard_adc_timer()
 		
 		if (current.servo_real_mode == REC_MODE_PLAY) {
 			change_record_page();
-			_delay_ms(100);
+			_delay_ms(300);
 			return;
 		}
 		
@@ -69,6 +70,7 @@ void keyboard_adc_timer()
 		} else if (rec_mode_inc == 1) {
 			set_mode(REC_MODE_GEN);
 		}
+		_delay_ms(400);
 		
 		set_record_page(rec_mode_inc);
 		
@@ -159,7 +161,7 @@ void change_option(uint8_t option_)
 			if (current.nr > 1) {
 				current.nr = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr, 0);
 		break;
 		
 		case EQ_OPTION:
@@ -167,7 +169,7 @@ void change_option(uint8_t option_)
 			if (current.eq > 2) {
 				current.eq = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq, 0);
 		break;
 		
 		case KONTR_OPTION:
@@ -175,7 +177,7 @@ void change_option(uint8_t option_)
 			if (current.kontr > 1) {
 				current.kontr = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr, 0);
 		break;
 	}
 }

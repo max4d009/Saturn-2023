@@ -147,7 +147,7 @@ void on()
 	current.page = PAGE_OLED_TIMER;
 
 	current.on = 1;
-	disp1color_SetBrightness(10);
+	disp1color_SetBrightness(50);
 }
 
 void off_timer()

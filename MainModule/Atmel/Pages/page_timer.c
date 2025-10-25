@@ -86,7 +86,7 @@ static void show_current_mode()
 	static uint8_t in_process_inc = 0;
 	
 	if (current.in_process == 1) {
-		if (in_process_inc <= 6) {
+		if (in_process_inc <= 5) {
 			in_process_inc++;
 			return;
 		}

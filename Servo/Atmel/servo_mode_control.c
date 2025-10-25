@@ -205,26 +205,30 @@ static uint8_t play_timer()
 			set_motor_speed(1000 + kinematics_mode.motor_speed_play_correction, 1);
 		}
 		
-		if (kinematics_mode.kinematics_speed == 0) {
-			servo_list[SERVO_RIGHT].speed  = 2;
-		} else {
-			servo_list[SERVO_RIGHT].speed  = 1;
-		}
+		servo_list[SERVO_RIGHT].speed  = 2;
+
 		
 		servo_list[SERVO_LEFT].speed   = 1;
 		servo_list[SERVO_PLAY].speed   = 2;
 		servo_list[SERVO_REWIND].speed = 1;
-		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].play_angle;
-		
+        servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].min_angle;
+		servo_list[SERVO_LEFT].need_angle   = servo_list[SERVO_LEFT].pause_angle;
+
 	} else if (kinematics_mode.change_mode_counter == 20) {
+		//servo_list[SERVO_PLAY].speed   = 1;
 		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].play_angle;
 		servo_list[SERVO_LEFT].need_angle   = servo_list[SERVO_LEFT].play_angle;
-		
-				servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].play_angle;
-				pidReset(servo_list[SERVO_LEFT].current_angle);
-				kinematics_mode.tension_sensor_enable = 1;
-				return 1;
+		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].play_angle;
+		pidReset(servo_list[SERVO_LEFT].current_angle);
+		kinematics_mode.tension_sensor_enable = 1;
 	} 
+		 else if (kinematics_mode.change_mode_counter == 100) {
+			 
+			servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].play_angle;
+			return 1;
+
+		 }
+
 	return 0;
 }
 
@@ -341,6 +345,7 @@ static uint8_t rewind_timer()
 static uint8_t stop_timer(uint8_t long_wait)
 {
 	if (kinematics_mode.change_mode_counter == 0) {
+		
 		if (kinematics_mode.kinematics_speed == 0) {
  			servo_list[SERVO_RIGHT].speed  = 2;
  			servo_list[SERVO_LEFT].speed   = 2;
@@ -349,38 +354,32 @@ static uint8_t stop_timer(uint8_t long_wait)
 		} else {
  			servo_list[SERVO_RIGHT].speed  = 1;
  			servo_list[SERVO_LEFT].speed   = 1;
-			servo_list[SERVO_PLAY].speed   = 1;
+			servo_list[SERVO_PLAY].speed   = 2;
 			servo_list[SERVO_REWIND].speed = 1;
 		}
 
-// 		servo_list[SERVO_RIGHT].speed  = 2;
-// 		servo_list[SERVO_LEFT].speed   = 2;
-				
 		kinematics_mode.tension_sensor_enable = 0;
 		
 		if (kinematics_mode.previous == FORWARD_MODE || kinematics_mode.previous == FORWARD_SEARCH_MODE) {
+			servo_list[SERVO_LEFT].speed   = 2;
 			servo_list[SERVO_LEFT].need_angle = servo_list[SERVO_LEFT].stop_angle;
 		} else if (kinematics_mode.previous == REWIND_MODE || kinematics_mode.previous == REWIND_SEARCH_MODE) {
+			servo_list[SERVO_RIGHT].speed  = 2;
 			servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].min_angle; //1250;
 		}
 		
-	} else if (kinematics_mode.change_mode_counter == 10) {
-		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].stop_angle;
-				servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].stop_angle;
+	} else if (kinematics_mode.change_mode_counter == 15 ) {
+		set_motor_speed(BRAKE_SPEED, 2);
 	} else if (kinematics_mode.change_mode_counter == 40) {
-		//set_motor_speed(BRAKE_SPEED, 2);
-		servo_list[SERVO_LEFT].need_angle  = servo_list[SERVO_LEFT].stop_angle;
-
-	} else if (kinematics_mode.change_mode_counter == 50) {
-		servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].stop_angle;
+		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].stop_angle;
+	} else if (kinematics_mode.change_mode_counter == 50 ) {
+		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].stop_angle;
+	} else if (kinematics_mode.change_mode_counter == 70 ) {
+ 		servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].stop_angle;
+ 		servo_list[SERVO_LEFT].need_angle  = servo_list[SERVO_LEFT].stop_angle;
 		set_motor_speed(STOP_SPEED, 1);
-		
-	} else if (kinematics_mode.change_mode_counter == 55 && long_wait == 0) {
 		return 1;
-	} else if (kinematics_mode.change_mode_counter == 80 && long_wait == 1) {
-		return 1;
-	}
-
+	} 
 	return 0;
 }
 

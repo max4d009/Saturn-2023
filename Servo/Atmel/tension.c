@@ -18,9 +18,9 @@ void tension_init()
 		pid_regulator_list[i].i = get_pid_regulator_eeprom_val(i, CONFIG_PID_REGULATOR_I);
 		pid_regulator_list[i].d = get_pid_regulator_eeprom_val(i, CONFIG_PID_REGULATOR_D);
 		
-		pid_regulator_calculated_list[i].p = pid_regulator_list[i].p * 0.01;
-		pid_regulator_calculated_list[i].i = pid_regulator_list[i].i * 0.01;
-		pid_regulator_calculated_list[i].d = pid_regulator_list[i].d * 0.01;		
+		pid_regulator_calculated_list[i].p = pid_regulator_list[i].p * 0.001;
+		pid_regulator_calculated_list[i].i = pid_regulator_list[i].i * 0.001;
+		pid_regulator_calculated_list[i].d = pid_regulator_list[i].d * 0.001;		
 	}
 }
 
@@ -55,12 +55,12 @@ void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right, uint8_t sp
 	static uint8_t rt_buf = 0;
 	static uint8_t letter_start = 0;	
 
-	i2c_send_debug_int_var_oled("L", letter_start);
+	//i2c_send_debug_int_var_oled("L", letter_start);
 
 
-	if (kinematics_mode.current != PLAY_MODE || kinematics_mode.tension_sensor_enable == 0 || kinematics_mode.in_process == 1) {
+	if ( kinematics_mode.tension_sensor_enable == 0 || kinematics_mode.in_process == 1) {
 		if (servo_list[SERVO_RIGHT].current_angle != servo_list[SERVO_RIGHT].play_angle) {
-			servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].play_angle;
+			//servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].play_angle;
 		}
 		reel_right_stable_inc = 0;
 		letter_start = 0;
@@ -71,7 +71,7 @@ void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right, uint8_t sp
 		letter_start++;
 	}
 	
-	if (letter_start < 15) {
+	if (letter_start < 8) {
 		return;
 	}
 	

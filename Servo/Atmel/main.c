@@ -13,7 +13,7 @@ int main(void)
 	sei(); 
 	eeprom_init();
  	m4d_adc_init_8();
-	USART_ini(8);
+	USART_ini(BAUD_19200);
     m4d_servo_init();
 	tension_init();
 	audio_init();

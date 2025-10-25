@@ -11,7 +11,7 @@
 
 void i2c_init_as_master(void);
 void i2c_send_byte_servo(unsigned char value);
-void i2c_send_option_motherboard( uint8_t option,  uint8_t optionValue);
+void i2c_send_option_motherboard( uint8_t option,  uint8_t optionValue, uint8_t long_wait);
 void i2c_send_mode_motherboard( uint8_t mode_);
 void i2c_send_freq_oled(uint8_t freq_name,  uint8_t freq_level);
 void i2c_send_freq_gen(uint8_t freq);
@@ -134,7 +134,7 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_DATA_DEBUG_2_COUNT 11
 #define I2C_DATA_ALL_COUNT 29
 
-#define I2C_SEND_QUERY_COUNT 12
+#define I2C_SEND_QUERY_COUNT 10
 
 struct I2CReadByte {
 	unsigned char byte;

@@ -99,13 +99,12 @@ void timer_search_timer()
 					(current.servo_real_mode == REWIND_MODE && current.reel_speed_right > current.reel_speed_left * 1.5)
 				) {
 					stop_coef = 2;
-					end_speed = SEARCH_END_SPEED-10;
+					end_speed = SEARCH_END_SPEED - 15;
 				}
 				
 				motor_speed--;
-				motor_speed--;
-				if (motor_speed < 10) {
-					motor_speed = 10;
+				if (motor_speed < end_speed) {
+					motor_speed = end_speed;
 				}
 				i2c_set_motor_speed(motor_speed, 1);
 				break;

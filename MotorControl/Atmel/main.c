@@ -170,7 +170,7 @@ void set_d(uint8_t d)
 
 int main(void)
 {
-	USART_ini(8);
+	USART_ini(51);
 	set_fast_pid();
 	set_target_speed_from_eeprom();
 // 	kp = EEPROM_read_word(EPROM_ADDR_P);

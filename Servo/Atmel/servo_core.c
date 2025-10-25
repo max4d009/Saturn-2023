@@ -271,7 +271,7 @@ static void update_servo_positions()
 		uint16_t current_angle = servo_list[i].current_angle;
 		uint16_t need_angle = servo_list[i].need_angle;
 		
-		if (kinematics_mode.debug_mode != 1) {
+		//if (kinematics_mode.debug_mode != 1) {
 			if (need_angle < servo_list[i].min_angle) {
 				need_angle = servo_list[i].min_angle;
 			}
@@ -279,7 +279,7 @@ static void update_servo_positions()
 			if (need_angle > servo_list[i].max_angle) {
 				need_angle = servo_list[i].max_angle;
 			}
-		}
+		//}
 		
 		if (current_angle > need_angle) {
 			delta = current_angle - need_angle;
@@ -317,10 +317,10 @@ static void emergency_shutdown_timer()
 ISR(PCINT0_vect)
 {
 	if (!(PINB & (1 << REEL_RIGHT_SENSOR_PIN))) {
-		if (reels_speed.right_timer < 253) {
+		if (reels_speed.right_timer < 255) {
 			reels_speed.right_timer++;
 		}
-		if (reels_speed.right < 253) {
+		if (reels_speed.right < 255) {
 			reels_speed.right++;
 		}
 		calc_search_overdo();
@@ -330,10 +330,10 @@ ISR(PCINT0_vect)
 ISR(PCINT2_vect)
 {
 	if (!(PIND & (1 << REEL_LEFT_SENSOR_PIN))) {
-		if (reels_speed.left_timer < 253) {
+		if (reels_speed.left_timer < 255) {
 			reels_speed.left_timer++;
 		}
-		if (reels_speed.left < 253) {
+		if (reels_speed.left < 255) {
 			reels_speed.left++;
 		}
 		calc_search_overdo();

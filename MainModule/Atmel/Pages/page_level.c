@@ -68,19 +68,19 @@ void page_level_minus()
 	} else if (current_select == SELECT_PAGE_LEVEL_BIAS) {
 		if (current.bias > 0) {
 			current.bias--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_UZ_EQ) {
 		if (current.uz_eq > 0) {
 			current.uz_eq--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_FIX_LEVEL) {
 		current.fix_level = 0;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level, 0);
 	} else if (current_select == SELECT_PAGE_LEVEL_MUTE) {
 		current.mute = 0;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 0);
 	}
 }
 
@@ -99,19 +99,19 @@ void page_level_plus()
 	} else if (current_select == SELECT_PAGE_LEVEL_BIAS) {
 		if (current.bias < 15) {
 			current.bias++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_UZ_EQ) {
 		if (current.uz_eq < 3) {
 			current.uz_eq++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_FIX_LEVEL) {
 		current.fix_level = 1;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level, 0);
 	} else if (current_select == SELECT_PAGE_LEVEL_MUTE) {
 		current.mute = 1;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 0);
 	}
 }
 

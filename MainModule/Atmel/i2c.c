@@ -31,6 +31,7 @@ void send_from_query_timer()
 		if (query_list[i].sended == 0) {
 			i2c_send_data(query_list[i].i2c_data, query_list[i].long_wait, query_list[i].count);
 			query_list[i].sended = 1;
+			
 			//_delay_ms(10);
 		}
 	}
@@ -125,7 +126,7 @@ static uint8_t i2c_communication_attempt(uint8_t module_addr, uint8_t sla_w_modu
 		return 0;
 	}
 	status = TWIGetStatus();
-	if (status != 0x10) { // TW_REP_START (здесь возникает ошибка 16)
+	if (status != 0x10 && status != 0x08) { // TW_REP_START (здесь возникает ошибка 16)
 		i2c_stop_condition();
 		return 0;
 	}	
@@ -291,6 +292,7 @@ static struct I2CReadByte i2c_read_byte_from_slave(uint8_t is_last)
 		if ((TWSR & 0xF8) != TW_MR_DATA_NACK) {
 			i2c_byte_dto.error = 3;
 			i2c_byte_dto.byte = 0;
+			TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO);
 			return i2c_byte_dto;
 		}
 	}
@@ -326,7 +328,7 @@ static void after_i2c_read_servo()
 		mute_delay++;
 		if (mute_delay == 40) {
 			current.mute = 0;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 0);
 			mute_delay = 0;
 		}
 	}
@@ -345,19 +347,16 @@ static void after_i2c_read_servo()
 	
 	current.in_process = i2c_data[I2C_DATA_KINEMATICS_IN_PROCESS];
 	current.repeat = i2c_data[I2C_DATA_REPEAT];
-	
-	static uint8_t up_down = 1;
-	
-	if (current.reel_speed_left == 0 && current.reel_speed_right == 0) {
-		if (current.servo_real_mode != REWIND_MODE) {
-			up_down = 1;
-		} else {
-			up_down = 0;
-		}
-	}
-	
+		
 	if (current.reel_speed_left != 0 && current.reel_speed_right != 0) {
-		if (up_down == 1) {
+		if (current.servo_real_mode != REWIND_MODE) {
+			
+			if (current.prev_mode == REWIND_MODE && current.in_process == 1) {
+				counterOut(speed_sum);
+			} else {
+				counterIn(speed_sum);
+			}
+			
 			counterIn(speed_sum);
 		} else {
 			counterOut(speed_sum);
@@ -406,13 +405,7 @@ static int8_t get_query_id()
 static void i2c_send(uint8_t module, uint8_t type, uint8_t long_wait, uint8_t count_params,  ...)
 {
 	
-	int8_t query_id = get_query_id();
-	
-// 				oled_printf(0, 0, FONTID_6X8M, "%d", query_id);
-// 					disp1color_UpdateFromBuff();
-// 				_delay_ms(100);
-
-			
+	int8_t query_id = get_query_id();	
 	
 	if (query_id == -1) {
 		oled_show_info("OV");
@@ -460,7 +453,7 @@ void i2c_send_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 
 void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 {
-	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF, 1, 3, pid_regulator_id, koef_id, value);
+	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF, 0, 3, pid_regulator_id, koef_id, value);
 }
 
 void i2c_send_config_current_pid(uint8_t pid_regulator_num)
@@ -490,7 +483,7 @@ void i2c_save_motor_speed()
 
 void i2c_save_position_servo(uint8_t servo, uint8_t parameter, uint8_t value)
 {
-	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PARAM, 1, 3, servo, parameter, value);
+	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PARAM, 0, 3, servo, parameter, value);
 }
 
 void i2c_set_debug_mode(uint8_t debug)
@@ -506,9 +499,9 @@ void i2c_send_freq_gen(uint8_t freq)
 	i2c_send(SLA_W_GEN, I2C_GEN_START_TRANSACTION_SYMBOL_FREQ, 0, 1, freq);
 }
 
-void i2c_send_option_motherboard(uint8_t option,  uint8_t optionValue)
+void i2c_send_option_motherboard(uint8_t option,  uint8_t optionValue, uint8_t long_wait)
 {
-	i2c_send(SLA_W_MAINBOARD, I2C_MOTHERBOARD_START_TRANSACTION_SYMBOL_OPTION, 0, 2, option, optionValue);
+	i2c_send(SLA_W_MAINBOARD, I2C_MOTHERBOARD_START_TRANSACTION_SYMBOL_OPTION, long_wait, 2, option, optionValue);
 }
 
 void i2c_send_mode_motherboard(uint8_t mode)
@@ -541,8 +534,6 @@ static uint8_t i2c_send_data(uint8_t *data, uint8_t long_wait, uint8_t count)
 			return 0;
 		}
 		
-		_delay_us(500);
-		
 		uint8_t status = TWIGetStatus();
 		
 		if (i == 0 && status != 0x18) {
@@ -555,7 +546,7 @@ static uint8_t i2c_send_data(uint8_t *data, uint8_t long_wait, uint8_t count)
 			return 0;
 		}
 		
-		_delay_us(400);
+		_delay_us(200);
 		i++;
 	} while (i < count);
 	
@@ -566,7 +557,7 @@ static uint8_t i2c_send_data(uint8_t *data, uint8_t long_wait, uint8_t count)
 
 	
 	if (long_wait == 1) {
-		_delay_us(50); // надо избавиться на сервомодуле от ситуаций, когда в прерывании он долго думает
+		_delay_ms(110); // надо избавиться на сервомодуле от ситуаций, когда в прерывании он долго думает
 	} else {
 		_delay_us(50);
 	}
@@ -624,7 +615,7 @@ static uint8_t i2c_stop_condition(void)
 	    _delay_us(1);
     }
 	
-	_delay_us(10);
+	_delay_us(100);
 	
 // 	if (timeout == 0) {
 // 		show_time_error();

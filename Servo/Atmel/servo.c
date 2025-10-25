@@ -16,7 +16,7 @@ static void auto_stop_by_audio_timer();
 void reels_speed_timer(uint8_t speed_left, uint8_t speed_right, uint16_t speed_sum)
 { 
 	// ≈сли это воспроизведение - будем подстраивать нат€жение на подмоточном узле
-	if (kinematics_mode.current == PLAY_MODE) {
+	if (kinematics_mode.current == PLAY_MODE || kinematics_mode.current == REC_MODE_PLAY) {
 		tension_play_right_reel(speed_left, speed_right, speed_sum);
 		return;
 	}
@@ -71,7 +71,7 @@ void auto_stop_timer(uint16_t adc)
 		return;
 	}
 	
-	if (kinematics_mode.repeat > 0 && kinematics_mode.current == PLAY_MODE) {
+	if (kinematics_mode.repeat > 0 && (kinematics_mode.current == PLAY_MODE || kinematics_mode.current == REC_MODE_PLAY)) {
 		auto_stop_by_audio_timer(adc);
 	}
 	

@@ -6,6 +6,7 @@
 #include "main.h"
 
 static uint8_t timer_inc = 0;
+static uint8_t timer_inc2 = 0;
 static uint8_t buttons_timer_inc = 0;
 
 void resetParameters()
@@ -17,9 +18,9 @@ void resetParameters()
 	current.nr = 0;
 	current.eq = 0;
 	current.kontr = 1;
-	current.uz_eq = 1;
+	current.uz_eq = 0;
 	current.fix_level = 0;
-	current.bias = 7;
+	current.bias = 3;
 	current.page = PAGE_OLED_TIMER;
 	current.debug = 0;
 	current.reel_speed_left = 0;
@@ -42,13 +43,13 @@ void resetParameters()
 	timer_inc = 0;
 	buttons_timer_inc = 0;
 	
- 	i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level);
-	i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level, 1);
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 1);
 }
 
 uint8_t is_rec_mode(uint8_t mode) 
@@ -102,16 +103,27 @@ int main(void)
 			
 		off_timer();
 		
-		if (timer_inc > 200) {	
-			if (IR_impulse_count == 0) {
- 				i2c_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
-				send_from_query_timer();
- 				keyboard_adc_timer();
-				inc_counter();
-				manager_page_showPage();
-				debug_led();
+		if (timer_inc > 250) {	
+			if (IR_impulse_count != 0) {
+				continue;
 			}
+			
+			if (timer_inc2 > 2) {
+				i2c_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
+				inc_counter();
+				keyboard_adc_timer();
+				debug_led();
+				timer_inc2 = 0;
+			}
+			
+			send_from_query_timer();
+			
+			
+			manager_page_showPage();
+			
+			
 			timer_inc = 0;
+			timer_inc2++;
 		}
 		timer_inc++;
 	}

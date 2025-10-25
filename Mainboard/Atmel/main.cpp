@@ -11,7 +11,7 @@ struct RelayPins relay_pins[RELAY_PINS_DDRD_COUNT+RELAY_PINS_DDRB_COUNT];
 struct OptoPins opto_pins[11];
 
 uint8_t current_mode = STOP_MODE;
-uint32_t mute_delay = 0;
+volatile uint32_t mute_delay = 0;
 
 void relay_all_pins_to_state(int state)
 {
@@ -38,15 +38,15 @@ void relay_switch(uint8_t state, uint8_t relay_id)
 	if (state) {
 		relay_all_pins_to_state(0);
 		*relay_pins[relay_id].port |= (1 << relay_pins[relay_id].pin);
-		_delay_ms(30);
+		_delay_ms(15);
 		*relay_pins[relay_id].port &= ~(1 <<relay_pins[relay_id].pin);
-		_delay_ms(30);
+		_delay_ms(10);
 	} else {
 		relay_all_pins_to_state(1);
 		*relay_pins[relay_id].port &= ~(1 << relay_pins[relay_id].pin);
-		_delay_ms(30);
+		_delay_ms(15);
 		*relay_pins[relay_id].port |= (1 << relay_pins[relay_id].pin);
-		_delay_ms(30);
+		_delay_ms(10);
 	}
 }
 
@@ -95,15 +95,7 @@ void optocouplers_init()
 			
 	opto_pins[OPTOCOUPLER_SADP3_ID].pin = OPTO_SADP3_PIN;
 	opto_pins[OPTOCOUPLER_SADP3_ID].port = &PORTB;
-	DDRB |= (1 << OPTO_SADP3_PIN);
-	
-	opto_pins[OPTOCOUPLER_UZ0_ID].pin = OPTO_UZ0_PIN;
-	opto_pins[OPTOCOUPLER_UZ0_ID].port = &PORTC;
-	DDRC |= (1 << OPTO_UZ0_PIN);
-	
-	opto_pins[OPTOCOUPLER_UZ1_ID].pin = OPTO_UZ1_PIN;
-	opto_pins[OPTOCOUPLER_UZ1_ID].port = &PORTC;
-	DDRC |= (1 << OPTO_UZ1_PIN);	
+	DDRB |= (1 << OPTO_SADP3_PIN);	
 }
 
 void relays_init()
