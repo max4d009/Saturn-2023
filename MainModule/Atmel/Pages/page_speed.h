@@ -9,10 +9,9 @@
 
 #include "../main.h"
 
-#define PAGE_SPEED_SELECT_REEL_SIZE 0
-#define PAGE_SPEED_SELECT_MOTOR_SPEED 1
-#define PAGE_SPEED_SELECT_KINEMATICS_SPEED 2
-#define PAGE_SPEED_SELECT_NUM 3
+#define PAGE_SPEED_SELECT_MOTOR_SPEED 0
+#define PAGE_SPEED_SELECT_KINEMATICS_SPEED 1
+#define PAGE_SPEED_SELECT_NUM 2
 
 void page_speed_render(uint8_t first_render);
 void page_speed_menu();

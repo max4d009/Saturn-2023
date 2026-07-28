@@ -27,13 +27,18 @@ static struct I2CReadByte byte_dto;
 
 void send_from_query_timer()
 {
-	for (uint8_t i = 0; i < I2C_SEND_QUERY_COUNT; i++) {
+	static uint8_t i = 0;
+	
+	//for (uint8_t i = 0; i < I2C_SEND_QUERY_COUNT; i++) {
 		if (query_list[i].sended == 0) {
 			i2c_send_data(query_list[i].i2c_data, query_list[i].long_wait, query_list[i].count);
-			query_list[i].sended = 1;
-			
-			//_delay_ms(10);
+			query_list[i].sended = 1;	
 		}
+	//}
+	
+	i++;
+	if (i >= I2C_SEND_QUERY_COUNT) {
+		i = 0;
 	}
 }
 
@@ -44,7 +49,7 @@ void i2c_init_as_master()
 	}
 	
 	TWBR = 0x20;
- 	TWCR |= (1<<TWEA) | (1<<TWEN) | (1<<TWIE);
+ 	TWCR |= (1<<TWEA) | (1<<TWEN);
 }	
 
 // ‘”Ќ ÷»я ¬ќ——“јЌќ¬Ћ≈Ќ»я Ў»Ќџ (добавьте в i2c.h)
@@ -102,7 +107,7 @@ static uint8_t i2c_communication_attempt(uint8_t module_addr, uint8_t sla_w_modu
 		i2c_stop_condition(); // ѕринудительный STOP
 		return 0;
 	}
-	_delay_us(200); // ѕауза после START
+	//_delay_us(200); // ѕауза после START
 	
 	
 	
@@ -190,7 +195,7 @@ static uint8_t i2c_communication_attempt(uint8_t module_addr, uint8_t sla_w_modu
 }
 
 
-void i2c_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module)
+void i2c_polling_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module)
 {
 	if (current.on == 1) {
 		i2c_stop = 0;
@@ -209,6 +214,8 @@ void i2c_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module)
 			send_count = I2C_DATA_DEBUG_1_COUNT;
 		} else if (current.debug == 2) {
 			send_count = I2C_DATA_DEBUG_2_COUNT;
+		} else if (current.debug == 3) {
+			send_count = I2C_DATA_DEBUG_3_COUNT;
 		}
 	} else if (module_addr == VU_ADDR) {
 		send_count = I2C_DATA_VU_COUNT;
@@ -233,7 +240,7 @@ void i2c_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module)
 	}
 	    
 	if (!success) {
-		//show_i2c_error();
+		show_i2c_error();
 		i2c_stop = 1; // ќстановить I2C при посто€нных ошибках
 	} else {
 		after_i2c_read(module_addr);
@@ -249,7 +256,7 @@ static void show_i2c_error()
 	disp1color_FillScreenbuff(0);
 	oled_printf(0,0, FONTID_6X8M, "i%d", TWIGetStatus());
 	disp1color_UpdateFromBuff();
-	_delay_ms(500);
+	_delay_ms(400);
 }
 
 
@@ -300,7 +307,7 @@ static struct I2CReadByte i2c_read_byte_from_slave(uint8_t is_last)
 	i2c_byte_dto.error = 0;
 	i2c_byte_dto.byte = TWDR;
 	
-	_delay_us(500);
+	_delay_us(200);
 	return i2c_byte_dto;
 }
 
@@ -355,9 +362,7 @@ static void after_i2c_read_servo()
 				counterOut(speed_sum);
 			} else {
 				counterIn(speed_sum);
-			}
-			
-			counterIn(speed_sum);
+			}			
 		} else {
 			counterOut(speed_sum);
 		}
@@ -366,10 +371,6 @@ static void after_i2c_read_servo()
 	if (current.debug == 0) {
 		return;
 	} else if (current.debug == 1) {
-		audio_level.left = i2c_data[I2C_DATA_AUDIO_L];
-		audio_level.right = i2c_data[I2C_DATA_AUDIO_R];
-		audio_level.updated = 1;
-			
 		current.motor_speed = i2c_data[I2C_DATA_CONFIG_MOTOR_SPEED];
 		current.tension = i2c_data[I2C_DATA_TENSION];
 			
@@ -388,6 +389,10 @@ static void after_i2c_read_servo()
 		if (i2c_data[I2C_DATA_RESULT_EXIST] == 1) {
 			oled_show_result(i2c_data[I2C_DATA_RESULT_VALUE]);
 		}
+	} else if (current.debug == 3) {
+		audio_level.left = i2c_data[I2C_DATA_AUDIO_L];
+		audio_level.right = i2c_data[I2C_DATA_AUDIO_R];
+		audio_level.updated = 1;
 	}
 }
 
@@ -471,11 +476,6 @@ void i2c_set_kinematics_speed(uint8_t speed)
 	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_SET_KINEMATICS_SPEED, 0, 1, speed);
 }
 
-void i2c_set_reels_size(uint8_t size)
-{
-	i2c_send(SLA_W_SERVO, I2C_SERVO_START_TRANSACTION_SYMBOL_SET_REELS_SIZE, 0, 1, size);
-}
-
 void i2c_save_motor_speed()
 {
 	i2c_send(SLA_W_SERVO, I2C_START_TRANSACTION_SYMBOL_SAVE_MOTOR_SPEED, 0, 0);
@@ -546,15 +546,13 @@ static uint8_t i2c_send_data(uint8_t *data, uint8_t long_wait, uint8_t count)
 			return 0;
 		}
 		
-		_delay_us(200);
+		_delay_us(100);
 		i++;
 	} while (i < count);
 	
 	if (i2c_stop_condition() == 0) {
 		return 0;
 	}
-	
-
 	
 	if (long_wait == 1) {
 		_delay_ms(110); // надо избавитьс€ на сервомодуле от ситуаций, когда в прерывании он долго думает

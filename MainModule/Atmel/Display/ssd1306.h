@@ -89,7 +89,7 @@
 #define SSD1306_Reset_DDR               DDRB
 #define SSD1306_Reset_Mask              (1 << 0)
 
-#define SSD1306_CSPinUsed             0       // Используется управление пином CS ssd1306      
+#define SSD1306_CSPinUsed             1       // Используется управление пином CS ssd1306      
 #define SSD1306_CS_Port               PORTB
 #define SSD1306_CS_DDR                DDRB
 #define SSD1306_CS_Mask               (1 << 2)
@@ -98,6 +98,14 @@
 #define SSD1306_DC_Mask               (1 << 1)
 
 //==============================================================================
+
+
+#define SSD1306_RESET_HIGH()    SSD1306_Reset_Port |= SSD1306_Reset_Mask
+#define SSD1306_RESET_LOW()     SSD1306_Reset_Port &= ~SSD1306_Reset_Mask
+#define SSD1306_DC_HIGH()       SSD1306_DC_Port |= SSD1306_DC_Mask
+#define SSD1306_DC_LOW()        SSD1306_DC_Port &= ~SSD1306_DC_Mask
+#define SSD1306_CS_HIGH()       SSD1306_CS_Port |= SSD1306_CS_Mask
+#define SSD1306_CS_LOW()        SSD1306_CS_Port &= ~SSD1306_CS_Mask
 
 
 // Процедура инициализации дисплея на контроллере ssd1306

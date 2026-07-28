@@ -35,7 +35,7 @@ static void reel_end_timer(uint8_t speed_left, uint8_t speed_right, uint16_t spe
 {
 	static uint8_t timer = 0;
 	
-	if (kinematics_mode.slow_rew == 0 && speed_sum > 5 && timer < 10) {
+	if (kinematics_mode.slow_rew == 0 && speed_sum > 5 && timer < 2) {
 		uint8_t coef = 2.6;
 		if (speed_sum < 70) {
 			coef = 3.2;
@@ -52,7 +52,7 @@ static void reel_end_timer(uint8_t speed_left, uint8_t speed_right, uint16_t spe
 		timer = 0;
 	}
 	
-	if (timer == 4) {
+	if (timer == 2) {
 		kinematics_mode.slow_rew = 1;
 		usart_send_speed(REEL_END_SPEED, 0);
 		timer = 0;
@@ -105,7 +105,7 @@ static void auto_stop_by_audio_timer()
 	
 	if (audio_level.left > 20 && audio_level.right > 20) {
 		blank_tape_wait++;
-		if (blank_tape_wait > 300) {
+		if (blank_tape_wait > 250) {
 			blank_tape_wait = 0;
 			set_mode(STOP_MODE, 1, 1);
 			return;

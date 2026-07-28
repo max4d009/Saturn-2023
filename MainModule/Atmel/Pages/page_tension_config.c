@@ -14,9 +14,9 @@ PGM_P tension_pid_type_names[3];
 
 void init_page_tension_config()
 {
-	tension_pid_type_names[PID_REGULATOR_TENSION_PLAY]    = PSTR("натяж.воспр");
-	tension_pid_type_names[PID_REGULATOR_TENSION_FORWARD] = PSTR("натяж.впер");
-	tension_pid_type_names[PID_REGULATOR_TENSION_REWIND]  = PSTR("натяж.назад");
+	tension_pid_type_names[PID_REGULATOR_TENSION_PLAY]    = PSTR("н.восп");
+	tension_pid_type_names[PID_REGULATOR_TENSION_FORWARD] = PSTR("н.впер");
+	tension_pid_type_names[PID_REGULATOR_TENSION_REWIND]  = PSTR("н.наз");
 	
 	menu_pid_params[CONFIG_TENSION_P].name = PSTR("P");
 	menu_pid_params[CONFIG_TENSION_P].id = I2C_DATA_CONFIG_TENSION_P;

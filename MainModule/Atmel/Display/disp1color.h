@@ -9,7 +9,7 @@
 #ifndef _DISP1COLOR_H
 #define _DISP1COLOR_H
 
-//#include "types.h"
+#include "../main.h"
 
 // Список поддерживаемых дисплеев (контроллеров дисплеев)
 #define DISPTYPE_ssd1306        0       // OLED-дисплей с контроллером ssd1306
@@ -21,6 +21,27 @@
 // Размеры дисплея в пикселях
 #define DISP1COLOR_Width        128
 #define DISP1COLOR_Height       64
+
+struct SelectWidgetItem {
+	PGM_P name;
+};
+
+struct SelectTextWidget {
+	struct SelectWidgetItem items[3];  // Максимум 3 элемента
+	uint8_t items_count;                // Реальное количество
+	int8_t current_value;             // Выбранный элемент (-1 если ничего не выбрано)
+	PGM_P title;                  // Название виджета
+	void (*operation)(int8_t);
+};
+
+struct SelectGaugeWidget {
+	uint8_t items_count;                // Реальное количество
+	uint8_t current_value;
+	uint8_t zero_off;
+	int8_t center_value;
+	PGM_P title;                  // Название виджета
+	void (*operation)(uint8_t);
+};
 
 
 // Процедура инициализирует 1-цветый дисплей
@@ -36,33 +57,39 @@ void disp1color_FillScreenbuff(uint8_t FillValue);
 void disp1color_UpdateFromBuff(void);
 
 // Процедура рисует прямую линию в буфере кадра дисплея
-void oled_draw_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+//void oled_draw_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 // Процедура рисует прямоугольник в буфере кадра дисплея
 void oled_draw_rectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 // Процедура рисует окружность в буфере кадра дисплея. x0 и y0 - координаты центра окружности
-void disp1color_DrawCircle(int16_t x0, int16_t y0, int16_t radius);
+//void disp1color_DrawCircle(int16_t x0, int16_t y0, int16_t radius);
 
 // Функция вывода символа Char на дисплей. Возвращает ширину выведенного символа
 uint8_t disp1color_DrawChar(uint8_t X, uint8_t Y, uint8_t FontID, uint8_t Char);
 // Функция вывода текста из строки Str на дисплей
-void disp1color_DrawString(uint8_t X, uint8_t Y, uint8_t FontID, uint8_t *Str);
+uint8_t oled_draw_string(uint8_t X, uint8_t Y, uint8_t FontID, uint8_t *Str);
 // Процедура выводит на дисплей форматированную строку
 void oled_printf(uint8_t X, uint8_t Y, uint8_t FontID, const char *args, ...);
 
 void oled_draw_pixel(uint8_t X, uint8_t Y, uint8_t State);
 void oled_draw_double_pixel(uint8_t X, uint8_t Y, uint8_t State);
-void oled_draw_menu_item(uint8_t X, uint8_t Y, uint8_t FontID, uint8_t selected, const char *args, ...);
+uint8_t oled_draw_menu_item(uint8_t X, uint8_t Y, uint8_t FontID, uint8_t selected, const char *args, ...);
 void oled_draw_reel(uint8_t x, uint8_t y, uint8_t angle);
 void oled_show_stop(uint8_t x, uint8_t y);
 void oled_show_pause(uint8_t x, uint8_t y);
 void oled_show_play(uint8_t x, uint8_t y);
 void oled_show_forward(uint8_t x, uint8_t y);
 void oled_show_rewind(uint8_t x, uint8_t y);
-void show_level_bar(uint8_t width, uint8_t x, uint8_t y, uint8_t level, uint8_t max, uint8_t invert);
+void show_level_bar(uint8_t width, uint8_t x, uint8_t y, uint8_t level, uint8_t max);
 void oled_show_repeat(uint8_t x, uint8_t y, uint8_t count);
-void oled_show_conter_background();
+void oled_show_counter_background();
 void oled_show_eq(uint8_t eq);
 void oled_show_info(char *str);
 void oled_show_result(uint16_t varValue);
 void oled_show_tension();
+void oled_draw_filled_rectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t big);
+void show_text_item_widget(struct SelectTextWidget *widget, uint8_t x, uint8_t y, uint8_t padding, uint8_t active_widget);
+void show_gauge_item_widget(struct SelectGaugeWidget *widget, uint8_t x, uint8_t y, uint8_t active_widget);
+void oled_draw_line_vertical(int8_t x1, int8_t y1, int8_t length, uint8_t state);
+void oled_draw_hline(int16_t x1, int16_t x2, int16_t y, uint8_t state);
+void oled_draw_vline(int16_t x, int16_t y1, int16_t y2, uint8_t state);
 #endif

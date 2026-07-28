@@ -15,6 +15,6 @@ void page_timer_select();
 void page_timer_minus();
 void page_timer_plus();
 void page_timer_save();
-
+void reel_measure_update(void);
 
 #endif /* PAGE_TIMER_H_ */

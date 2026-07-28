@@ -17,6 +17,7 @@ struct Timer {
 	uint16_t buf_up;
 	uint16_t buf_down;
 	int16_t all_sec;
+	uint8_t tps;
 };
 struct Timer timer;
 

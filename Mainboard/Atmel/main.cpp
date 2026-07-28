@@ -9,9 +9,11 @@
 
 struct RelayPins relay_pins[RELAY_PINS_DDRD_COUNT+RELAY_PINS_DDRB_COUNT];
 struct OptoPins opto_pins[11];
+static void pwm_eq_init();
 
 uint8_t current_mode = STOP_MODE;
 volatile uint32_t mute_delay = 0;
+static void pwm_bbe_set(uint8_t level);
 
 void relay_all_pins_to_state(int state)
 {
@@ -127,7 +129,55 @@ void relays_init()
 	relay_pins[RELAY_REC_ID].pin = RELAY_REC_PIN;
 	relay_pins[RELAY_REC_ID].port = &PORTB;
 	DDRB |= (1 << RELAY_REC_PIN);
-		
+}
+
+volatile uint8_t pwm_level = 0;   // 0...255
+static uint16_t pwm_acc = 0;
+// Инициализация программного ШИМ
+static void pwm_eq_init() 
+{
+	pwm_bbe_set(0);
+	// Настройка таймера 0 в обычный режим (счет до 255)
+	TCCR0A = 0;                     // Обычный режим, без аппаратного ШИМ
+	TCCR0B = (1 << CS00);           // ПРЕДДЕЛИТЕЛЬ 1 → 31.25 кГц (исправлено!)
+	TIMSK0 |= (1 << TOIE0);         // Разрешить прерывание по переполнению
+    DDRB |= (1 << OPTO_EQ_PIN);     // PB5 как выход
+}
+
+// Установка скважности (0-255)
+static void pwm_bbe_set(uint8_t level) 
+{
+	pwm_level = level;
+	pwm_acc = 0;
+}
+
+ISR(TIMER0_OVF_vect)
+{
+	// level = 0 → оптопара выключена → на выходе 9В
+	if (pwm_level == 0)
+	{
+		PORTB &= ~(1 << OPTO_EQ_PIN);  // Постоянно LOW (0В) на PD6
+		return;
+	}
+
+	// level = 255 → оптопара включена → на выходе 0В
+	if (pwm_level == 255)
+	{
+		PORTB |= (1 << OPTO_EQ_PIN);   // Постоянно HIGH (5В) на PD6
+		return;
+	}
+
+	pwm_acc += pwm_level;
+
+	if (pwm_acc >= 256)
+	{
+		pwm_acc -= 256;
+		PORTB |= (1 << OPTO_EQ_PIN);   // HIGH → оптопара включена
+	}
+	else
+	{
+		PORTB &= ~(1 << OPTO_EQ_PIN);  // LOW → оптопара выключена
+	}
 }
 
 void set_mode(uint8_t mode)
@@ -179,17 +229,9 @@ void set_option(char option_, char value_)
 		break;
 		
 		case EQ_OPTION:
-			if (value_ == 0) {
-				relay_switch(EQ_STATE_OFF, RELAY_EQ_ID);
-			} else if(value_ == 1) {
-				relay_switch(EQ_STATE_ON, RELAY_EQ_ID);
-				optocoupler_switch(EQ_STATE_OFF, OPTOCOUPLER_EQ_ID);
-			} else if(value_ == 2) {
-				relay_switch(EQ_STATE_ON, RELAY_EQ_ID);
-				optocoupler_switch(EQ_STATE_ON, OPTOCOUPLER_EQ_ID);
-			}
+			relay_switch(value_, RELAY_EQ_ID);
 		break;
-		
+
 		case KONTR_OPTION:
 			relay_switch(value_, RELAY_KONTR_ID);
 		break;
@@ -216,6 +258,18 @@ void set_option(char option_, char value_)
 		case MUTE_OPTION:
 			relay_switch(!value_, RELAY_LINE_ID);
 		break;
+		
+		case BBE_OPTION:
+			if (value_ == 0) {
+				pwm_bbe_set(0);
+			} else if (value_ == 1) {
+				pwm_bbe_set(32);
+			} else if (value_ == 2) {
+				pwm_bbe_set(65);
+			} else if (value_ == 3) {
+				pwm_bbe_set(250);
+			}
+		break;
 	}
 }
 
@@ -226,18 +280,21 @@ int main(void)
 
 	sei();
 	relays_init();
-	optocouplers_init();
+	
+ 	optocouplers_init();
 	
 	relay_all_pins_to_state(0);
 
 	set_mode(STOP_MODE);
 	set_option(GEN_OPTION, 0);
-	optocoupler_switch(0, OPTOCOUPLER_GEN_ID);
+ 	optocoupler_switch(0, OPTOCOUPLER_GEN_ID);
 	
-	DDRD &= ~(1 << TEST_PD0_PIN);
+	DDRD |=(1 << TEST_PD0_PIN);
 	PORTD |= (1 << TEST_PD0_PIN);
 
 	relay_switch(LINE_STATE_ON, RELAY_LINE_ID);
+	pwm_eq_init();	
+	
 	while (1) {			
 		execute_command_timer();
 		

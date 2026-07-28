@@ -33,7 +33,6 @@ void update_i2c_data_timer_background()
 		return;
 	}
 	
-	
     static uint8_t write_buffer = 0;  // Буфер для записи (противоположный active_buffer)
 	
     // Атомарно определяем буфер для записи
@@ -46,7 +45,6 @@ void update_i2c_data_timer_background()
     i2c_data_buffer[write_buffer][I2C_DATA_KINEMATICS_MODE_CURRENT] = kinematics_mode.current;
     i2c_data_buffer[write_buffer][I2C_DATA_KINEMATICS_IN_PROCESS] = kinematics_mode.in_process;
     i2c_data_buffer[write_buffer][I2C_DATA_REPEAT] = kinematics_mode.repeat;
-	
 	
     if (kinematics_mode.debug_mode == 1) {
 	    i2c_data_buffer[write_buffer][I2C_DATA_TENSION] = kinematics_mode.tension / 10;
@@ -83,15 +81,18 @@ void update_i2c_data_timer_background()
 		i2c_data_buffer[write_buffer][I2C_DATA_RESULT_VALUE] = result[1];
 		result[0] = 0;
 		result[1] = 1;
+    } else if (kinematics_mode.debug_mode == 3) {
+		i2c_data_buffer[write_buffer][I2C_DATA_TENSION] = 0;
+	    i2c_data_buffer[write_buffer][I2C_DATA_AUDIO_L] = audio_level.left;
+	    i2c_data_buffer[write_buffer][I2C_DATA_AUDIO_R] = audio_level.right;
     }
 	
     // Атомарное переключение
     oldSREG = SREG;
     cli();
     active_buffer = write_buffer;
-    SREG = oldSREG;
-	
 	i2c_data_ready = 1;
+    SREG = oldSREG;
 }
 
 // Инициализация в роли ведомого устройства
@@ -107,7 +108,7 @@ void m4d_i2c_init_as_slave(void)
 
 	TWAR = ME_ADDR & 0xFE;
 	TWCR=(1<<TWEN)|(1<<TWEA)|(1<<TWINT)|(1 << TWIE);/* Enable TWI, Enable ack generation */
-	while (!(TWCR & (1<<TWINT))); 
+	//while (!(TWCR & (1<<TWINT))); 
 }
 
 // Запускается по таймеру постоянно
@@ -149,7 +150,6 @@ uint8_t execute_command_timer()
 		break;
 		case I2C_SERVO_START_TRANSACTION_SYMBOL_DEBUG_ENABLE:  // Включить дебаг режим (больше данных передаётся по i2c в модуль дисплея)
 			kinematics_mode.debug_mode = transactData[0];
-			i2c_send_debug_int_var_oled("Debug", kinematics_mode.debug_mode);
 		break;
 		case I2C_START_TRANSACTION_SYMBOL_SAVE_MOTOR_SPEED: // Сохранить скорость мотора при воспроизведении
 			EEPROM_write(PR_MODE_MOTOR_SPEED, kinematics_mode.motor_speed_play_correction);
@@ -210,28 +210,30 @@ uint8_t execute_command_timer()
 // функция наполняет массив i2c_data данными, которые будут забраны дисплейным модулем при обращении на чтение
 void update_i2c_data_timer()
 {	
-	// Обновляем скорости только в АКТИВНОМ буфере (текущие данные)
-// 	uint8_t oldSREG = SREG;
-// 	cli();
-// 	uint8_t current_buf = active_buffer;
-// 	SREG = oldSREG;
-	
-    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_LEFT] = reels_speed.left_timer;
-    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_RIGHT] = reels_speed.right_timer;
-	
-	reels_speed.left_timer = 0;
-	reels_speed.right_timer = 0;
+    uint8_t left_timer, right_timer;
+
+    uint8_t sreg = SREG;
+    cli();
+
+    left_timer = reels_speed.left_timer;
+    right_timer = reels_speed.right_timer;
+
+    reels_speed.left_timer = 0;
+    reels_speed.right_timer = 0;
+
+    SREG = sreg;
+
+    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_LEFT] = left_timer;
+    i2c_data_buffer[active_buffer][I2C_DATA_REEL_SPEED_RIGHT] = right_timer;
 }
 
 static void send_ack()
 {
-	_delay_us(10);
 	TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWINT) | (1<<TWEA);
 }
 
 static void send_n_ack()
 {
-	_delay_us(10);
 	TWCR =  (1<<TWEN)|(1<<TWIE)|(1<<TWINT);
 }
 
@@ -245,28 +247,21 @@ ISR(TWI_vect)
 		send_count = I2C_DATA_DEBUG_1_COUNT;
 	} else if (kinematics_mode.debug_mode == 2) {
 		send_count = I2C_DATA_DEBUG_2_COUNT;
+	} else if (kinematics_mode.debug_mode == 3) {
+		send_count = I2C_DATA_DEBUG_3_COUNT;
 	}
-	
-    // Защита от неожиданных состояний
-    if ((TWSR & 0xF8) == 0xF8) {
-	    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-	    return;
-    }
 	
 	status = TWSR & 0xF8; // (11111000) Маска. Если настроили скорость.. но последние биты не являются нулями
 	
-	// Проверяем, действительно ли обращаются к нам
-	if (status == 0x60 || status == 0xA8) { // SLA+W или SLA+R
-		uint8_t received_addr = TWDR >> 1; // Адрес из запроса
-		if (received_addr != (TWAR >> 1)) {
-			// Обращаются не к нам - игнорируем
-			TWCR = (1<<TWINT)|(1<<TWEN);
-			return;
-		}
-	}
-	
 	switch (status)
 	{
+		case 0x60:  // Свой адрес + W (начало записи)
+		// Уже обработано выше, но на всякий случай
+		transactProcess = 0;
+		transactCounter = 0;
+		send_ack();
+		break;
+				
 		case 0x80:;  // Пришли данные от мастера.
 		 	char data = TWDR;
 		 	if (transactProcess == 0) {
@@ -274,9 +269,12 @@ ISR(TWI_vect)
 		 		transactProcess = 1;
 				transactCounter = 0;  // Сбрасываем счетчик
 		 	} else {
-				if (transactCounter < 10) {
+				if (transactCounter < sizeof(transactData)) {
 					transactData[transactCounter] = data;
 					transactCounter++;
+				} else {
+					transactProcess = 0;
+					transactCounter = 0;
 				}
 		 	}
 		 	send_ack();
@@ -285,41 +283,58 @@ ISR(TWI_vect)
 			
 			transactProcess = 0;
 			//transactCounter = 0;
-			need_execute = 1;
 			send_ack();
+			need_execute = 1;
 			break;			 
 		//--- Status-Codes Slave Transmitter Modus
 		case 0xA8: // Запрос на чтение (SLA+R received)
 			update_i2c_data_timer();
 			i2c_data_current = 0;
-			
 			TWDR = i2c_data_buffer[active_buffer][0];
+			 i2c_data_current++;
 			send_ack();
 			break;
 		case 0xB8: // byte was sent and ACK received
-            i2c_data_current++;
+           
             if (i2c_data_current < send_count) {
 	            // Ещё есть данные для отправки
 	            TWDR = i2c_data_buffer[active_buffer][i2c_data_current];
+				 i2c_data_current++;
 	            send_ack();
 	         } else {
 	            // Это был ПОСЛЕДНИЙ байт
 				 TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWEA)|(1<<TWINT); // Последний байт - готовимся к завершению
 	            //send_n_ack(); // Говорим мастеру "всё отправил"
 	            // Данные НЕ обновляем - ждём STOP condition (case 0xA0)
-				
             }
 		break;
-		case 0xC0: // Last byte sent, NACK received
-		case 0xC8: // Last byte sent, ACK received  
-            // ? Мастер подтвердил получение последнего байта
-            // Но транзакция ещё не завершена - может быть повторный START
-			    // Переходим в режим ожидания
-			    TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWEA)|(1<<TWINT);
-				i2c_data_ready = 0;
+		
+		case 0xC0: // NACK - транзакция завершена
+		TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWEA)|(1<<TWINT);
+		i2c_data_ready = 0; // Можно обновлять данные
+		break;
+		
+		case 0xC8: // ACK - ещё не конец
+		TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWEA)|(1<<TWINT);
+		// i2c_data_ready НЕ трогаем
+		break;
+		
+// 		case 0xC0: // Last byte sent, NACK received
+// 		case 0xC8: // Last byte sent, ACK received  
+//             // ? Мастер подтвердил получение последнего байта
+//             // Но транзакция ещё не завершена - может быть повторный START
+// 			    // Переходим в режим ожидания
+// 			    TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWEA)|(1<<TWINT);
+// 				i2c_data_ready = 0;
 		break;
 		case 0x00: // BUS-Error
 			TWCR = (1<<TWINT) | (1<<TWSTO) | (1<<TWEN);
+		break;
+		case 0x68: // Арбитраж потерян, адрес + W
+		case 0x78: // Арбитраж потерян, адрес + R
+		case 0xB0: // Арбитраж потерян, адрес + R
+			// Игнорируем
+			TWCR = (1<<TWINT)|(1<<TWEN);
 		break;
 		default:
 			send_ack();

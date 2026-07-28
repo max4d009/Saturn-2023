@@ -20,8 +20,9 @@
 #define PAGE_OLED_MENU 8
 #define PAGE_OLED_VU 9
 #define PAGE_OLED_TENSION_CONFIG 10
+#define PAGE_OLED_EQ 11
 
-#define NUM_PAGES 11
+#define NUM_PAGES 12
 
 #define REC_MENU_PAGES_NUM 3
 

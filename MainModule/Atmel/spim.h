@@ -11,22 +11,8 @@
 
 #include "main.h"
 
-typedef enum {
-	SPI_MODE_0 = 0, // CPOL=0, CPHA=0
-	SPI_MODE_1,     // CPOL=0, CPHA=1
-	SPI_MODE_2,     // CPOL=1, CPHA=0
-	SPI_MODE_3      // CPOL=1, CPHA=1
-} SPIMode;
-
-typedef enum {
-	SPI_SPEED_DIV2 = 0,
-	SPI_SPEED_DIV4,
-	SPI_SPEED_DIV8,
-	SPI_SPEED_DIV16,
-	SPI_SPEED_DIV32,
-	SPI_SPEED_DIV64,
-	SPI_SPEED_DIV128
-} SPISpeed;
+#define SPI_SPEED_SLOW  0
+#define SPI_SPEED_HIGH  1
 
 // Процедура инициализации spi в режиме master
 void spim_init(void);

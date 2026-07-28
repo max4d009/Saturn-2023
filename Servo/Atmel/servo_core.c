@@ -7,6 +7,28 @@
 
 #include "servo_core.h"
 
+// В глобальной области
+static volatile uint8_t flag_x1 = 0;
+static volatile uint8_t flag_x2 = 0;
+static volatile uint8_t flag_x3 = 0;
+static volatile uint8_t flag_x4 = 0;
+static volatile uint8_t flag_x6 = 0;
+static volatile uint8_t flag_x8 = 0;
+static volatile uint8_t flag_x10 = 0;
+static volatile uint8_t flag_x20 = 0;
+static volatile uint8_t flag_x60 = 0;
+
+// Счетчики в ISR
+static uint8_t cnt_x1 = 0;
+static uint8_t cnt_x2 = 0;
+static uint8_t cnt_x3 = 0;
+static uint8_t cnt_x4 = 0;
+static uint8_t cnt_x6 = 0;
+static uint8_t cnt_x8 = 0;
+static uint8_t cnt_x10 = 0;
+static uint8_t cnt_x20 = 0;
+static uint8_t cnt_x60 = 0;
+
 static void update_servo_positions();
 static void servo_timer_inc();
 static void servo_timer_divide_x1();
@@ -131,11 +153,9 @@ void m4d_servo_init()
 // Самый быстрый таймер
 static void servo_timer_divide_x1()
 {	
-	update_i2c_data_timer_background();
-	
-	compute_all_adc_timer(); // Рассчёты АЦП
 	search_program_timer();  // Поиск по паузам
-
+	 // Рассчёты АЦП
+		compute_all_adc_timer();
 	if (kinematics_mode.kinematics_speed == 2) {
 		update_servo_positions(); // Обновление положения сервоприводов
 	}
@@ -146,12 +166,13 @@ static void servo_timer_divide_x1()
 // В 2 раза медленней
 static void servo_timer_divide_x2()
 {
-	execute_command_timer(); // Выполнить команды если какие то пришли по i2c
+	update_i2c_data_timer_background();
 }
 
 // В 3 раза медленней
 static void servo_timer_divide_x3()
 {
+	execute_command_timer(); // Выполнить команды если какие то пришли по i2c
 	if (kinematics_mode.kinematics_speed == 1) {
 		update_servo_positions(); // Обновление положения сервоприводов
 	}
@@ -179,6 +200,7 @@ static void servo_timer_divide_x8()
 // В 10 раза медленней
 static void servo_timer_divide_x10()
 {
+		
 }
 
 // В 20 раза медленней
@@ -195,71 +217,81 @@ static void servo_timer_divide_x60()
 // Тут пока вызов различных функций для которых нужна скорость боковых узлов
 static void reels_timer()
 {
-	if (reels_speed.left > 0 && reels_speed.right > 0) {
-		reels_speed.sum = reels_speed.left + reels_speed.right;
-	} else {
-		reels_speed.sum = 0;
-	}
-	
-	reels_speed_timer(reels_speed.left, reels_speed.right, reels_speed.sum);
-	
+	uint8_t left, right;
+
+// 	uint8_t sreg = SREG;
+// 	cli();
+
+	left = reels_speed.left;
+	right = reels_speed.right;
+
 	reels_speed.left = 0;
 	reels_speed.right = 0;
+
+/*	SREG = sreg;*/
+
+	uint8_t sum = (left > 0 && right > 0) ? (left + right) : 0;
+	reels_speed.sum = sum;
+
+	reels_speed_timer(left, right, sum);
 }
 
 // Вызов функций-таймеров с различными делителями
 static void servo_timer_inc()
 {
-	servo_timer_divide_x1();
-	
-	if (servo_timer.div_x2 == 1) {
-		servo_timer_divide_x2();
-		servo_timer.div_x2 = 0;
+	cnt_x1++;
+	if (cnt_x1 >= 1) {
+		cnt_x1 = 0;
+		flag_x1 = 1;
 	}
 	
-	if (servo_timer.div_x3 == 2) {
-		servo_timer_divide_x3();
-		servo_timer.div_x3 = 0;
-	}
-	
-	if (servo_timer.div_x4 == 3) {
-		servo_timer_divide_x4();
-		servo_timer.div_x4 = 0;
-	}
-	
-	if (servo_timer.div_x6 == 5) {
-		servo_timer_divide_x6();
-		servo_timer.div_x6 = 0;
-	}
-	
-	if (servo_timer.div_x8 == 7) {
-		servo_timer_divide_x8();
-		servo_timer.div_x8 = 0;
-	}
-	
-	if (servo_timer.div_x10 == 9) {
-		servo_timer_divide_x10();
-		servo_timer.div_x10 = 0;
-	}
-	
-	if (servo_timer.div_x20 == 19) {
-		servo_timer_divide_x20();
-		servo_timer.div_x20 = 0;
-	}
-	
-	if (servo_timer.div_x60 == 59) {
-		servo_timer_divide_x60();
-		servo_timer.div_x60 = 0;
-	}
-	
-	servo_timer.div_x2++; 
-	servo_timer.div_x3++; 
-	servo_timer.div_x4++; 
-	servo_timer.div_x6++; 
-	servo_timer.div_x8++; 
-	servo_timer.div_x10++; 
-	servo_timer.div_x20++; 
-	servo_timer.div_x60++;
+    cnt_x2++;
+    if (cnt_x2 >= 2) {
+	    cnt_x2 = 0;
+	    flag_x2 = 1;
+    }
+    
+    cnt_x3++;
+    if (cnt_x3 >= 3) {
+	    cnt_x3 = 0;
+	    flag_x3 = 1;
+    }
+    
+    cnt_x4++;
+    if (cnt_x4 >= 4) {
+	    cnt_x4 = 0;
+	    flag_x4 = 1;
+    }
+    
+    cnt_x6++;
+    if (cnt_x6 >= 6) {
+	    cnt_x6 = 0;
+	    flag_x6 = 1;
+    }
+    
+    cnt_x8++;
+    if (cnt_x8 >= 8) {
+	    cnt_x8 = 0;
+	    flag_x8 = 1;
+    }
+    
+    cnt_x10++;
+    if (cnt_x10 >= 10) {
+	    cnt_x10 = 0;
+	    flag_x10 = 1;
+    }
+    
+    cnt_x20++;
+    if (cnt_x20 >= 20) {
+	    cnt_x20 = 0;
+	    flag_x20 = 1;
+    }
+    
+    cnt_x60++;
+    if (cnt_x60 >= 60) {
+	    cnt_x60 = 0;
+	    flag_x60 = 1;
+    }
 }
 
  // Обновление положения сервоприводов
@@ -368,7 +400,6 @@ ISR(TIMER1_COMPA_vect)
 	if (servo_timer_via_one == 1) {
 		servo_timer_via_one = 0;
 		servo_timer_num++;
-		servo_timer_inc();
 		//servo_timer_on = 1;
 	} else {
 		servo_timer_via_one = 1;
@@ -378,5 +409,56 @@ ISR(TIMER1_COMPA_vect)
 	if (servo_timer_takt == NUM_SERVO+NUM_SERVO) {
 		servo_timer_takt = 0;
 		servo_timer_num  = 0;
+	}
+	
+    servo_timer_inc();
+}
+
+void flag_update()
+{
+	// Обрабатываем флаги
+	if (flag_x1) {
+		flag_x1 = 0;
+		servo_timer_divide_x1();
+	}
+	
+	if (flag_x2) {
+		flag_x2 = 0;
+		servo_timer_divide_x2();
+	}
+	    
+	if (flag_x3) {
+		flag_x3 = 0;
+		servo_timer_divide_x3();
+	}
+	    
+	if (flag_x4) {
+		flag_x4 = 0;
+		servo_timer_divide_x4();
+	}
+	    
+	if (flag_x6) {
+		flag_x6 = 0;
+		servo_timer_divide_x6();
+	}
+	    
+	if (flag_x8) {
+		flag_x8 = 0;
+		servo_timer_divide_x8();
+	}
+	    
+	if (flag_x10) {
+		flag_x10 = 0;
+		servo_timer_divide_x10();
+	}
+	    
+	if (flag_x20) {
+		flag_x20 = 0;
+		servo_timer_divide_x20();
+	}
+	    
+	if (flag_x60) {
+		flag_x60 = 0;
+		servo_timer_divide_x60();
 	}
 }

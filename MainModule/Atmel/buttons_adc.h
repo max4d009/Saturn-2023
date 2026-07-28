@@ -9,10 +9,11 @@
 
 #include "main.h"
 
+void adc_buttons_init();
 void keyboard_adc_timer();
 void change_option(uint8_t option_);
 void set_mode(uint8_t mode_);
 void reset_rec_mode_inc();
-
+void set_bbe_option(uint8_t value);
 
 #endif /* BUTTONS_ADC_H_ */

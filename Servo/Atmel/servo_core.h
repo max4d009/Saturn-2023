@@ -137,7 +137,7 @@ struct ProgramTimer {
 struct ProgramTimer servo_timer;
 
 struct Servo servo_list[NUM_SERVO];
-
+void flag_update();
 
 void servo_update_timer();
 void servo_position_load(uint8_t servo);

@@ -9,16 +9,6 @@
 #include "ssd1306.h"
 
 
-
-#define SSD1306_RESET_HIGH()    SSD1306_Reset_Port |= SSD1306_Reset_Mask
-#define SSD1306_RESET_LOW()     SSD1306_Reset_Port &= ~SSD1306_Reset_Mask
-#define SSD1306_DC_HIGH()       SSD1306_DC_Port |= SSD1306_DC_Mask
-#define SSD1306_DC_LOW()        SSD1306_DC_Port &= ~SSD1306_DC_Mask
-
-#define SSD1306_CS_HIGH()     ;
-#define SSD1306_CS_LOW()      ;
-
-
 // Размеры дисплея в пикселях
 uint8_t SSD1306_Height;
 uint8_t SSD1306_Width;
@@ -350,9 +340,6 @@ void SSD1306_Init(uint8_t Width, uint8_t Height)
   SSD1306_Height = Height;
   
   SSD1306_GPIO_init();
-  
-  // Инициализация интерфейса
-  spim_init();
 
   // Сброс контроллера дисплея ssd1306 ножкой Reset
   SSD1306_RESET_HIGH();

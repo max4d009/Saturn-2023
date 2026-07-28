@@ -12,8 +12,6 @@ static void minus();
 static void plus();
 static void save();
 
-static uint8_t button_timer = 0;
-static uint8_t button_timer_fast = 0;
 static uint16_t off_timer_inc = 0;
 static uint8_t vu_config_loaded = 0;
 
@@ -40,80 +38,87 @@ static const ButtonConfig_t button_cfg[NUM_BUTTONS] PROGMEM = {
 
 void buttons_timer()
 {
-	static uint8_t wait_count = 0;
-	uint8_t any_key_pressed = 0;
-	
 	for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
+		// Кнопка нажата (активный LOW)
 		if (!(*button_list[i].PIN_REG & (1 << button_list[i].pin))) {
-			any_key_pressed = 1;
-			if (button_list[i].pressed == 1) {
-				
-				if (i == MINUS_BUTTON || i == PLUS_BUTTON) {
-					if (button_timer_fast >= 10) {
-						button_timer_fast++;
-						if (button_timer_fast >= 20) {
-							button_list[i].operation();
-							button_timer_fast = 10;
+			
+			// --- Кнопка уже нажата (удержание) ---
+			if (button_list[i].pressed) {
+				switch (i) {
+					case MINUS_BUTTON:
+					case PLUS_BUTTON:
+						// Ускоренный режим
+						if (button_list[i].timer_fast >= BTN_FAST_START_TICKS) {
+							button_list[i].timer_fast++;
+							if (button_list[i].timer_fast >= BTN_FAST_SPEED_TICKS) {
+								button_list[i].operation();
+								button_list[i].timer_fast = BTN_FAST_START_TICKS;
+							}
+							break;
 						}
-						continue;
-					}
-					button_timer++;
-					if (button_timer > 30) {
-						button_list[i].operation();
-						button_timer = 1;
-						button_timer_fast++;
-					}
+					
+						// Медленный автоповтор
+						button_list[i].timer++;
+						if (button_list[i].timer > BTN_HOLD_START_TICKS) {
+							button_list[i].operation();
+							button_list[i].timer = 1;
+							button_list[i].timer_fast++;
+						}
+						break;
+					
+					case MENU_BUTTON:
+						button_list[i].timer++;
+						if (button_list[i].timer == BTN_HOLD_START_TICKS) {
+							button_list[i].timer++;
+							current.page = PAGE_OLED_TIMER;
+						}
+						break;
 				}
-				
-				if (i == MENU_BUTTON) {
-					if (button_timer < 70) {
-						button_timer++;
-						continue;
-					}
-					if (button_timer == 70) {
-						button_timer = 71;
-						current.page = PAGE_OLED_TIMER;
-					}	
-				}			
 				continue;
 			}
-			button_timer = 0;
-			button_timer_fast = 0;
-			if (wait_count < button_list[i].wait_period) {
-				wait_count++;
+			
+			// --- Первое нажатие (антидребезг) ---
+			button_list[i].timer = 0;
+			button_list[i].timer_fast = 0;
+			
+			// Используем wait_period из структуры для каждой кнопки
+			if (button_list[i].wait_count < button_list[i].wait_period) {
+				button_list[i].wait_count++;
 			}
-			if (wait_count == button_list[i].wait_period) {
+			if (button_list[i].wait_count == button_list[i].wait_period) {
 				button_list[i].operation();
 				button_list[i].pressed = 1;
-				wait_count = 0;
+				button_list[i].wait_count = 0;
 			}
+			
 		} else {
+			// --- Кнопка отпущена ---
 			button_list[i].pressed = 0;
+			button_list[i].timer = 0;
+			button_list[i].timer_fast = 0;
+			button_list[i].wait_count = 0;  // сбрасываем антидребезг
 		}
-	}
-	if (any_key_pressed == 0) {
-		wait_count = 0;
 	}
 }
 
 void buttons_init()
 {
-    for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
-	    ButtonConfig_t tmp;
-	    memcpy_P(&tmp, &button_cfg[i], sizeof(ButtonConfig_t));
+	for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
+		ButtonConfig_t tmp;
+		memcpy_P(&tmp, &button_cfg[i], sizeof(ButtonConfig_t));
 
-	    // ??????????? ???? ?? ????? ??? volatile
-	    button_list[i].DDR_REG     = tmp.DDR_REG;
-	    button_list[i].PORT_REG    = tmp.PORT_REG;
-	    button_list[i].PIN_REG     = tmp.PIN_REG;
-	    button_list[i].pin         = tmp.pin;
-	    button_list[i].operation   = tmp.operation;
-	    button_list[i].wait_period = tmp.wait_period;
+		// ??????????? ???? ?? ????? ??? volatile
+		button_list[i].DDR_REG     = tmp.DDR_REG;
+		button_list[i].PORT_REG    = tmp.PORT_REG;
+		button_list[i].PIN_REG     = tmp.PIN_REG;
+		button_list[i].pin         = tmp.pin;
+		button_list[i].operation   = tmp.operation;
+		button_list[i].wait_period = tmp.wait_period;
 
-	    // ??????????? ???? ? ?????????
-	    *button_list[i].DDR_REG  &= ~(1 << button_list[i].pin);
-	    *button_list[i].PORT_REG |=  (1 << button_list[i].pin);
-    }
+		// ??????????? ???? ? ?????????
+		*button_list[i].DDR_REG  &= ~(1 << button_list[i].pin);
+		*button_list[i].PORT_REG |=  (1 << button_list[i].pin);
+	}
 }
 
 void loading_anim(uint16_t wait_time)
@@ -135,11 +140,11 @@ void on()
 	show_loading();
 	PORTD |= (1 << STAND_BY_PIN);
 
-	loading_anim(100);
+	loading_anim(150);
 
 	if (vu_config_loaded == 0) {
 		for (uint8_t i = 0; i < 50;  i++) {
-			i2c_timer(VU_ADDR, SLA_W_VU, SLA_R_VU);
+			i2c_polling_timer(VU_ADDR, SLA_W_VU, SLA_R_VU);
 			show_loading();
 		}
 		vu_config_loaded = 1;
@@ -148,6 +153,7 @@ void on()
 
 	current.on = 1;
 	disp1color_SetBrightness(50);
+	bh3864_init();
 }
 
 void off_timer()
@@ -165,14 +171,14 @@ void off_timer()
 	if (off_timer_inc == 5) {
 		set_mode(STOP_MODE);
 	} 
-	if (off_timer_inc >= 10000) {
+	if (off_timer_inc >= 10) {
 		current.on = 0;
 		off_timer_inc = 0;
 		disp1color_FillScreenbuff(0);
 		disp1color_UpdateFromBuff();
 		
 		for (uint8_t i = 0; i < 255; i++) {
-			i2c_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
+			i2c_polling_timer(SERVO_ADDR, SLA_W_SERVO, SLA_R_SERVO);
 		}
 		TWCR &= ~(1 << TWEA); // Вспомнить зачем это..
 		TWCR &= ~(1 << TWEN); // Вспомнить зачем это..

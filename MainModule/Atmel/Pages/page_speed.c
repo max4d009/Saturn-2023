@@ -17,7 +17,6 @@ void page_speed_render(uint8_t first_render)
 	oled_printf(-1, 11, FONTID_6X8M, strcpy_P(str_buf, PSTR("%03d")), current.reel_speed_left);
 	oled_printf(109, 11, FONTID_6X8M, strcpy_P(str_buf, PSTR("%03d")), current.reel_speed_right);
 	
-	oled_draw_menu_item(2, 37, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_REEL_SIZE ? 1:0, strcpy_P(str_buf, PSTR("к:%d")), current.reel_size);
 	oled_draw_menu_item(2, 46, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_KINEMATICS_SPEED ? 1:0, strcpy_P(str_buf, PSTR("с.серв:%d")), current.kinematics_speed);
 	oled_draw_menu_item(2, 55, FONTID_6X8M, current_select == PAGE_SPEED_SELECT_MOTOR_SPEED ? 1:0, strcpy_P(str_buf, PSTR("с.мот:%d")), current.motor_speed);
 	
@@ -30,7 +29,7 @@ void page_speed_select()
 {
 	current_select++;
 	if (current_select >= PAGE_SPEED_SELECT_NUM) {
-		current_select = PAGE_SPEED_SELECT_REEL_SIZE;
+		current_select = PAGE_SPEED_SELECT_MOTOR_SPEED;
 	}
 }
 	
@@ -45,18 +44,7 @@ void page_speed_minus() {
 			current.kinematics_speed--;
 			i2c_set_kinematics_speed(current.kinematics_speed);
 		}
-	} else if (current_select == PAGE_SPEED_SELECT_REEL_SIZE) {
-		switch (current.reel_size) {
-			case 18:
-				current.reel_size = 15;
-				i2c_set_reels_size(current.reel_size);
-				break;
-			case 15:
-				current.reel_size = 13;
-				i2c_set_reels_size(current.reel_size);
-				break;				
-		}
-	}	
+	}
 }
 	
 void page_speed_plus() 
@@ -74,17 +62,6 @@ void page_speed_plus()
 		if (current.kinematics_speed < 2) {
 			current.kinematics_speed++;
 			i2c_set_kinematics_speed(current.kinematics_speed);
-		}
-	} else if (current_select == PAGE_SPEED_SELECT_REEL_SIZE) {
-		switch (current.reel_size) {
-			case 13:
-				current.reel_size = 15;
-				i2c_set_reels_size(current.reel_size);
-				break;
-			case 15:
-				current.reel_size = 18;
-				i2c_set_reels_size(current.reel_size);
-				break;
 		}
 	}
 }

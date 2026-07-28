@@ -16,7 +16,7 @@ void i2c_send_mode_motherboard( uint8_t mode_);
 void i2c_send_freq_oled(uint8_t freq_name,  uint8_t freq_level);
 void i2c_send_freq_gen(uint8_t freq);
 void i2c_send_mode_servo(uint8_t mode_);
-void i2c_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module);
+void i2c_polling_timer(uint8_t module_addr, uint8_t sla_w_module, uint8_t sla_r_module);
 void i2c_send_config_current_servo(uint8_t servo_num);
 void i2c_send_position_servo(uint8_t servo, uint8_t position);
 void i2c_set_motor_speed(uint8_t speed, uint8_t type);
@@ -24,7 +24,6 @@ void i2c_save_motor_speed();
 void i2c_save_position_servo(uint8_t servo, uint8_t parameter, uint8_t value);
 void i2c_set_debug_mode(uint8_t debug);
 void i2c_set_kinematics_speed(uint8_t speed);
-void i2c_set_reels_size(uint8_t size);
 void i2c_send_repeat_servo(uint8_t repeat);
 void i2c_send_vu_params(char transact_symbol, uint8_t value);
 void send_from_query_timer();
@@ -65,6 +64,7 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_MOTHERBOARD_UZ_EQ_OPTION 5
 #define I2C_MOTHERBOARD_FIX_LEVEL_OPTION 6
 #define I2C_MOTHERBOARD_MUTE_OPTION 7
+#define I2C_MOTHERBOARD_BBE_OPTION 8
 
 #define I2C_MOTHERBOARD_START_TRANSACTION_SYMBOL_MODE 1
 #define I2C_MOTHERBOARD_START_TRANSACTION_SYMBOL_OPTION 2
@@ -78,7 +78,6 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_START_TRANSACTION_SYMBOL_SAVE_MOTOR_SPEED 7
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_SET_KINEMATICS_SPEED 8
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_REPEAT 9
-#define I2C_SERVO_START_TRANSACTION_SYMBOL_SET_REELS_SIZE 10
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_CURRENT_PID_REGULATOR 11
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SAVE_PID_KOEF 12
 #define I2C_SERVO_START_TRANSACTION_SYMBOL_CONFIG_SEND_PID_KOEF 13
@@ -132,9 +131,10 @@ void i2c_save_pid_koef(uint8_t pid_regulator_id, uint8_t koef_id, uint8_t value)
 #define I2C_DATA_COUNT 5
 #define I2C_DATA_DEBUG_1_COUNT 29
 #define I2C_DATA_DEBUG_2_COUNT 11
+#define I2C_DATA_DEBUG_3_COUNT 8
 #define I2C_DATA_ALL_COUNT 29
 
-#define I2C_SEND_QUERY_COUNT 10
+#define I2C_SEND_QUERY_COUNT 12
 
 struct I2CReadByte {
 	unsigned char byte;

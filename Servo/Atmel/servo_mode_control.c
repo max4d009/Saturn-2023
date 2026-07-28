@@ -272,29 +272,28 @@ static uint8_t forward_timer()
 			servo_list[SERVO_REWIND].speed = 1;
 		}
 		servo_list[SERVO_PLAY].speed = 1;
-		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].forward_angle;
+		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].min_angle;
 		servo_list[SERVO_LEFT].need_angle   = servo_list[SERVO_LEFT].forward_angle;
+	} else if (kinematics_mode.change_mode_counter == 28) {
 		servo_list[SERVO_PLAY].need_angle   = servo_list[SERVO_PLAY].forward_angle;
-
-	} else if (kinematics_mode.change_mode_counter == 10) {
 		servo_list[SERVO_REWIND].need_angle = servo_list[SERVO_REWIND].forward_angle;
-		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].forward_angle;
 		set_motor_speed(SPEED_FULL, 0);
-	} else if (kinematics_mode.change_mode_counter == 20) {
+	} else if (kinematics_mode.change_mode_counter == 38) {
 		if (kinematics_mode.in_search == 1 && kinematics_mode.search_step == SEARCH_STEP_5_REWIND) {
 			set_motor_speed(SEARCH_BACK_SPEED, 1);
 			return 1;
 		}	
-	} else if (kinematics_mode.change_mode_counter == 30) {
+	} else if (kinematics_mode.change_mode_counter == 48) {
 		if (kinematics_mode.kinematics_speed == 0) {
 			servo_list[SERVO_LEFT].speed = 4;		
 		}		
-
+		servo_list[SERVO_RIGHT].need_angle  = servo_list[SERVO_RIGHT].forward_angle;
+				pidReset(servo_list[SERVO_LEFT].forward_angle);
+				kinematics_mode.tension_sensor_enable = 1;
+				return 1;
 		
 	} else if (kinematics_mode.change_mode_counter == 100) {
-		pidReset(servo_list[SERVO_LEFT].forward_angle);
-		kinematics_mode.tension_sensor_enable = 1;
-		return 1;
+
 	}
 	return 0;
 }
@@ -354,7 +353,7 @@ static uint8_t stop_timer(uint8_t long_wait)
 		} else {
  			servo_list[SERVO_RIGHT].speed  = 1;
  			servo_list[SERVO_LEFT].speed   = 1;
-			servo_list[SERVO_PLAY].speed   = 2;
+			servo_list[SERVO_PLAY].speed   = 1;
 			servo_list[SERVO_REWIND].speed = 1;
 		}
 
@@ -377,7 +376,11 @@ static uint8_t stop_timer(uint8_t long_wait)
 	} else if (kinematics_mode.change_mode_counter == 70 ) {
  		servo_list[SERVO_RIGHT].need_angle = servo_list[SERVO_RIGHT].stop_angle;
  		servo_list[SERVO_LEFT].need_angle  = servo_list[SERVO_LEFT].stop_angle;
-		set_motor_speed(STOP_SPEED, 1);
+ 		set_motor_speed(STOP_SPEED, 1);
+		if (long_wait == 0) {
+			return 1;
+		} 
+	} else if (kinematics_mode.change_mode_counter == 100 ) {
 		return 1;
 	} 
 	return 0;

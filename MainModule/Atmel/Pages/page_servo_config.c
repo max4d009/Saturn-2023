@@ -16,10 +16,10 @@ PGM_P servo_names[4];
 
 void init_page_servo_config()
 {
-	servo_names[SERVO_LEFT]   = PSTR("натяж.л.");
-	servo_names[SERVO_REWIND] = PSTR("перем.");
-	servo_names[SERVO_PLAY]   = PSTR("воспр.");
-	servo_names[SERVO_RIGHT]  = PSTR("натяж.пр.");
+	servo_names[SERVO_LEFT]   = PSTR("н.л.");
+	servo_names[SERVO_REWIND] = PSTR("пер.");
+	servo_names[SERVO_PLAY]   = PSTR("вос.");
+	servo_names[SERVO_RIGHT]  = PSTR("нат.пр.");
 	
 	menu_servo_params[CONFIG_SERVO_MIN].name = PSTR("мин");
 	menu_servo_params[CONFIG_SERVO_MIN].id = I2C_DATA_CONFIG_SERVO_MIN;
@@ -29,7 +29,7 @@ void init_page_servo_config()
 	menu_servo_params[CONFIG_SERVO_MAX].id = I2C_DATA_CONFIG_SERVO_MAX;
 	menu_servo_params[CONFIG_SERVO_MAX].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_PLAY].name = PSTR("воспр");
+	menu_servo_params[CONFIG_SERVO_PLAY].name = PSTR("восп");
 	menu_servo_params[CONFIG_SERVO_PLAY].id = I2C_DATA_CONFIG_SERVO_PLAY;
 	menu_servo_params[CONFIG_SERVO_PLAY].value = 0;
 	
@@ -41,7 +41,7 @@ void init_page_servo_config()
 	menu_servo_params[CONFIG_SERVO_FORWARD].id = I2C_DATA_CONFIG_SERVO_FORWARD;
 	menu_servo_params[CONFIG_SERVO_FORWARD].value = 0;
 	
-	menu_servo_params[CONFIG_SERVO_REWIND].name = PSTR("назад");
+	menu_servo_params[CONFIG_SERVO_REWIND].name = PSTR("наз");
 	menu_servo_params[CONFIG_SERVO_REWIND].id = I2C_DATA_CONFIG_SERVO_REWIND;
 	menu_servo_params[CONFIG_SERVO_REWIND].value = 0;
 	

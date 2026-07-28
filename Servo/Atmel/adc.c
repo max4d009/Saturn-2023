@@ -50,7 +50,8 @@ void m4d_adc_init_8(void)
 	// Разрешить прерывания
 	ADCSRA |= (1 << ADIE);
 }
-
+volatile uint8_t discard_first;
+volatile uint8_t adc_running_mux;
 // Функция производит иммерения АЦП
 // Запускается по таймеру. 
 // Если для канала АЦП указан флаг repeat измерения будут производиться бесконечно.
@@ -58,6 +59,12 @@ void m4d_adc_init_8(void)
 // После каждого измерения будет выполненна функция adc_result_timer
 void compute_all_adc_timer()
 {		
+
+	static uint8_t hang_counter = 0;
+	if (adc_list[current_mux].status != ADC_STATUS_IN_COMPUTE) {
+		hang_counter = 0;
+	}
+	
 	if (adc_list[current_mux].repeat == 1 && (adc_list[current_mux].status == ADC_STATUS_NO_COMPUTE || adc_list[current_mux].status == ADC_STATUS_COMPUTED)) {
 		adc_list[current_mux].status = ADC_STATUS_NEED_COMPUTE;
 	} else if (adc_list[current_mux].status == ADC_STATUS_NO_COMPUTE || adc_list[current_mux].status == ADC_STATUS_COMPUTED) {
@@ -66,14 +73,41 @@ void compute_all_adc_timer()
 			current_mux = 0;
 		}
 	} else if (adc_list[current_mux].status == ADC_STATUS_NEED_COMPUTE) {
-		mux_set(current_mux);
-		ADCSRA |= (1 << ADSC);
-		adc_list[current_mux].status = ADC_STATUS_IN_COMPUTE;
-		adc_list[current_mux].adc_result = 0;		
+		
+		uint8_t sreg = SREG;
+		cli();
+
+			if (ADCSRA & (1 << ADSC))
+			{
+				SREG = sreg;
+				return;
+			}
+		
+			adc_list[current_mux].status = ADC_STATUS_IN_COMPUTE;
+			adc_list[current_mux].adc_result = 0;
+			discard_first = 1;
+			adc_running_mux = current_mux;
+			mux_set(adc_running_mux);
+			ADCSRA |= (1 << ADSC);
+		SREG = sreg;
+		
 	} else if (adc_list[current_mux].status == ADC_STATUS_IN_COMPUTE) { // Между попытками ждём	
+        hang_counter++;
+        
+		if (hang_counter > 50)
+		{
+			hang_counter = 0;
+
+			adc_list[current_mux].status = ADC_STATUS_NO_COMPUTE;
+			discard_first = 0;
+			current_mux++;
+			if (current_mux >= ADC_OPERATION_COUNT)
+			current_mux = 0;
+		}
+        return;
 	} else if (adc_list[current_mux].status == ADC_STATUS_ISR_COMPUTED) { // Если было получено значение в прерывании
-		adc_result_timer(current_mux);
-		adc_list[current_mux].status = ADC_STATUS_COMPUTED;
+		adc_result_timer(adc_running_mux);
+		adc_list[adc_running_mux].status = ADC_STATUS_COMPUTED;
 		current_mux++;
 		if (current_mux >= ADC_OPERATION_COUNT) {
 			current_mux = 0;
@@ -104,7 +138,7 @@ static void adc_result_timer(uint8_t mux)
 		audio_timer_right(adc_list[mux].adc_result);
 	} else if (mux == ADC_OPERATION_TENSION) {
 		kinematics_mode.tension = adc_list[mux].adc_result;
-		if (kinematics_mode.tension_sensor_enable == 1 && kinematics_mode.in_process == 0) {
+		if (kinematics_mode.tension_sensor_enable == 1) {
 			tension_sensor_set_timer();
 		}
 	} else if (mux == ADC_OPERATION_AUTO_STOP) {
@@ -118,7 +152,7 @@ static void adc_result_timer(uint8_t mux)
 void mux_set(uint8_t mux)
 {
 	switch (mux) {
-		case ADC_OPERATION_KEYBOARD:
+	case ADC_OPERATION_KEYBOARD:
 		ADMUX &= ~(1 << MUX0);
 		ADMUX &= ~(1 << MUX1);
 		ADMUX &= ~(1 << MUX2);
@@ -159,7 +193,13 @@ void mux_set(uint8_t mux)
 
 ISR(ADC_vect)
 {
-	adc_list[current_mux].adc_result = ADC;
-	adc_list[current_mux].status = ADC_STATUS_ISR_COMPUTED;
-	ADCSRA &= ~(1 << ADIF);
+	if (discard_first)
+	{
+		(void)ADC;          // дочитать результат первого измерения
+		discard_first = 0;
+		ADCSRA |= (1<<ADSC);
+		return;
+	}
+	adc_list[adc_running_mux].adc_result = ADC;
+	adc_list[adc_running_mux].status = ADC_STATUS_ISR_COMPUTED;
 }

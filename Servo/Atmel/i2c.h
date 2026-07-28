@@ -82,6 +82,7 @@ void I2C_Slave_Init(uint8_t slave_address);
 #define I2C_DATA_COUNT 5
 #define I2C_DATA_DEBUG_1_COUNT 29
 #define I2C_DATA_DEBUG_2_COUNT 11
+#define I2C_DATA_DEBUG_3_COUNT 8
 #define I2C_DATA_ALL_COUNT 29
 
 #define I2C_DEBUG_STR_MAX_LEN 8

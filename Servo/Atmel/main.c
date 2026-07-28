@@ -27,7 +27,10 @@ int main(void)
 	
 	DDRD &= ~(1 << PD4);
 	PORTD &= ~(1 << PD4);
-	
+
+
     while (1) {	
+		flag_update();
+		_delay_us(100);
     }
 }
