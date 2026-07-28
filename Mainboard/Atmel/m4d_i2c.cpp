@@ -15,11 +15,7 @@ volatile uint8_t i2c_data_current = 0;
 void m4d_i2c_init_as_slave(void)
 {
 	TWAR = ME_ADDR & 0xFE;
-	TWCR = (1 << TWEN)|(1 << TWEA)|(1 << TWINT)|(1 << TWIE);
-	
-	while (!(TWCR & (1<<TWINT)));
-		
-	// while(TWCR&(0xF8)!=(0x60));
+	TWCR = (1 << TWEN) | (1 << TWEA) | (1 << TWIE);
 }
 
 char transactType = 0;

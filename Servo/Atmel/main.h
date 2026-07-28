@@ -1,7 +1,7 @@
-﻿/*
+/*
  * main.h
  *
- * λ Created: 17.12.2020 2:05:42
+ * ? Created: 17.12.2020 2:05:42
  *  Author: m4d
  */ 
 #ifndef MAIN_H_
@@ -25,5 +25,7 @@
 #include "search.h"
 #include "tension.h"
 #include "repeat.h"
+
+
 
 #endif /* MAIN_H_ */

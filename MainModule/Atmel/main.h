@@ -1,7 +1,7 @@
-﻿/*
+/*
  * main.h
  *
- * λ Author: max4d
+ * ? Author: max4d
  */ 
 #ifndef _MAIN_H
 #define _MAIN_H
@@ -14,6 +14,8 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
+#include <avr/sleep.h>
+#include "Display/ssd1306.h"
 #include "Display/disp1color.h"
 #include "Display/font.h"
 #include "i2c.h"
@@ -38,6 +40,8 @@
 #include "spim.h"
 #include "Pages/page_tension_config.h"
 #include "time_search.h"
+#include "BH3864F.h"
+#include "Pages/page_eq.h"
 
 #define REC_MODE 0
 #define PLAY_MODE 1
@@ -52,12 +56,12 @@
 #define REWIND_LITTLE_MODE 10
 #define FORWARD_LITTLE_MODE 11
 
-
 #define NR_OPTION 0
 #define EQ_OPTION 1
 #define KONTR_OPTION 2
 #define GEN_OPTION 3
 #define PAGE_OLED_OPTION 4
+#define BBE_OPTION 5
 
 #define IR_LED_PIN PD4
 #define STAND_BY_PIN PD5
@@ -75,6 +79,7 @@ struct CurrentParameters {
 	uint8_t servo_real_mode;
 	uint8_t nr;
 	uint8_t eq;
+	uint8_t bbe;
 	uint8_t kontr;
 	uint8_t uz_eq;
 	uint8_t fix_level;
@@ -91,7 +96,6 @@ struct CurrentParameters {
 	uint8_t mute;
 	uint8_t vu_peaks_mode;
 	uint8_t vu_peaks_time;
-	uint8_t reel_size;
 };
 struct CurrentParameters current;
 
@@ -114,5 +118,6 @@ void resetParameters();
 void send_debug_var_oled_left(char *varValue);
 uint8_t is_rec_mode(uint8_t mode);
 uint8_t is_rec_gen_mode();
+
 
 #endif

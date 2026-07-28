@@ -1,7 +1,7 @@
-ï»¿/*
+/*
  * pageLevel.c
  *
- * Î» Created: 19.07.2024 22:04:24
+ * ? Created: 19.07.2024 22:04:24
  *  Author: max4d
  */ 
 #include "page_level.h"
@@ -24,7 +24,7 @@ void page_level_render(uint8_t first_render)
 	}
 	
 	char str_buf[10];
-	oled_printf(2, 1, FONTID_6X8M, strcpy_P(str_buf, PSTR("Ð£Ñ€Ð¾Ð²ÐµÐ½ÑŒ")));
+	oled_printf(2, 1, FONTID_6X8M, strcpy_P(str_buf, PSTR("Óðîâ.")));
  	show_menu(2, 10);
 	 
 	if (is_rec_gen_mode() == 1) {
@@ -32,6 +32,12 @@ void page_level_render(uint8_t first_render)
 	}
  	
  	show_level_bars(69, 11);
+	 
+	if (current.kontr == 1) {
+		oled_draw_string(100, 1, FONTID_6X8M, (uint8_t*)strcpy_P(str_buf, PSTR("âûõ")));
+	} else {
+		oled_draw_string(100, 1, FONTID_6X8M, (uint8_t*)strcpy_P(str_buf, PSTR("âõ")));
+	}
 }
 
 void page_level_menu()
@@ -68,19 +74,19 @@ void page_level_minus()
 	} else if (current_select == SELECT_PAGE_LEVEL_BIAS) {
 		if (current.bias > 0) {
 			current.bias--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_UZ_EQ) {
 		if (current.uz_eq > 0) {
 			current.uz_eq--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_FIX_LEVEL) {
 		current.fix_level = 0;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level, 0);
 	} else if (current_select == SELECT_PAGE_LEVEL_MUTE) {
 		current.mute = 0;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 0);
 	}
 }
 
@@ -99,19 +105,19 @@ void page_level_plus()
 	} else if (current_select == SELECT_PAGE_LEVEL_BIAS) {
 		if (current.bias < 15) {
 			current.bias++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_UZ_EQ) {
 		if (current.uz_eq < 3) {
 			current.uz_eq++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	} else if (current_select == SELECT_PAGE_LEVEL_FIX_LEVEL) {
 		current.fix_level = 1;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_FIX_LEVEL_OPTION, current.fix_level, 0);
 	} else if (current_select == SELECT_PAGE_LEVEL_MUTE) {
 		current.mute = 1;
-		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute);
+		i2c_send_option_motherboard(I2C_MOTHERBOARD_MUTE_OPTION, current.mute, 0);
 	}
 }
 
@@ -135,19 +141,21 @@ static void show_level_bars(uint8_t x, uint8_t y)
 	if (audio_level.right < level_right) {
 		level_right--;
 	}
-		
- 	oled_printf(x+2, y+36, FONTID_6X8M, "2");     oled_printf(x+6, y+36, FONTID_6X8M, "5");
- 	oled_printf(x+2, y+21, FONTID_6X8M, "2");     oled_printf(x+6, y+21, FONTID_6X8M, "0");
-	oled_printf(x+2, y+4, FONTID_6X8M,  "1");     oled_printf(x+6, y+4, FONTID_6X8M,  "5");
-
- 	oled_printf(x+42, y+36, FONTID_6X8M, "2");     oled_printf(x+46, y+36, FONTID_6X8M, "5");
- 	oled_printf(x+42, y+21, FONTID_6X8M, "2");     oled_printf(x+46, y+21, FONTID_6X8M, "0");
- 	oled_printf(x+41, y+4, FONTID_6X8M,  "1");     oled_printf(x+45, y+4, FONTID_6X8M,  "5");	 
-	 
 	
-	oled_draw_line(x+13, y+4,  x+13, y+45); // Ð»ÐµÐ²Ð°Ñ Ð»Ð¸Ð½Ð¸Ñ
-	oled_draw_line(x+39, y+4,  x+39, y+45); // Ð¿Ñ€Ð°Ð²Ð°Ñ Ð»Ð¸Ð½Ð¸Ñ
-	oled_draw_line(x+13, y+46, x+39, y+46); // Ð½Ð¸Ð¶Ð½ÑÑ Ð»Ð¸Ð½Ð¸Ñ
+	char str_buf[2];
+	sprintf_P(str_buf, PSTR("2")); oled_printf(x+2, y+36, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("5")); oled_printf(x+6, y+36, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("2")); oled_printf(x+2, y+21, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("0")); oled_printf(x+6, y+21, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1")); oled_printf(x+2, y+4, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("5")); oled_printf(x+6, y+4, FONTID_6X8M, str_buf);
+
+	sprintf_P(str_buf, PSTR("2")); oled_printf(x+42, y+36, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("5")); oled_printf(x+46, y+36, FONTID_6X8M, str_buf);	
+	sprintf_P(str_buf, PSTR("2")); oled_printf(x+42, y+21, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("0")); oled_printf(x+46, y+21, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1")); oled_printf(x+41, y+4, FONTID_6X8M, str_buf); sprintf_P(str_buf, PSTR("5")); oled_printf(x+45, y+4, FONTID_6X8M, str_buf);
+				
+	
+	
+	oled_draw_vline(x + 13, y + 4, y + 45, 1);
+	oled_draw_vline(x + 39, y + 4, y + 45, 1);
+	oled_draw_hline(x + 13, x + 39, y + 46, 1);
 	
 	oled_draw_pixel(x+40, y+42, 1);
 	oled_draw_pixel(x+40, y+37, 1);
@@ -164,8 +172,8 @@ static void show_level_bars(uint8_t x, uint8_t y)
 	oled_draw_pixel(x+12, y+4,  1);
 
 
-	show_level_bar(10, x+15, y+4, level_left, 40, 1);  // Ð»ÐµÐ²Ñ‹Ð¹ ÑƒÑ€Ð¾Ð²ÐµÐ½ÑŒ
-	show_level_bar(10, x+27, y+4, level_right, 40, 1); // Ð¿Ñ€Ð°Ð²Ñ‹Ð¹ ÑƒÑ€Ð¾Ð²ÐµÐ½ÑŒ
+	show_level_bar(10, x+15, y+4, level_left, 40);  // ëåâûé óðîâåíü
+	show_level_bar(10, x+27, y+4, level_right, 40); // ïðàâûé óðîâåíü
 }
 
 static void show_freq()
@@ -173,27 +181,27 @@ static void show_freq()
 	char str_buf[10];
 	
 	if (current_freq <= 20) {
-		//oled_printf(5, 30, FONTID_6X8M, "Ñ‡Ð°ÑÑ‚Ð¾Ñ‚Ð°: %d", current_freq * 50);
-		oled_draw_menu_item(2, 49, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FREQ ? 1:0, strcpy_P(str_buf, PSTR("Ñ‡Ð°ÑÑ‚:%d")), current_freq * 50);
+		//oled_printf(5, 30, FONTID_6X8M, "÷àñòîòà: %d", current_freq * 50);
+		oled_draw_menu_item(2, 49, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FREQ ? 1:0, strcpy_P(str_buf, PSTR("÷àñò:%d")), current_freq * 50);
 
 	} else {
-		//oled_printf(5, 30, FONTID_6X8M, "Ñ‡Ð°ÑÑ‚Ð¾Ñ‚Ð°: %d", current_freq * 100);
-		oled_draw_menu_item(2, 49, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FREQ ? 1:0, strcpy_P(str_buf, PSTR("Ñ‡Ð°ÑÑ‚:%d")), current_freq * 100);
+		//oled_printf(5, 30, FONTID_6X8M, "÷àñòîòà: %d", current_freq * 100);
+		oled_draw_menu_item(2, 49, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FREQ ? 1:0, strcpy_P(str_buf, PSTR("÷àñò:%d")), current_freq * 100);
 	}
 }
 
 static void show_menu(uint8_t x, uint8_t y)
 {	
-	char str_buf[15];
+	char str_buf[13];
 	
-	oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FIX_LEVEL ? 1:0, strcpy_P(str_buf, PSTR("Ñ„Ð¸ÐºÑ.ÑƒÑ€:%d")), current.fix_level);
+	oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_FIX_LEVEL ? 1:0, strcpy_P(str_buf, PSTR("ôèêñ.óð:%d")), current.fix_level);
 	y = y+10;
-	oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_MUTE ? 1:0, strcpy_P(str_buf, PSTR("Ð¾Ñ‚ÐºÐ».Ð·Ð²:%d")), current.mute);
+	oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_MUTE ? 1:0, strcpy_P(str_buf, PSTR("îòêë.çâ:%d")), current.mute);
 	y = y+10;
 	
 	if (is_rec_mode(current.servo_real_mode) == 1) {
-		oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_BIAS ? 1:0, strcpy_P(str_buf, PSTR("Ð¿Ð¾Ð´Ð¼:%02d")), current.bias);
+		oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_BIAS ? 1:0, strcpy_P(str_buf, PSTR("ïîäì:%02d")), current.bias);
 		y = y+10;
-		oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("ÑkÐ²:%d")), current.uz_eq);
+		oled_draw_menu_item(x, y, FONTID_6X8M, current_select == SELECT_PAGE_LEVEL_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("ýkâ:%d")), current.uz_eq);
 	}
 }

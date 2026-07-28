@@ -1,7 +1,7 @@
-﻿/*
+/*
  * counter.h
  *
- * λ Created: 17.08.2024 1:19:20
+ * ? Created: 17.08.2024 1:19:20
  *  Author: max4d
  */ 
 #ifndef COUNTER_H_
@@ -17,6 +17,7 @@ struct Timer {
 	uint16_t buf_up;
 	uint16_t buf_down;
 	int16_t all_sec;
+	uint8_t tps;
 };
 struct Timer timer;
 

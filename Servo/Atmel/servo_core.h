@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * servo_core.h
  *
- * О» Created: 09.07.2024 18:44:56
+ * ? Created: 09.07.2024 18:44:56
  *  Author: max4d
  */ 
 #ifndef SERVO_CORE_H_
@@ -11,13 +11,13 @@
 
 #define NUM_SERVO 4
 
-// РџРёРЅС‹ РґР»СЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+// Пины для сервоприводов
 #define SERVO_LEFT_PIN PB1
 #define REWIND_SERVO_PIN PB2
 #define PLAY_SERVO_PIN PB3
 #define SERVO_RIGHT_PIN PB4
 
-// РџРёРЅ РІС‹РєР»СЋС‡РµРЅРёСЏ РїРёС‚Р°РЅРёСЏ РЅР° СЃРµСЂРІРѕРїСЂРёРІРѕРґС‹
+// Пин выключения питания на сервоприводы
 #define SERVO_ENABLE_PORT PORTD
 #define SERVO_ENABLE_DDR DDRD
 #define SERVO_ENABLE_PIN PD3
@@ -69,7 +69,7 @@
 #define AUTOSTOP_ADC_ACTIVATION 14
 #define AUTOSTOP_OPACITY_TIMER 1
 
-// РћР±С‰Р°СЏ СЃС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РІСЃРµС… СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
+// Общая структура для всех сервоприводов
 struct Servo {
 	char pin;
 	volatile uint8_t speed;
@@ -108,6 +108,7 @@ struct KinematicsMode {
 	uint8_t tension_calibrate_enable;
 	uint16_t servo_left_saved_angle;
 	uint8_t reel_size;
+	uint8_t debug_mode;
 };
 
 volatile struct KinematicsMode kinematics_mode;
@@ -136,8 +137,9 @@ struct ProgramTimer {
 struct ProgramTimer servo_timer;
 
 struct Servo servo_list[NUM_SERVO];
-
+void flag_update();
 
 void servo_update_timer();
+void servo_position_load(uint8_t servo);
 
 #endif /* SERVO_CORE_H_ */

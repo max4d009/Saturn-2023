@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * pageFFT.c
  *
- * О» Created: 24.10.2023 18:21:57
+ * ? Created: 24.10.2023 18:21:57
  *  Author: m4d
  */ 
 #include "page_fft.h"
@@ -37,7 +37,7 @@ void page_fft_render(uint8_t first_render)
 
 void page_fft_menu() 
 {
-	//current.page = PAGE_OLED_TIMER;
+	current.page = PAGE_OLED_TIMER;
 }
 	
 void page_fft_select()
@@ -55,12 +55,12 @@ void page_fft_minus()
 	} else if (current_select == SELECT_PAGE_FFT_BIAS) {
 		if (current.bias > 0) {
 			current.bias--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_FFT_UZ_EQ) {
 		if (current.uz_eq > 0) {
 			current.uz_eq--;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	}
 }
@@ -72,12 +72,12 @@ void page_fft_plus()
 	} else if (current_select == SELECT_PAGE_FFT_BIAS) {
 		if (current.bias < 15){
 			current.bias++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_SADP_OPTION, current.bias, 0);
 		}
 	} else if (current_select == SELECT_PAGE_FFT_UZ_EQ) {
 		if (current.uz_eq < 3) {
 			current.uz_eq++;
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_UZ_EQ_OPTION, current.uz_eq, 0);
 		}
 	}
 }
@@ -86,75 +86,66 @@ void page_fft_save() {}
 
 static void show_fft()
 {	
-	oled_draw_line(7,   f50,   12,  f50);  // 50
-	oled_draw_line(16,  f100,  24,  f100); // 100
-	oled_draw_line(28,  f350,  38,  f350); // 350
-	oled_draw_line(42,  f1k,   47,  f1k);  // 1Рє
-	oled_draw_line(51,  f6k,   58,  f6k);  // 6Рє
-	oled_draw_line(62,  f10k,  71,  f10k); // 10Рє
-	oled_draw_line(75,  f12k,  84,  f12k); // 12Рє
-	oled_draw_line(88,  f14k,  97,  f14k); // 14Рє
-	oled_draw_line(101, f16k,  110, f16k); // 16Рє
-	oled_draw_line(113, f20k,  123, f20k); // 20Рє
+	oled_draw_hline(7,   12,  f50, 1);   // 50 Гц
+	oled_draw_hline(16,  24,  f100, 1);  // 100 Гц
+	oled_draw_hline(28,  38,  f350, 1);  // 350 Гц
+	oled_draw_hline(42,  47,  f1k, 1);   // 1 кГц
+	oled_draw_hline(51,  58,  f6k, 1);   // 6 кГц
+	oled_draw_hline(62,  71,  f10k, 1);  // 10 кГц
+	oled_draw_hline(75,  84,  f12k, 1);  // 12 кГц
+	oled_draw_hline(88,  97,  f14k, 1);  // 14 кГц
+	oled_draw_hline(101, 110, f16k, 1);  // 16 кГц
+	oled_draw_hline(113, 123, f20k, 1);  // 20 кГц
 }
 
-static void show_fft_background()
+void show_fft_background()
 {
-	oled_printf(5, 50, FONTID_6X8M, "5");
-	oled_printf(9, 50, FONTID_6X8M, "0");
+	char str_buf[2];  // Один буфер на 4 символа
 
-	oled_printf(14, 50, FONTID_6X8M, "1");
-	oled_printf(17, 50, FONTID_6X8M, "0");
-	oled_printf(21, 50, FONTID_6X8M, "0");
+	// Верхняя строка (частоты) - все отдельные цифры и буквы
+	sprintf_P(str_buf, PSTR("5"));   oled_printf(5, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(9, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(14, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(17, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(21, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("3"));   oled_printf(27, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("5"));   oled_printf(31, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(35, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(40, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(44, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("6"));   oled_printf(50, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(55, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(60, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(63, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(68, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(73, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("2"));   oled_printf(76, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(81, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(86, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("4"));   oled_printf(89, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(94, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("1"));   oled_printf(99, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("6"));   oled_printf(102, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(107, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("2"));   oled_printf(112, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(116, 50, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("k"));   oled_printf(121, 50, FONTID_6X8M, str_buf);
 
-	oled_printf(27, 50, FONTID_6X8M, "3");
-	oled_printf(31, 50, FONTID_6X8M, "5");
-	oled_printf(35, 50, FONTID_6X8M, "0");
-
-	oled_printf(40, 50, FONTID_6X8M, "1");
-	oled_printf(44, 50, FONTID_6X8M, "k");
-
-	oled_printf(50, 50, FONTID_6X8M, "6");
-	oled_printf(55, 50, FONTID_6X8M, "k");
-
-	oled_printf(60, 50, FONTID_6X8M, "1");
-	oled_printf(63, 50, FONTID_6X8M, "0");
-	oled_printf(68, 50, FONTID_6X8M, "k");
-
-	oled_printf(73, 50, FONTID_6X8M, "1");
-	oled_printf(76, 50, FONTID_6X8M, "2");
-	oled_printf(81, 50, FONTID_6X8M, "k");
-
-	oled_printf(86, 50, FONTID_6X8M, "1");
-	oled_printf(89, 50, FONTID_6X8M, "4");
-	oled_printf(94, 50, FONTID_6X8M, "k");
-
-	oled_printf(99, 50, FONTID_6X8M, "1");
-	oled_printf(102, 50, FONTID_6X8M, "6");
-	oled_printf(107, 50, FONTID_6X8M, "k");
-
-	oled_printf(112, 50, FONTID_6X8M, "2");
-	oled_printf(116, 50, FONTID_6X8M, "0");
-	oled_printf(121, 50, FONTID_6X8M, "k");
-
-	oled_printf(0, 15, FONTID_6X8M, "5");
-	oled_printf(0, 25, FONTID_6X8M, "0");
-	oled_printf(0, 35, FONTID_6X8M, "5");
+	// Левая колонка
+	sprintf_P(str_buf, PSTR("5"));   oled_printf(0, 15, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("0"));   oled_printf(0, 25, FONTID_6X8M, str_buf);
+	sprintf_P(str_buf, PSTR("5"));   oled_printf(0, 35, FONTID_6X8M, str_buf);
 	
-	for (uint8_t i = 6; i <= 126; i = i + 10) {
-		oled_draw_pixel(i, 19, 1);
+	// === Сетка (горизонтальные линии из точек) ===
+	for (uint8_t i = 6; i <= 126; i += 10) {
+		oled_draw_pixel(i, 19, 1);  // уровень 5
+		oled_draw_pixel(i, 29, 1);  // уровень 0
+		oled_draw_pixel(i, 39, 1);  // уровень 5
 	}
 	
-	for (uint8_t i = 6; i <= 126; i = i + 10) {
-		oled_draw_pixel(i, 29, 1);
-	}
-	
-	for (uint8_t i = 6; i <= 126; i = i + 10) {
-		oled_draw_pixel(i, 39, 1);
-	}
-	
-	oled_draw_line(5, 50, 5, 10);
-	oled_draw_line(5, 50, 126, 50);
+	// === Оси координат ===
+	oled_draw_vline(5, 10, 50, 1);     // вертикальная ось (Y от 10 до 50)
+	oled_draw_hline(5, 126, 50, 1);    // горизонтальная ось (X от 5 до 126)
 }
 
 static void show_menu()
@@ -162,13 +153,13 @@ static void show_menu()
 	char str_buf[15];
 	
 	if (current_channel == CHANNEL_LEFT) {
-		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:Р»РµРІ")));
+		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:лев")));
 	} else {
-		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:РїСЂ")));
+		oled_draw_menu_item(6, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_CHANNEL ? 1:0, strcpy_P(str_buf, PSTR("k:пр")));
 	}
 	
-	oled_draw_menu_item(45, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_BIAS ? 1:0, strcpy_P(str_buf, PSTR("РїРѕРґРј:%02d")), current.bias);
-	oled_draw_menu_item(96, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("СЌkРІ:%d")), current.uz_eq);
+	oled_draw_menu_item(45, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_BIAS ? 1:0, strcpy_P(str_buf, PSTR("подм:%02d")), current.bias);
+	oled_draw_menu_item(96, -2, FONTID_6X8M, current_select == SELECT_PAGE_FFT_UZ_EQ ? 1:0, strcpy_P(str_buf, PSTR("эkв:%d")), current.uz_eq);
 }
 
 static void set_freq_level(uint8_t freq_name, uint8_t freq_level)

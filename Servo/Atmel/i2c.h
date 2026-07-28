@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * m4d_i2c.h
  *
- * О» Created: 17.12.2020 1:03:28
+ * ? Created: 17.12.2020 1:03:28
  *  Author: m4d
  */ 
 #ifndef M4D_I2C_H_
@@ -12,10 +12,11 @@
 void m4d_i2c_init_as_slave(void);
 uint8_t execute_command_timer();
 void update_i2c_data_timer();
+void update_i2c_data_timer_background();
 void i2c_send_debug_int_var_oled(char *varName, uint16_t varValue);
 void I2C_Slave_Init(uint8_t slave_address);
 
-#define ME_ADDR 0x4D // РїРѕСЃР»РµРґРЅРёР№ СЂРµР·СЂРµС€РµРЅРёРµ РѕС‚РєР»РёРєР° РЅР° Р°РґСЂРµСЃ
+#define ME_ADDR 0x4D // последний резрешение отклика на адрес
 
 #define REC_MODE 0
 #define PLAY_MODE 1
@@ -75,10 +76,13 @@ void I2C_Slave_Init(uint8_t slave_address);
 #define I2C_DATA_CONFIG_TENSION_P 6
 #define I2C_DATA_CONFIG_TENSION_I 7
 #define I2C_DATA_CONFIG_TENSION_D 8
+#define I2C_DATA_RESULT_EXIST 9
+#define I2C_DATA_RESULT_VALUE 10
 
 #define I2C_DATA_COUNT 5
 #define I2C_DATA_DEBUG_1_COUNT 29
-#define I2C_DATA_DEBUG_2_COUNT 9
+#define I2C_DATA_DEBUG_2_COUNT 11
+#define I2C_DATA_DEBUG_3_COUNT 8
 #define I2C_DATA_ALL_COUNT 29
 
 #define I2C_DEBUG_STR_MAX_LEN 8

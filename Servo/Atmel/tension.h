@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * tension.h
  *
- * О» Created: 13.01.2023 1:59:18
+ * ? Created: 13.01.2023 1:59:18
  *  Author: m4d
  */ 
 #ifndef TENSION_H_
@@ -9,26 +9,12 @@
 
 #include "main.h"
 
-#define TENSION_MIDDLE_ADC 450 // РЎСЂРµРґРЅСЏСЏ С‚РѕС‡РєР° РґР°С‚С‡РёРєР° РЅР°С‚СЏР¶РµРЅРёСЏ. Р—РЅР°С‡РµРЅРёРµ ADC 450, С‡РµРј Р±РѕР»СЊС€Рµ С‚РµРј РјРµРЅСЊС€Рµ РЅР°С‚СЏР¶РµРЅРёРµ
+#define TENSION_MIDDLE_ADC 450 // Средняя точка датчика натяжения. Значение ADC 450, чем больше тем меньше натяжение
 
-#define TENSION_PLAY_P 0.08
-#define TENSION_PLAY_I 0.03
-#define TENSION_PLAY_D 0.008
+
 #define TENSION_PLAY_T 1
-
-#define TENSION_FORWARD_P 5
-#define TENSION_FORWARD_I 3
-#define TENSION_FORWARD_D 0.8
 #define TENSION_FORWARD_T 1
-#define TENSION_FORWARD_P_SMALL_REEL 0.05
-#define TENSION_FORWARD_I_SMALL_REEL 0.003
-
-#define TENSION_REWIND_P 0.12
-#define TENSION_REWIND_I 0.007
-#define TENSION_REWIND_D 0.0004
 #define TENSION_REWIND_T 1
-#define TENSION_REWIND_P_SMALL_REEL 0.05
-#define TENSION_REWIND_I_SMALL_REEL 0.003
 
 #define PID_REGULATOR_TENSION_PLAY 0
 #define PID_REGULATOR_TENSION_FORWARD 1
@@ -41,8 +27,16 @@
 #define NUM_PID_REGULATOR 3
 #define NUM_PID_REGULATOR_PARAM 3
 
+
+#define SERVO_MIN_ANGLE   0
+#define SERVO_MAX_ANGLE   160
+#define SERVO_OFFSET      60
+#define SPEED_SCALE       2
+#define UPDATE_INTERVAL   6
+#define STABLE_THRESHOLD  5
+
 void tension_sensor_set_timer();
-void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right);
+void tension_play_right_reel(uint8_t speed_left, uint8_t speed_right, uint8_t speed_sum);
 void tension_init();
 
 struct PidRegulator {

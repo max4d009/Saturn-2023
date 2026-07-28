@@ -1,20 +1,20 @@
-п»ї/*
+/*
  * m4d_eeprom.c
  *
- * О» Created: 17.12.2020 1:29:13
+ * ? Created: 17.12.2020 1:29:13
  *  Author: m4d
  */ 
 
 #include "eeprom.h"
 
-static uint8_t get_eeprom_addr_servo_parameter_by_i2c(uint8_t servo, uint8_t parameter);
+static uint8_t get_eeprom_addr_servo_parameter_by_i2c(uint8_t servo, uint8_t i2c_parameter);
 static uint8_t get_eeprom_addr_pid_regulator_parameter_by_i2c(uint8_t pid_regulator, uint8_t parameter);
 
 volatile uint8_t eeprom_addr_by_servo_param[NUM_SERVO][CONFIG_SERVO_COUNT_ALL] = {0};
 volatile uint8_t eeprom_addr_by_pid_regulator_param[NUM_PID_REGULATOR][NUM_PID_REGULATOR_PARAM] = {0};
 
-// РќР°Р·РЅР°С‡РµРЅРёРµ Р°РґСЂРµСЃРѕРІ РІ eeprom РґР»СЏ РІСЃРµР· РЅР°СЃС‚СЂРѕРµРє СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРІ
-// С‚Р°РєРѕРµ СЃРµР±Рµ С‡РµСЂРµР· С†РёРєР»С‹ РґРµР»Р°С‚СЊ РґСѓРјР°СЋ..
+// Назначение адресов в eeprom для всех настроек сервоприводов
+// такое себе через циклы делать думаю..
 void eeprom_init()
 {
 	uint8_t eeprom_address = PR_MODE_SERVO_CONFIG_START;
@@ -34,53 +34,79 @@ void eeprom_init()
 	}
 }
 
-// РЎРѕС…СЂР°РЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂ СЃРµСЂРІРѕРїСЂРёРІРѕРґР°
-void update_servo_parameter_from_i2c(uint8_t servo, uint8_t parameter, uint8_t value)
+// Сохранить параметр пид регулятора по названию i2c параметра
+void update_pid_regulator_parameter_from_i2c(uint8_t pid_regulator, uint8_t i2c_parameter, uint8_t value)
 {
-	uint8_t adr = get_eeprom_addr_servo_parameter_by_i2c(servo, parameter);
-	EEPROM_write(adr, value);
-	m4d_servo_init();
-}
-
-// РЎРѕС…СЂР°РЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂ РїРёРґ СЂРµРіСѓР»СЏС‚РѕСЂР°
-void update_pid_regulator_parameter_from_i2c(uint8_t pid_regulator, uint8_t parameter, uint8_t value)
-{
-	uint8_t adr = get_eeprom_addr_pid_regulator_parameter_by_i2c(pid_regulator, parameter);
+	uint8_t adr = get_eeprom_addr_pid_regulator_parameter_by_i2c(pid_regulator, i2c_parameter);
 	EEPROM_write(adr, value);
 	tension_init();
 }
 
-// РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂ СЃРµСЂРІРѕРїСЂРёРІРѕРґР° РёР· eeprom
-uint8_t get_servo_eeprom_val(uint8_t servo, uint8_t parameter)
+// Получить eeprom адрес параметра сервопривода по названию i2c параметра
+static uint8_t get_eeprom_addr_servo_parameter_by_i2c(uint8_t servo, uint8_t i2c_parameter)
 {
-	uint8_t val = EEPROM_read(eeprom_addr_by_servo_param[servo][parameter]);
-	if (parameter != CONFIG_SERVO_SPEED) {
-		if (val < 40 || val > 254) {
+	return eeprom_addr_by_servo_param[servo][i2c_parameter - I2C_DATA_CONFIG_SERVO_MIN];
+}
+
+// Сохранить параметр сервопривода
+void update_servo_parameter_from_i2c(uint8_t servo, uint8_t i2c_parameter, uint8_t value)
+{
+	uint8_t adr = get_eeprom_addr_servo_parameter_by_i2c(servo, i2c_parameter);
+	EEPROM_write(adr, value);
+}
+
+uint8_t get_servo_eeprom_val_from_i2c(uint8_t servo, uint8_t i2c_parameter)
+{
+	uint8_t adr = get_eeprom_addr_servo_parameter_by_i2c(servo, i2c_parameter);
+	uint8_t val = EEPROM_read(adr);
+
+	if (val < 40 || val > 250) {
+		if (i2c_parameter == CONFIG_SERVO_MAX) {
+			val = 250;
+		} else if (i2c_parameter == CONFIG_SERVO_MIN) {
+			val = 40;
+		} else {
 			val = 150;
-		}
-	} else {
-		if (val < 1 || val > 20) {
-			val = 5;
 		}
 	}
 
 	return val;
 }
 
-// РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂ РїРёРґ СЂРµРіСѓР»СЏС‚РѕСЂР° РёР· eeprom
+
+// Получить параметр сервопривода из eeprom
+uint8_t get_servo_eeprom_val(uint8_t servo, uint8_t parameter)
+{
+	uint8_t val = EEPROM_read(eeprom_addr_by_servo_param[servo][parameter]);
+
+	if (val < 40 || val > 250) {
+		if (parameter == CONFIG_SERVO_MAX) {
+			val = 250;	
+		} else if (parameter == CONFIG_SERVO_MIN) {
+			val = 40;
+		} else {
+			val = 150;
+		}
+	}
+
+	return val;
+}
+
+// Получить параметр пид регулятора из eeprom
 uint8_t get_pid_regulator_eeprom_val(uint8_t pid_regulator, uint8_t parameter)
 {
 	uint8_t val = EEPROM_read(eeprom_addr_by_pid_regulator_param[pid_regulator][parameter]);
 	return val;
 }
 
-// РџРѕР»СѓС‡РёС‚СЊ eeprom Р°РґСЂРµСЃ РїР°СЂР°РјРµС‚СЂР° СЃРµСЂРІРѕРїСЂРёРІРѕРґР°
-static uint8_t get_eeprom_addr_servo_parameter_by_i2c(uint8_t servo, uint8_t parameter)
+uint8_t get_pid_regulator_eeprom_val_from_i2c(uint8_t pid_regulator, uint8_t i2c_parameter)
 {
-	return eeprom_addr_by_servo_param[servo][parameter - I2C_DATA_CONFIG_SERVO_MIN];
+	uint8_t adr = get_eeprom_addr_pid_regulator_parameter_by_i2c(pid_regulator, i2c_parameter);
+	return EEPROM_read(adr);
 }
 
-// РџРѕР»СѓС‡РёС‚СЊ eeprom Р°РґСЂРµСЃ РїР°СЂР°РјРµС‚СЂР° pid СЂРµРіСѓР»СЏС‚РѕСЂР°
+
+// Получить eeprom адрес параметра pid регулятора
 static uint8_t get_eeprom_addr_pid_regulator_parameter_by_i2c(uint8_t pid_regulator, uint8_t parameter)
 {
 	return eeprom_addr_by_pid_regulator_param[pid_regulator][parameter - I2C_DATA_CONFIG_TENSION_P];
@@ -89,21 +115,21 @@ static uint8_t get_eeprom_addr_pid_regulator_parameter_by_i2c(uint8_t pid_regula
 void EEPROM_write(uint8_t uiAddress, unsigned char ucData)
 {
 	/* Wait for completion of previous write */
-	while(EECR & (1<<EEPE)) //Р¶РґРµРј РѕСЃРІРѕР±РѕР¶РґРµРЅРёСЏ С„Р»Р°РіР° РѕРєРѕРЅС‡Р°РЅРёСЏ РїРѕСЃР»РµРґРЅРµР№ РѕРїРµСЂР°С†РёРµР№ СЃ РїР°РјСЏС‚СЊСЋ
+	while(EECR & (1<<EEPE)) //ждем освобождения флага окончания последней операцией с памятью
 	{}
-	EEAR = uiAddress; //РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р°РґСЂРµСЃ
-	EEDR = ucData; //РџРёС€РµРј РґР°РЅРЅС‹Рµ РІ СЂРµРіРёСЃС‚СЂ
-	EECR |= (1<<EEMPE); //Р Р°Р·СЂРµС€Р°РµРј Р·Р°РїРёСЃСЊ
-	EECR |= (1<<EEPE); //РџРёС€РµРј Р±Р°Р№С‚ РІ РїР°РјСЏС‚СЊ
+	EEAR = uiAddress; //Устанавливаем адрес
+	EEDR = ucData; //Пишем данные в регистр
+	EECR |= (1<<EEMPE); //Разрешаем запись
+	EECR |= (1<<EEPE); //Пишем байт в память
 }
 
 unsigned char EEPROM_read(uint8_t uiAddress)
 {
 	while(EECR & (1<<EEPE))
-	{} //Р¶РґРµРј РѕСЃРІРѕР±РѕР¶РґРµРЅРёСЏ С„Р»Р°РіР° РѕРєРѕРЅС‡Р°РЅРёСЏ РїРѕСЃР»РµРґРЅРµР№ РѕРїРµСЂР°С†РёРµР№ СЃ РїР°РјСЏС‚СЊСЋ
-	EEAR = uiAddress; //РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р°РґСЂРµСЃ
-	EECR |= (1<<EERE); //Р—Р°РїСѓСЃРєР°РµРј РѕРїРµСЂР°С†РёСЋ СЃС‡РёС‚С‹РІР°РЅРёСЏ РёР· РїР°РјСЏС‚Рё РІ СЂРµРіРёСЃС‚СЂ РґР°РЅРЅС‹С…
-	return EEDR; //Р’РѕР·РІСЂР°С‰Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚
+	{} //ждем освобождения флага окончания последней операцией с памятью
+	EEAR = uiAddress; //Устанавливаем адрес
+	EECR |= (1<<EERE); //Запускаем операцию считывания из памяти в регистр данных
+	return EEDR; //Возвращаем результат
 }
 
 void EEPROM_write_word(uint16_t uiAddress, uint16_t ucData)

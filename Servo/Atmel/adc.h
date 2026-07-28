@@ -1,4 +1,4 @@
-﻿/*
+/*
  * m4d_adc.h
  *
  * λ Created: 08.12.2020 1:18:27
@@ -23,6 +23,7 @@
 #define ADC_STATUS_IN_COMPUTE 2
 #define ADC_STATUS_ISR_COMPUTED 3
 #define ADC_STATUS_COMPUTED 4
+#define ADC_STATUS_FIRST_ISR_COMPUTED 5
 
 #define ADC_RETURN_NULL 2000
 
@@ -35,6 +36,7 @@ struct adcResult {
 	volatile uint16_t adc_result;
 	volatile uint8_t status;
 	volatile uint8_t repeat;
+	volatile uint8_t num;
 };
 
 volatile struct adcResult adc_list[ADC_OPERATION_COUNT];

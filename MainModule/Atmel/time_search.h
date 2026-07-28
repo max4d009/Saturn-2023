@@ -1,7 +1,7 @@
-﻿/*
+/*
  * time_search.h
  *
- * λ Created: 24.01.2025 2:33:30
+ * ? Created: 24.01.2025 2:33:30
  *  Author: max4d
  */ 
 #ifndef TIME_SEARCH_H_
@@ -10,8 +10,8 @@
 #include "main.h"
 
 #define SEARCH_START_SPEED 90
-#define SEARCH_LOW_SPEED 60
-#define SEARCH_END_SPEED 20
+#define SEARCH_LOW_SPEED 70
+#define SEARCH_END_SPEED 30
 #define SEARCH_SECONDS_BEFORE_SET_MIDDLE_SPEED 50
 
 #define STEP_OFF -1

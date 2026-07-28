@@ -30,6 +30,17 @@ ISR(TWI_vect)
 	uint8_t send_count = I2C_DATA_COUNT;
 	status = TWSR & 0xF8; 
 	
+	
+	// Проверяем, действительно ли обращаются к нам
+	if (status == 0x60 || status == 0xA8) { // SLA+W или SLA+R
+		uint8_t received_addr = TWDR >> 1; // Адрес из запроса
+		if (received_addr != (TWAR >> 1)) {
+			// Обращаются не к нам - игнорируем
+			TWCR = (1<<TWINT)|(1<<TWEN);
+			return;
+		}
+	}
+	
 		switch (status)
 		{
 			case 0x80:;  // Пришли данные от мастера. (До это мы уже приняли свой адрес)
@@ -37,7 +48,7 @@ ISR(TWI_vect)
 				if (transactProcess == 0) {
 					transactType = data;
 					transactProcess = 1;
-					} else {
+				} else {
 					transactData[transactCounter] = data;
 					transactCounter++;
 				}
@@ -53,23 +64,28 @@ ISR(TWI_vect)
 			case 0xa8: // own slave adress received
 				update_i2c_data_timer();
 				i2c_data_current = 0;
-			case 0xb8: // byte was sent and ACK received
-
-				TWDR = i2c_data[i2c_data_current];
-				i2c_data_current++;
-				if (i2c_data_current == send_count) {
-					send_n_ack();
-					} else {
-					send_ack();
-				}
+				TWDR = i2c_data[0];
+				send_ack();
 			break;
+			case 0xb8: // byte was sent and ACK received
+			   i2c_data_current++;
+			   if (i2c_data_current < send_count) {
+				   // Ещё есть данные для отправки
+				   TWDR = i2c_data[i2c_data_current];
+				   send_ack();
+				} else {
+				   // Это был ПОСЛЕДНИЙ байт
+				   send_n_ack(); // Говорим мастеру "всё отправил"
+				   // Данные НЕ обновляем - ждём STOP condition (case 0xA0)
+			   }
+			   break;
 			case 0xc0: // last byte was sent
 			case 0xc8:
 				//TWCR = 0xc5; // set TWEA
 				send_ack();
 			break;
 				case 0x00: // BUS-Error
-				TWCR = 0xd5;
+				TWCR = (1<<TWEN)|(1<<TWINT)|(1<<TWIE)|(1<<TWEA);
 			break;
 			default:
 			//send_ack();
@@ -79,11 +95,13 @@ ISR(TWI_vect)
 
 static void send_ack()
 {
+	_delay_us(10); // небольшая пауза, чтобы мастер успел подготовиться
 	TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWINT) | (1<<TWEA);
 }
 
 static void send_n_ack()
 {
+	_delay_us(10); // небольшая пауза, чтобы мастер успел подготовиться
 	TWCR =  (1<<TWEN)|(1<<TWIE)|(1<<TWINT);
 }
 

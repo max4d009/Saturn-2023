@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * search.c
  *
- * О» Created: 11.06.2024 1:29:06
+ * ? Created: 11.06.2024 1:29:06
  *  Author: max4d
  */ 
 
@@ -12,11 +12,11 @@ uint16_t count_stopped_overdo = 0;
 
 static float expRunningAverageAdaptive(float newVal);
 
-// Р—Р°РїСѓСЃРєР°РµСЃСЏ РїРѕСЃС‚РѕСЏРЅРЅРѕ РїРѕ С‚Р°Р№РјРµСЂСѓ
-// Р¤СѓРЅРєС†РёСЏ РїРѕРёСЃРєР° РїРѕ РїР°СѓР·Р°Рј, РЅР°РїРёСЃР°РЅРЅР°СЏ "РїРѕ Р±С‹СЃС‚СЂРѕРјСѓ" РЅСѓР¶РЅРѕ РґРѕСЂР°Р±Р°С‚С‹РІР°С‚СЊ
+// Запускаеся постоянно по таймеру
+// Функция поиска по паузам, написанная "по быстрому" нужно дорабатывать
 void search_program_timer()
 {
-	// Р’С‹С…РѕРґРёРј РµСЃР»Рё РЅРµ РІ СЂРµР¶РёРјРµ РїРѕРёСЃРєР°
+	// Выходим если не в режиме поиска
 	if (kinematics_mode.in_search == 0) {
 		if (kinematics_mode.search_step != SEARCH_STEP_0_STOP_SEARCH) {
 			kinematics_mode.search_step = SEARCH_STEP_0_STOP_SEARCH;
@@ -24,7 +24,7 @@ void search_program_timer()
 		return;
 	}
 
-	// РЎРЅР°С‡Р°Р»Р° РїРµСЂРµС…РѕРґРёРј РІ СЂРµР¶РёРј РїРѕРёСЃРєР° РїР°СѓР·С‹
+	// Сначала переходим в режим поиска паузы
 	if (kinematics_mode.search_step == SEARCH_STEP_0_STOP_SEARCH) {
 		count_stopped_overdo = 0;
 		overdo_sum = 0;
@@ -32,13 +32,13 @@ void search_program_timer()
 		return;
 	}
 	
-	// РџРѕРєР° РїР°СѓР·Р° РЅРµ РЅР°С€Р»Р°СЃСЊ РІС‹С…РѕРґРёРј
+	// Пока пауза не нашлась выходим
 	if (kinematics_mode.search_step == SEARCH_STEP_1_FIND_PAUSE) {
 		return;
 	}
 
-	// РљР°Рє С‚РѕР»СЊРєРѕ РЅР°С€Р»Рё РїР°СѓР·Сѓ РЅРµРєРѕС‚РѕСЂРѕРµ РІСЂРµРјСЏ Р¶РґС‘Рј РїРѕРєР° РјРµС…Р°РЅРёРєР° РїРµСЂРµС…РѕРґС‚ РІ СЂРµР¶РёРј СЃС‚РѕРї.
-	// Р’ СЌС‚Рѕ РІСЂРµРјСЏ С‚Р°Рє Р¶Рµ СЃС‡РёС‚Р°СЋС‚СЃСЏ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РґР°С‚С‡РёРєРѕРІ РЅР° Р±РѕРєРѕРІС‹С… СѓР·Р»Р°С…
+	// Как только нашли паузу некоторое время ждём пока механика переходт в режим стоп.
+	// В это время так же считаются срабатывания датчиков на боковых узлах
 	if (kinematics_mode.search_step == SEARCH_STEP_2_CALC_OVERDO) {
 		count_stopped_overdo++;
 		if (count_stopped_overdo > SEARCH_OVERDO_CALC_TIME) {
@@ -47,9 +47,9 @@ void search_program_timer()
 		return;
 	}
 
-    // Р•СЃР»Рё РєРѕР»-РІРѕ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёР№ РґР°С‚С‡РёРєРѕРІ Р±С‹Р»Рѕ РЅРµР±РѕР»СЊС€РёРј СЃСЂР°Р·Сѓ РІРєР»СЋС‡Р°РµРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ
-	// РРЅР°С‡Рµ СЃС‡РёС‚Р°РµРј, С‡С‚Рѕ СЃР»РёС€РєРѕРј РґРѕР»РіРѕ РѕСЃС‚Р°РЅР°РІР»РёРІР°Р»Р°СЃСЊ РјРµС…Р°РЅРёРєР° Рё РјС‹ СЃРёР»СЊРЅРѕ РїРµСЂРµР»РµС‚РµР»Рё РїР°СѓР·Сѓ
-	// РўРѕРіРґР° РЅСѓР¶РЅРѕ СЃ РїРѕРјРѕС‰СЊСЋ РїРµСЂРµРјРѕС‚РєРё РѕС‚РјРѕС‚Р°С‚СЊ РЅР°Р·Р°Рґ РЅР° РєРѕР»-РІРѕ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёР№ РґР°С‚С‡РёРєРѕРІ Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ
+    // Если кол-во срабатываний датчиков было небольшим сразу включаем воспроизведение
+	// Иначе считаем, что слишком долго останавливалась механика и мы сильно перелетели паузу
+	// Тогда нужно с помощью перемотки отмотать назад на кол-во срабатываний датчиков боковых узлов
 	if (kinematics_mode.search_step == SEARCH_STEP_3_OVERDO_CALCULATED) {
 		if (overdo_sum <= SEARCH_OVERDO_IGNORE) {
 			kinematics_mode.in_search = 0;
@@ -68,7 +68,7 @@ void search_program_timer()
 		return;
 	}
 
-	// Р’РєР»СЋС‡Р°РµРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ РїРѕСЃР»Рµ РІРѕР·РІСЂР°С‚Р° Рє РїР°СѓР·Рµ РєРѕС‚РѕСЂСѓСЋ "РїРµСЂРµР»РµС‚РµР»Рё"
+	// Включаем воспроизведение после возврата к паузе которую "перелетели"
 	if (kinematics_mode.search_step == SEARCH_STEP_5_REWIND) {
 		if (overdo_sum <= SEARCH_OVERDO_BEFORE_REACHING) {
 			kinematics_mode.in_search = 0;
@@ -79,7 +79,7 @@ void search_program_timer()
 	}
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ С‚РѕРіРѕ РєР°Рє РђР¦Рџ РїСЂРѕРёР·РІРµР» СЂР°СЃСЃС‡С‘С‚
+// Вызывается после того как АЦП произвел рассчёт
 void search_pause_with_adc(uint16_t adc)
 {
 	static uint8_t silens_wait_time = 0;
@@ -93,17 +93,17 @@ void search_pause_with_adc(uint16_t adc)
 	
 	adc = (uint16_t) expRunningAverageAdaptive(adc);
 	
-	// Р–РґС‘Рј РїРѕРєР° РЅРµ РїРѕСЏРІРёС‚СЃСЏ СЃС‚Р°Р±РёР»СЊРЅС‹Р№ СѓСЂРѕРІРµРЅСЊ СЃРёРіРЅР°Р»Р°
+	// Ждём пока не появится стабильный уровень сигнала
 	if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) {
 		silens_wait_time = 0;
 		hight_level_time = 0;
-	} else if (adc > SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) { // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ СѓСЂРѕРІРµРЅСЊ СЃРёРіРЅР°Р»Р° РЅР°Р±Р»СЋРґР°РµС‚СЃСЏ РЅРµРєРѕС‚РѕСЂРѕРµ РІСЂРµРјСЏ
+	} else if (adc > SEARCH_ADC_SILENCE_LEVEL && hight_level_time <= SEARCH_LEVEL_WITHOUT_DROPS_TIME) { // Проверяем, что уровень сигнала наблюдается некоторое время
 		hight_level_time++;
-	} else if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time > SEARCH_LEVEL_WITHOUT_DROPS_TIME && silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) { // РЎС‡РёС‚Р°РµРј РІСЂРµРјСЏ РІ РїР°СѓР·Рµ
+	} else if (adc < SEARCH_ADC_SILENCE_LEVEL && hight_level_time > SEARCH_LEVEL_WITHOUT_DROPS_TIME && silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) { // Считаем время в паузе
 		if (silens_wait_time < SEARCH_LEVEL_SILENCE_TIME) {
 			silens_wait_time++;
 		}
-	} else if (silens_wait_time >= SEARCH_LEVEL_SILENCE_TIME) { // Р•СЃР»Рё РѕР±РЅР°СЂСѓР¶РµРЅР° РїР°СѓР·Р°
+	} else if (silens_wait_time >= SEARCH_LEVEL_SILENCE_TIME) { // Если обнаружена пауза
 		set_mode(STOP_MODE, 0, 0);
 		hight_level_time = 0;
 		silens_wait_time = 0;
@@ -111,9 +111,9 @@ void search_pause_with_adc(uint16_t adc)
 	}
 }
 
-// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё СЃСЂР°Р±Р°С‚С‹РІР°РЅРёРё Р»СЋР±РѕРіРѕ РёР· РґР°С‚С‡РёРєРѕРІ Р±РѕРєРѕРІС‹С… СѓР·Р»РѕРІ РїСЂРё РёС… РІСЂР°С‰РµРЅРёРё
-// РџРѕРєР° РїСЂРѕСЃС‚Рѕ РЅР°С‡РёРЅР°РµРј СЃС‡РёС‚Р°С‚СЊ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РїСЂРё РѕР±РЅР°СЂСѓР¶РµРЅРёРё РїР°СѓР·С‹ РїСЂРё РїРѕРёСЃРєРµ
-// Р•СЃР»Рё РїР°СѓР·Сѓ РїРµСЂРµР»РµС‚РµР»Рё, РЅР° С‚Р°РєРѕРµ Р¶Рµ РєРѕР»-РІРѕ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёР№ РјРµРґР»РµРЅРЅРѕР№ Р±СѓРґРµРј РјРѕС‚Р°С‚СЊ РЅР°Р·Р°Рґ
+// Вызывается при срабатывании любого из датчиков боковых узлов при их вращении
+// Пока просто начинаем считать срабатывания при обнаружении паузы при поиске
+// Если паузу перелетели, на такое же кол-во срабатываний медленной будем мотать назад
 void calc_search_overdo()
 {
 	if (kinematics_mode.search_step == SEARCH_STEP_2_CALC_OVERDO && overdo_sum < SEARCH_OVERDO_MAX) {
@@ -129,7 +129,7 @@ static float expRunningAverageAdaptive(float newVal)
 {
 	static float filVal = 0;
 	float k;
-	// СЂРµР·РєРѕСЃС‚СЊ С„РёР»СЊС‚СЂР° Р·Р°РІРёСЃРёС‚ РѕС‚ РјРѕРґСѓР»СЏ СЂР°Р·РЅРѕСЃС‚Рё Р·РЅР°С‡РµРЅРёР№
+	// резкость фильтра зависит от модуля разности значений
 	if (abs(newVal - filVal) > 1.5) k = 0.9;
 	else k = 0.03;
 	

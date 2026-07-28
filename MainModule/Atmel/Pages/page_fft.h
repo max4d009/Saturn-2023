@@ -1,7 +1,7 @@
-﻿/*
+/*
  * pageFFT.h
  *
- * λ Created: 24.10.2023 18:22:14
+ * ? Created: 24.10.2023 18:22:14
  *  Author: m4d
  */ 
 #ifndef PAGEFFT_H_
