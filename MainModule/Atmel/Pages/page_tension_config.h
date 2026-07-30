@@ -1,7 +1,7 @@
-﻿/*
+/*
  * page_tension_config.h
  *
- * λ Created: 23.01.2025 2:39:54
+ * ? Created: 23.01.2025 2:39:54
  *  Author: max4d
  */ 
 #ifndef PAGE_TENSION_CONFIG_H_

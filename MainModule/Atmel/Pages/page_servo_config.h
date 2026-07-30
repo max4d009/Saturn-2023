@@ -1,7 +1,7 @@
-﻿/*
+/*
  * pageServoConfig.h
  *
- * λ Created: 29.11.2023 3:36:09
+ * ? Created: 29.11.2023 3:36:09
  *  Author: max-4d
  */ 
 #ifndef PAGESERVOCONFIG_H_
@@ -26,7 +26,7 @@
 #define CONFIG_SERVO_SEARCH 7
 
 #define MIN 0
-#define MAX 250
+#define MAX 255
 
 #define MENU_SERVO_CONFIG_COUNT_PARAMS 8
 

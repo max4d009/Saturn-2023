@@ -1,4 +1,4 @@
-/*
+﻿/*
  * buttons.h
  *
  * ? Created: 23.10.2023 20:21:36
@@ -27,6 +27,11 @@
 
 #define NUM_BUTTONS 7
 
+#define BTN_DEBOUNCE_TICKS      3    // 30 мс (антидребезг)
+#define BTN_HOLD_START_TICKS    40   // 300 мс (начало автоповтора) ← уменьшил!
+#define BTN_FAST_START_TICKS    6   // 200 мс (до ускорения)
+#define BTN_FAST_SPEED_TICKS    25   // 150 мс (ускоренный повтор) ← уменьшил!
+
 void buttons_init();
 void buttons_timer();
 void on();
@@ -39,7 +44,10 @@ struct Button {
 	volatile unsigned char *DDR_REG;
 	uint8_t pin;
 	uint8_t wait_period;
+	uint8_t wait_count;     // ← добавить!
 	uint8_t pressed;
+	uint8_t timer;
+	uint8_t timer_fast;
 	void (*operation)();
 };
 

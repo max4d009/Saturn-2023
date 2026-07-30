@@ -1,7 +1,7 @@
-﻿/*
+/*
  * manager_page.h
  *
- * λ Created: 17.08.2024 1:28:24
+ * ? Created: 17.08.2024 1:28:24
  *  Author: max4d
  */ 
 #ifndef MANAGER_PAGE_H_
@@ -20,8 +20,9 @@
 #define PAGE_OLED_MENU 8
 #define PAGE_OLED_VU 9
 #define PAGE_OLED_TENSION_CONFIG 10
+#define PAGE_OLED_EQ 11
 
-#define NUM_PAGES 11
+#define NUM_PAGES 12
 
 #define REC_MENU_PAGES_NUM 3
 
@@ -45,6 +46,7 @@ void manager_page_initPages();
 void manager_page_showPage();
 void change_record_page();
 void set_record_page(uint8_t rec_mode_inc);
-void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param);
+void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param, uint8_t items_per_row);
+void reset_rec_page_inc();
 
 #endif /* MANAGER_PAGE_H_ */

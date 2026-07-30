@@ -1,61 +1,83 @@
-﻿/*
+/*
  * buttons_adc.c
  *
- * λ Created: 24.10.2023 18:27:15
+ * ? Created: 24.10.2023 18:27:15
  *  Author: m4d
  */ 
 #include "buttons_adc.h"
 
-static uint8_t adc_pressed = 0;
 static uint8_t rec_mode_inc = 0;
+static uint8_t button_pressed = 0;
+static uint8_t block = 0;
+
+void adc_buttons_init()
+{
+	// INT1: �� �����
+	EICRA |= (1 << ISC10);  // ISC11=0, ISC10=1 -> ����� ���������
+	// ��������� ���������e
+	EIMSK |= (1 << INT1);
+	// ���������� ����
+	EIFR |= (1 << INTF1);
+}
+
+ISR (INT1_vect)
+{
+	button_pressed = 1;
+}
+
+void reset_rec_mode_inc()
+{
+	rec_mode_inc = 0;
+}
+
+static int8_t wait_mode = -1;
+static int8_t wait_option = -1;
+static uint8_t pressed_inc = 0;
+
+static void keyboard_reset()
+{
+    wait_mode = -1;
+	wait_option = -1;
+	pressed_inc = 0;
+	block = 2;
+	button_pressed = 0;
+}
 
 void keyboard_adc_timer()
 {
+	if (block > 0) {
+		block--;
+		return;
+	}
+	
+	if (button_pressed == 0) {
+		return;
+	}
+
 	uint16_t adc = adc_keyboard_read();
 	
-	static uint8_t little_inc = 0;
-	static uint8_t wait_mode = 0;
-		
-	if (current.servo_real_mode != PLAY_MODE && current.servo_real_mode != REWIND_LITTLE_MODE && current.servo_real_mode != FORWARD_LITTLE_MODE) {
-		little_inc = 0;
-	}
-	
-	// Нажали и отпустили кнопку перемотки. При этом не держали долго до страбатывания функции "откат"
-	if (adc > 1000 && little_inc != 0 && little_inc != 11 && wait_mode != 0) {
-		set_mode(wait_mode);
-		little_inc = 0;
-		adc_pressed = 1;
-		_delay_ms(100);
+	if (adc > 1000) {
+		if (pressed_inc < 10) {
+			if (wait_mode != -1) {
+				set_mode(wait_mode);
+			} else if (wait_option != -1) {
+				change_option(wait_option);
+			}
+		}
+		keyboard_reset();
 		return;
 	}
-	
-	// Находились в режиме "откат", отпустили кнопку перемотки и включаем воспроизведение.
-	if (adc > 1000 && little_inc == 11) {
-		set_mode(PLAY_MODE);
-		little_inc = 0;
-		adc_pressed = 1;
-		_delay_ms(100);
-		return;
-	}
-	
-	if (adc > 1000 || adc < 11) {
-		adc_pressed = 0;
-		return;
-	}
-	
-	if (adc_pressed == 1) {
-		return;
-	}
-	
-	if (adc > 10 && adc < 30) {			 // REC
+
+	if (adc > 10 && adc < 30) { // REC
 		
 		if (current.servo_real_mode != STOP_MODE && is_rec_mode(current.servo_real_mode) == 0) {
+			keyboard_reset();
 			return;
 		}
 		
 		if (current.servo_real_mode == REC_MODE_PLAY) {
 			change_record_page();
-			_delay_ms(100);
+			keyboard_reset();
 			return;
 		}
 		
@@ -72,11 +94,30 @@ void keyboard_adc_timer()
 			rec_mode_inc = 0;
 		}
 		
-		
 	} else if (adc > 90 && adc < 120) {  // KONTR
 		change_option(KONTR_OPTION);
 	} else if (adc > 150 && adc < 190) { // EQ
-		change_option(EQ_OPTION);
+		if (pressed_inc == 0) {
+			wait_option = EQ_OPTION;
+			pressed_inc = 1;
+			return;
+		}
+		if (pressed_inc < 10) {
+			pressed_inc++;
+			return;
+		}
+		static uint8_t prev_page = PAGE_OLED_TIMER;
+		if (pressed_inc == 10) {
+			pressed_inc = 11;
+			if (current.page != PAGE_OLED_EQ) {
+				prev_page = current.page;
+				current.page = PAGE_OLED_EQ;
+			} else {
+				current.page = prev_page;
+			}
+		}
+		
+		//change_option(EQ_OPTION);
 	} else if (adc > 270 && adc < 310) { // NR
 		change_option(NR_OPTION);
 	} else if (adc > 350 && adc < 405) { // REPEAT
@@ -95,15 +136,13 @@ void keyboard_adc_timer()
 		set_mode(PAUSE_MODE);
 	} else if (adc > 740 && adc < 780) { // REWIND
 		if (current.servo_real_mode == PLAY_MODE) {
-			wait_mode = REWIND_MODE;
-			if (little_inc < 10) {
-				little_inc++;
+			if (pressed_inc < 10) {
+				wait_mode = REWIND_MODE;
+				pressed_inc++;
 				return;
 			}
-			if (little_inc == 10) {
+			if (pressed_inc == 10) {
 				set_mode(REWIND_LITTLE_MODE);
-				little_inc++;
-				return;
 			}
 		} else {
 			if (current.servo_real_mode == REWIND_MODE) {
@@ -120,15 +159,13 @@ void keyboard_adc_timer()
 		}
 	} else if (adc > 900 && adc < 950) { // FORWARD
 		if (current.servo_real_mode == PLAY_MODE) {
-			wait_mode = FORWARD_MODE;
-			if (little_inc < 10) {
-				little_inc++;
+			if (pressed_inc < 10) {
+				wait_mode = FORWARD_MODE;
+				pressed_inc++;
 				return;
 			}
-			if (little_inc == 10) {
+			if (pressed_inc == 10) {
 				set_mode(FORWARD_LITTLE_MODE);
-				little_inc++;
-				return;
 			}
 		} else {
 			if (current.servo_real_mode == FORWARD_MODE) {
@@ -139,11 +176,13 @@ void keyboard_adc_timer()
 		}
 	}
 	
-	if (adc > 10 && adc < 950) {
-			adc_pressed = 1;
-			_delay_ms(100);
-	}
+	keyboard_reset();
+}
 
+void set_bbe_option(uint8_t value)
+{	
+	current.bbe = value;
+	i2c_send_option_motherboard(I2C_MOTHERBOARD_BBE_OPTION, current.bbe, 0);
 }
 
 void change_option(uint8_t option_)
@@ -154,23 +193,31 @@ void change_option(uint8_t option_)
 			if (current.nr > 1) {
 				current.nr = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_NR_OPTION, current.nr, 0);
 		break;
 		
 		case EQ_OPTION:
 			current.eq++;
-			if (current.eq > 2) {
+			if (current.eq > 1) {
 				current.eq = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.eq, 0);
 		break;
+		
+		case BBE_OPTION:
+			current.bbe++;
+			if (current.bbe > 3) {
+				current.bbe = 0;
+			}
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_EQ_OPTION, current.bbe, 0);
+		break;		
 		
 		case KONTR_OPTION:
 			current.kontr++;
 			if (current.kontr > 1) {
 				current.kontr = 0;
 			}
-			i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr);
+			i2c_send_option_motherboard(I2C_MOTHERBOARD_KONTR_OPTION, current.kontr, 0);
 		break;
 	}
 }

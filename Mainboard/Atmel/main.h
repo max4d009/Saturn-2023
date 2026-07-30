@@ -122,6 +122,7 @@ struct OptoPins {
 #define UZ_EQ_OPTION 5
 #define FIX_LEVEL_OPTION 6
 #define MUTE_OPTION 7
+#define BBE_OPTION 8
 
 #define TEST_PD0_PIN PD0
 #define TEST_PD1_PIN PD1

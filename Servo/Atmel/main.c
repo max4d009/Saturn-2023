@@ -1,7 +1,7 @@
-п»ї/*
+/*
  * Real-to-real tape recorder main.c
  *
- * О» Created: 08.04.2019 2:01:38
+ * ? Created: 08.04.2019 2:01:38
  * Author : m4d
  */ 
 #include "main.h"
@@ -13,21 +13,24 @@ int main(void)
 	sei(); 
 	eeprom_init();
  	m4d_adc_init_8();
-	USART_ini(8);
+	USART_ini(BAUD_19200);
     m4d_servo_init();
 	tension_init();
 	audio_init();
 
-    // Р’РєР»СЋС‡Р°РµРј РєР°РЅР°Р»С‹ РђР¦Рџ РЅР° РїРѕСЃС‚РѕСЏРЅРЅСѓСЋ С†РёРєР»РёС‡РЅСѓСЋ СЂР°Р±РѕС‚Сѓ. 
-	repeat_adc_on(ADC_OPERATION_LEFT_CHANNEL); // РёР·РјРµСЂРёС‚СЊ СѓСЂРѕРІРµРЅСЊ РїРѕ Р»РµРІРѕРјСѓ РєР°РЅР°Р»Сѓ
-	repeat_adc_on(ADC_OPERATION_RIGHT_CHANNEL); // РёР·РјРµСЂРёС‚СЊ СѓСЂРѕРІРµРЅСЊ РїРѕ РїСЂР°РІРѕРјСѓ РєР°РЅР°Р»Сѓ
-	repeat_adc_on(ADC_OPERATION_TENSION); // РёР·РјРµСЂРёС‚СЊ СѓСЂРѕРІРµРЅСЊ РїРѕ РґР°С‚С‡РёРєРєСѓ РЅР°С‚СЏР¶РµРЅРёСЏ
-	repeat_adc_on(ADC_OPERATION_CURRENT_CONSUPTION);  // РёР·РјРµСЂРёС‚СЊ СѓСЂРѕРІРµРЅСЊ РїРѕС‚СЂРµР±СѓР»РµРЅРёСЋ С‚РѕРєР° СЃРµСЂРІРѕРїСЂРёРІРѕРґР°РјРё
-	repeat_adc_on(ADC_OPERATION_AUTO_STOP);  // РёР·РјРµСЂРёС‚СЊ СѓСЂРѕРІРµРЅСЊ РїРѕ РєР°РЅР°Р»Сѓ Р°РІС‚РѕСЃС‚РѕРїР°
+    // Включаем каналы АЦП на постоянную цикличную работу. 
+	repeat_adc_on(ADC_OPERATION_LEFT_CHANNEL); // измерить уровень по левому каналу
+	repeat_adc_on(ADC_OPERATION_RIGHT_CHANNEL); // измерить уровень по правому каналу
+	repeat_adc_on(ADC_OPERATION_TENSION); // измерить уровень по датчикку натяжения
+	repeat_adc_on(ADC_OPERATION_CURRENT_CONSUPTION);  // измерить уровень потребления тока сервоприводами
+	repeat_adc_on(ADC_OPERATION_AUTO_STOP);  // измерить уровень по каналу автостопа
 	
 	DDRD &= ~(1 << PD4);
 	PORTD &= ~(1 << PD4);
-	
+
+
     while (1) {	
+		flag_update();
+		_delay_us(100);
     }
 }

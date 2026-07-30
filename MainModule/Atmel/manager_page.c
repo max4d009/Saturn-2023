@@ -1,7 +1,7 @@
 ﻿/*
  * manager_page.c
  *
- * λ Created: 17.08.2024 1:28:08
+ * ? Created: 17.08.2024 1:28:08
  *  Author: max4d
  */ 
 #include "manager_page.h"
@@ -95,6 +95,13 @@ void manager_page_initPages()
 	page_list[PAGE_OLED_TENSION_CONFIG].minus_click = page_tension_config_minus;
 	page_list[PAGE_OLED_TENSION_CONFIG].plus_click = page_tension_config_plus;
 	page_list[PAGE_OLED_TENSION_CONFIG].save_click = page_tension_config_save;
+	
+	page_list[PAGE_OLED_EQ].render_page = page_eq_render;
+	page_list[PAGE_OLED_EQ].menu_click = page_eq_menu;
+	page_list[PAGE_OLED_EQ].select_click = page_eq_select;
+	page_list[PAGE_OLED_EQ].minus_click = page_eq_minus;
+	page_list[PAGE_OLED_EQ].plus_click = page_eq_plus;
+	page_list[PAGE_OLED_EQ].save_click = page_eq_save;
 }
 
 void manager_page_showPage()
@@ -102,40 +109,37 @@ void manager_page_showPage()
 	static uint8_t current_page = 255;
 	
 	disp1color_FillScreenbuff(0);
-	
-	if (current.page == PAGE_OLED_TENSION_CONFIG) {
-		if (current.debug != 2) {
+			
+	if (current_page != current.page) {
+		if (current.page == PAGE_OLED_TENSION_CONFIG) {
 			current.debug = 2;
 			i2c_set_debug_mode(2);
-		}
-	} else if (current.page != PAGE_OLED_TIMER && current.page != PAGE_OLED_TIMER_REC && current.page != PAGE_OLED_IR_BINDING && current.page != PAGE_OLED_OFF) {
-		if (current.debug != 1) {
+		} else if (current.page == PAGE_OLED_SPEED || current.page == PAGE_OLED_SERVO_CONFIG || current.page == PAGE_OLED_TENSION_CONFIG) {
 			current.debug = 1;
 			i2c_set_debug_mode(1);
-		}
-	} else {
-		if (current.debug != 0) {
+		} else if (current.page == PAGE_OLED_FFT || current.page == PAGE_OLED_LEVEL) {
+			current.debug = 3;
+			i2c_set_debug_mode(3);
+		} else {
 			current.debug = 0;
 			i2c_set_debug_mode(0);
-		}
-	}
-	
-	_delay_ms(20); // todo: Исследовать почему без задежки виснет
-	
-	if (current_page != current.page) {
+		}		
+		
 		page_list[current.page].render_page(1);
 		current_page = current.page;
 	} else {
 		page_list[current.page].render_page(0);
 	}
-
- 	disp1color_UpdateFromBuff();
+// 	oled_printf(100,0, FONTID_6X8M, "%d", current.servo_real_mode);
+  	disp1color_UpdateFromBuff();
 }
 
 void change_record_page()
 {
 	if (current.servo_real_mode == STOP_MODE) {
 		rec_page_inc = 0;
+		current.page = PAGE_OLED_TIMER;
+		return;
 	}
 	current.page = rec_num_pages[rec_page_inc];
 	rec_page_inc++;
@@ -150,7 +154,12 @@ void set_record_page(uint8_t rec_mode_inc)
 	rec_page_inc = rec_mode_inc;
 }
 
-void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param)
+void reset_rec_page_inc()
+{
+	rec_page_inc = 0;
+}
+
+void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t current_param, uint8_t items_per_row)
 {
 	char s1, s2;
 	uint8_t x, y = 7, xx = 0, yy = 0;
@@ -161,16 +170,16 @@ void showConfigMenu(uint8_t num_params, struct ConfigParam *params, uint8_t curr
 			s1 = '['; s2 = ']';
 		}
 		x = 0;
-		if (xx == 2) {
+		if (items_per_row != 1 && xx == 2) {
 			x = 64; xx = 0;
 		}
-		
-		char param_name[10];
+				
+		char param_name[7];
 		strcpy_P(param_name, params[i].name);
-		
+						
 		char str_buf[12];
 		oled_printf(x, y, FONTID_6X8M, strcpy_P(str_buf, PSTR("%c%s:%03d%c")), s1, param_name, params[i].value, s2);
-		if (yy == 2) {
+		if (yy == items_per_row) {
 			y = y + 8; yy = 0;
 		}
 	}

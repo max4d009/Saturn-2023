@@ -143,7 +143,7 @@ void set_slow_pid()
 
 void set_fast_pid()
 {
-	maxOut = 26000;
+	maxOut = 35000;
 
 	kp = 40;
 	ki = 7;
@@ -170,7 +170,7 @@ void set_d(uint8_t d)
 
 int main(void)
 {
-	USART_ini(8);
+	USART_ini(51);
 	set_fast_pid();
 	set_target_speed_from_eeprom();
 // 	kp = EEPROM_read_word(EPROM_ADDR_P);

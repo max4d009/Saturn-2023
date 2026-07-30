@@ -1,7 +1,7 @@
-﻿/*
+/*
  * adc.h
  *
- * λ Created: 08.12.2020 1:18:27
+ * ? Created: 08.12.2020 1:18:27
  *  Author: m4d
  */ 
 #ifndef ADC_H_

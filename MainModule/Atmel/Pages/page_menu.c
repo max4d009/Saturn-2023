@@ -1,80 +1,120 @@
-п»ї/*
- * CFile1.c
+/*
+ * page_menu.c
  *
- * О» Created: 17.08.2024 4:04:15
- *  Author: max4d
- */ 
+ * Created: 17.08.2024
+ * Author: max4d
+ */
+
 #include "page_menu.h"
 
 static uint8_t current_select = 0;
 static uint8_t current_page = 0;
-static void show_main_menu(uint8_t x, uint8_t y, uint8_t page);
+
+static void show_main_menu(uint8_t x, uint8_t y);
+
+static const char menu_text[][11] PROGMEM =
+{
+	"Серво",
+	"Уровень",
+	"Скорость",
+	"ДУ",
+	"Индикатор",
+	"Натяжение",
+	"Эквалайзер"
+};
+
+static const uint8_t menu_page[PAGE_MENU_ITEMS_COUNT] PROGMEM =
+{
+	PAGE_OLED_SERVO_CONFIG,
+	PAGE_OLED_LEVEL,
+	PAGE_OLED_SPEED,
+	PAGE_OLED_IR_BINDING,
+	PAGE_OLED_VU,
+	PAGE_OLED_TENSION_CONFIG,
+	PAGE_OLED_EQ
+};
+
+/*--------------------------------------------------------------------
+ * Отрисовка
+ *------------------------------------------------------------------*/
 
 void page_menu_render(uint8_t first_render)
 {
-	if (first_render == 1) {
-		page_menu[0].page_id = PAGE_OLED_SERVO_CONFIG;
-		page_menu[0].name = PSTR("РќР°СЃС‚СЂ. СЃРµСЂРІ");
-		
-		page_menu[1].page_id = PAGE_OLED_LEVEL;
-		page_menu[1].name = PSTR("РЈСЂРѕРІРµРЅСЊ");
-		
-		page_menu[2].page_id = PAGE_OLED_SPEED;
-		page_menu[2].name = PSTR("РЎРєРѕСЂРѕСЃС‚СЊ");
-		
-		page_menu[3].page_id = PAGE_OLED_IR_BINDING;
-		page_menu[3].name = PSTR("РџСЂРёРІСЏР·РєР° Р”РЈ");
-		
-		page_menu[4].page_id = PAGE_OLED_VU;
-		page_menu[4].name = PSTR("РРЅРґРёРєР°С‚РѕСЂС‹");
-		
-		page_menu[5].page_id = PAGE_OLED_TENSION_CONFIG;
-		page_menu[5].name = PSTR("РќР°С‚СЏР¶РµРЅРёРµ");
-	}
-		
-	show_main_menu(2, 0, current_page);
-	
-	oled_printf(120, 0, FONTID_6X8M, "%d", current_page);
+	(void)first_render;
+
+	show_main_menu(2, 0);
+
+	oled_printf(
+		120,
+		0,
+		FONTID_6X8M,
+		"%d",
+		current_page
+	);
 }
 
-static void show_main_menu(uint8_t x, uint8_t y, uint8_t page)
+static void show_main_menu(uint8_t x, uint8_t y)
 {
 	uint8_t yy = y;
-	
-	uint8_t on_page_menu_index = 0;
-	for (uint8_t i = current_page * PAGE_MENU_ITEMS_ONE_PAGE_COUNT; i < PAGE_MENU_ITEMS_COUNT; i++) {
-		if (on_page_menu_index == PAGE_MENU_ITEMS_ONE_PAGE_COUNT) {
-			break;
-		}
-		on_page_menu_index++;
-		
-		char menu_item_name[strlen_P(page_menu[i].name) + 1];
-		strcpy_P(menu_item_name, page_menu[i].name);
-		
-		oled_draw_menu_item(x, yy, FONTID_6X8M, current_select == i ? 1:0, menu_item_name);
-		yy = yy + 10;
-	}	
+
+	uint8_t start =
+		current_page * PAGE_MENU_ITEMS_ONE_PAGE_COUNT;
+
+	uint8_t end =
+		start + PAGE_MENU_ITEMS_ONE_PAGE_COUNT;
+
+	if (end > PAGE_MENU_ITEMS_COUNT) {
+		end = PAGE_MENU_ITEMS_COUNT;
+	}
+
+	for (uint8_t i = start; i < end; i++) {
+
+		char menu_item_name[16];
+
+		strcpy_P(menu_item_name, menu_text[i]);
+
+		oled_draw_menu_item(
+			x,
+			yy,
+			FONTID_6X8M,
+			(current_select == i),
+			menu_item_name
+		);
+
+		yy += 10;
+	}
 }
 
-void page_menu_menu() 
+/*--------------------------------------------------------------------
+ * Управление
+ *------------------------------------------------------------------*/
+
+void page_menu_menu()
 {
 	current_select++;
-	if (current_select > PAGE_MENU_ITEMS_COUNT-1) {
+
+	if (current_select >= PAGE_MENU_ITEMS_COUNT) {
 		current_select = 0;
-		current_page = 0;
-		return;
 	}
-	
-	
-	if (current_select > PAGE_MENU_ITEMS_ONE_PAGE_COUNT-1) {
-		current_page++;
-		return;
-	}
+
+	current_page =
+		current_select / PAGE_MENU_ITEMS_ONE_PAGE_COUNT;
 }
-void page_menu_select() 
+
+void page_menu_select()
 {
-	current.page = page_menu[current_select].page_id;
+	current.page =
+		pgm_read_byte(&menu_page[current_select]);
 }
-void page_menu_minus() {}
-void page_menu_plus() {}
-void page_menu_save() {}
+
+void page_menu_minus()
+{
+}
+
+void page_menu_plus()
+{
+}
+
+void page_menu_save()
+{
+}
